@@ -35,8 +35,7 @@ setup(
     ],
     install_requires=[
         'colorama==0.3.7',
-        'docopt==0.6.2',
-        #: pyopenssl, ndg-httpsclient, pyasn1 are there to disable ssl warnings in requests
+        'docopt==0.6.2'
     ],
     dependency_links=[
     ],
