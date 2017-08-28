@@ -89,3 +89,4 @@ ENV/
 .ropeproject
 src/honeycomb/settings/__init__.py
 Logs/
+.noseids

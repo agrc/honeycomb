@@ -9,11 +9,13 @@ A python CLI tool used to generate and publish AGRC base maps including:
 TODO
 
 # Installation
-TODO
+From project folder base:
+`pip install . --upgrade`
 
 # Tests
 ### Linting
 `flake8 src/honeycomb/ tests`
 
 ### Unit Tests
-`nosetests --with-id --rednose --cov-config .coveragerc --with-coverage --cover-package honeycomb --cov-report term-missing --cover-erase`
+Test dependencies: `pip install nose nose-cov rednose mock`
+`python -m nose --with-id --rednose --cov-config .coveragerc --with-coverage --cover-package honeycomb --cov-report term-missing --cover-erase`
