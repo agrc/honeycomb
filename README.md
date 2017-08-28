@@ -22,7 +22,11 @@ Run `honeycomb` to see the help for this tool.
 
 ### Unit Tests
 Test dependencies: `pip install nose nose-cov rednose mock`
-`python -m nose --with-id --rednose --cov-config .coveragerc --with-coverage --cover-package honeycomb --cov-report term-missing --cover-erase`
+
+Running tests:
+```
+python -m nose --with-id --rednose --cov-config .coveragerc --with-coverage --cover-package honeycomb --cov-report term-missing --cover-erase
+```
 
 ### Running Source Version
 From `src` directory: `python -m honeycomb <...>`
