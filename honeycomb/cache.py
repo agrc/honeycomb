@@ -208,6 +208,10 @@ def main(s_name, overwrite, update, test):
     complete_num_bundles = complete_num_bundles_lu[service_name]
     global preview_url
     preview_url = settings.PREVIEW_URL.format(service_name)
+    """
+    import socket
+    socket.gethostbyname(socket.gethostname())
+    """
     global service
     service = r'C:\Users\agrc-arcgis\AppData\Roaming\ESRI\Desktop10.4\ArcCatalog\arcgis on localhost_6080 (admin)\{}.MapServer'.format(service_name)
     global email_subject

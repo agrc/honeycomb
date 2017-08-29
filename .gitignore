@@ -87,6 +87,7 @@ ENV/
 
 # Rope project settings
 .ropeproject
-src/honeycomb/settings/__init__.py
+honeycomb/settings/__init__.py
 Logs/
 .noseids
+honeycomb-hive/

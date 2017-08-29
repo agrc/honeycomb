@@ -18,15 +18,15 @@ Run `honeycomb` to see the help for this tool.
 
 # Development
 ### Linting
-`flake8 src/honeycomb/ tests`
+`flake8`
 
 ### Unit Tests
-Test dependencies: `pip install nose nose-cov rednose mock`
+Test dependencies: `pip install pytest pytest-watch pytest-cov --upgrade`
 
 Running tests:
 ```
-python -m nose --with-id --rednose --cov-config .coveragerc --with-coverage --cover-package honeycomb --cov-report term-missing --cover-erase
+ptw -- -s --cov=honeycomb
 ```
 
 ### Running Source Version
-From `src` directory: `python -m honeycomb <...>`
+From `root` directory: `python -m honeycomb <...>`
