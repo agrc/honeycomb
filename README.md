@@ -14,6 +14,7 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 1. Update `src/honeycomb/settings/__init__.py` with the secret values.
 1. From project folder base:
 `pip install . --upgrade`
+1. Add an environmental variable called `HONEYCOMB_HNAS` with the the dns name as the value (e.g. "some.dns.name").
 
 # Usage
 Run `honeycomb -help` to see the help for this tool.
