@@ -1,6 +1,3 @@
-AGS_CACHE_DIR = r'C:\arcgisserver\directories\arcgiscache'
-# AGS_CACHE_DIR = r'C:\Cache\tile-etl\test-data'
-
 from agrc import messaging
 from sys import argv
 import os
@@ -11,7 +8,8 @@ import threading
 import traceback
 from time import sleep
 
-
+AGS_CACHE_DIR = r'C:\arcgisserver\directories\arcgiscache'
+# AGS_CACHE_DIR = r'C:\Cache\tile-etl\test-data'
 CACHES = {
     # FolderName: Bucket
     'UploadTestService': ('state-of-utah-test', 'jpeg'),
@@ -45,6 +43,7 @@ try:
 except:
     pass
 
+
 def process_level(level):
     try:
         print('etl-ing level: {}'.format(level))
@@ -58,7 +57,6 @@ def process_level(level):
             parts = file_path.split(os.path.sep)[-2:]
             row = str(int(parts[0][1:], 16))
             column = str(int(parts[1][1:-4], 16))
-            ext = parts[1][-3:]
             column_folder = os.path.join(new_level_folder, column)
             if not os.path.exists(column_folder):
                 os.mkdir(column_folder)
@@ -87,11 +85,12 @@ def process_level(level):
 
     try:
         print('removing local folders')
-        sleep(1) #: give time for gsutil to release locks on files
+        sleep(1)  #: give time for gsutil to release locks on files
         shutil.rmtree(os.path.join(base_folder, level))
         shutil.rmtree(new_level_folder)
     except:
         print('error removing folders, they will need to be removed manually')
+
 
 print('processing: {}'.format(base_folder))
 for level in os.listdir(base_folder):

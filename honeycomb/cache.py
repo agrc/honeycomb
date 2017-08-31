@@ -7,12 +7,9 @@ TODO:
 import arcpy
 import os
 import time
-import shutil
 import sys
 from agrc import messaging
 from agrc import logging
-from agrc import update
-from agrc import arcpy_helpers
 import update_data
 import settings
 
@@ -100,6 +97,7 @@ emailer = messaging.Emailer('stdavis@utah.gov', testing=False)
 logger = logging.Logger()
 start_time = time.time()
 
+
 def cache_extent(scales, aoi, name):
     logger.logMsg('caching {} at {}'.format(name, scales))
 
@@ -112,21 +110,23 @@ def cache_extent(scales, aoi, name):
         logger.logGPMsg()
         emailer.sendEmail('Cache Update ({}) - arcpy.ExecuteError'.format(service_name), logger.log)
 
+
 def get_progress():
     global start_time
     total_bundles = get_bundles_count()
 
-    bundles_per_hour = (total_bundles - start_bundles)/((time.time() - start_time)/60/60)
+    bundles_per_hour = (total_bundles - start_bundles) / ((time.time() - start_time) / 60 / 60)
     if bundles_per_hour != 0 and total_bundles > start_bundles:
         hours_remaining = (complete_num_bundles - total_bundles) / bundles_per_hour
     else:
         start_time = time.time()
         hours_remaining = '??'
-    percent = int(round(float(total_bundles)/complete_num_bundles * 100.00))
+    percent = int(round(float(total_bundles) / complete_num_bundles * 100.00))
     msg = '{} of {} ({}%) bundle files created.\nEstimated hours remaining: {}'.format(
         total_bundles, complete_num_bundles, percent, hours_remaining)
     logger.logMsg(msg)
     return msg
+
 
 def get_bundles_count():
     totalfiles = 0
@@ -135,6 +135,7 @@ def get_bundles_count():
         if d != 'missing.jpg':
             totalfiles += len(os.listdir(os.path.join(basefolder, d)))
     return totalfiles
+
 
 def cache_test_extent():
     logger.logMsg('caching test extent')
@@ -171,12 +172,10 @@ def cache():
     for grid in grids:
         total_grids = int(arcpy.GetCount_management(grid[0]).getOutput(0))
         grid_count = 0
-        step = 10
-        currentStep = step
         with arcpy.da.SearchCursor(grid[0], ['SHAPE@', 'OID@']) as cur:
             for row in cur:
                 grid_count += 1
-                grid_percent = int(round((float(grid_count)/total_grids)*100))
+                grid_percent = int(round((float(grid_count) / total_grids) * 100))
                 cache_extent(grid[1], row[0], '{}: OBJECTID: {}'.format(grid[0], row[1]))
                 grit_percent_msg = 'Grids for this level completed: {}%'.format(grid_percent)
                 logger.logMsg(grit_percent_msg)
@@ -227,6 +226,7 @@ def main(s_name, overwrite, update, test):
     start_bundles = get_bundles_count()
 
     cache()
+
 
 if __name__ == '__main__':
     arg_prompts = ['Cache name with folder ( e.g. "Terrain"): ',

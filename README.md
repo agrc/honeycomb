@@ -17,15 +17,12 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 Run `honeycomb` to see the help for this tool.
 
 # Development
-### Linting
-`flake8`
+### Unit Tests & Linting
+Test dependencies: `pip install pytest pytest-watch pytest-cov pytest-flake8 --upgrade`
 
-### Unit Tests
-Test dependencies: `pip install pytest pytest-watch pytest-cov --upgrade`
-
-Running tests:
+Running tests/linting:
 ```
-ptw -- -s --cov=honeycomb
+ptw -- -s --cov=honeycomb --flake8
 ```
 
 ### Running Source Version
