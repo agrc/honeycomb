@@ -1,4 +1,6 @@
 # honeycomb
+[![Build Status](https://travis-ci.org/agrc/honeycomb.svg?branch=master)](https://travis-ci.org/agrc/honeycomb)
+
 A python CLI tool used to generate and publish AGRC base maps including:
 - raster tile cache generation
 - uploading raster tiles to GCP for use with discover.agrc.utah.gov
@@ -14,7 +16,7 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 `pip install . --upgrade`
 
 # Usage
-Run `honeycomb` to see the help for this tool.
+Run `honeycomb -help` to see the help for this tool.
 
 # Development
 ### Unit Tests & Linting
