@@ -25,14 +25,8 @@ def teardown_function():
         remove(config.config_location)
 
 
-def test_set_config_prop_overrides_all_values():
-    config.set_config_prop('sendEmails', True, override=True)
-
-    assert config.get_config_prop('sendEmails')
-
-
 def test_set_config_prop_overrides_default():
-    assert config.set_config_prop('sendEmails', True, override=True)
+    assert config.set_config_prop('sendEmails', True)
 
 
 @patch('honeycomb.config.create_default_config', wraps=config.create_default_config)
@@ -54,11 +48,29 @@ def test_set_config_prop_appends_items_from_list_if_not_overriding(mock_obj):
 
     message = config.set_config_prop('list', [1, 2])
 
-    assert message == 'Added [1, 2] to list'
+    assert message == 'Set list to [1, 2]'
 
     message = config.set_config_prop('test', True)
 
     assert message == 'Set test to True'
 
-    with pytest.raises(ValueError):
-        config.set_config_prop('list', [1])
+
+def test_add_basemap():
+    config.add_basemap('Lite')
+    message = config.add_basemap('Terrain')
+
+    assert config._get_config()['basemaps'] == ['Lite', 'Terrain']
+    assert message == 'Added "Terrain" basemap. Current basemaps: Lite, Terrain'
+
+
+def test_remove_basemap():
+    config.set_config_prop('basemaps', ['Lite', 'Terrain'])
+
+    message = config.remove_basemap('Lite')
+
+    assert config._get_config()['basemaps'] == ['Terrain']
+    assert message == 'Removed "Lite" basemap. Current basemaps: Terrain'
+
+
+def test_remove_invalid_basemap():
+    assert config.remove_basemap('bad name') == '"bad name" is not a valid basemap name! Current basemaps: '

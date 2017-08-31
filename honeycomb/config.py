@@ -44,33 +44,38 @@ def _get_config():
         return loads(json_config_file.read())
 
 
-def get_config_prop(key):
-    return _get_config()[key]
-
-
-def set_config_prop(key, value, override=False):
+def set_config_prop(key, value):
     config = _get_config()
 
     if key not in config:
         raise ValueError('{} not found in config.'.format(key))
 
-    if not override:
-        if not isinstance(value, list):
-            config[key] = value
-            message = 'Set {} to {}'.format(key, value)
-        else:
-            for item in value:
-                if item not in config[key]:
-                    config[key].append(item)
-
-                    message = 'Added {} to {}'.format(value, key)
-                else:
-                    raise ValueError('{} already contains {}'.format(key, value))
-    else:
-        config[key] = value
-        message = 'Set {} to {}'.format(key, value)
+    config[key] = value
+    message = 'Set {} to {}'.format(key, value)
 
     with open(config_location, 'w') as json_config_file:
         json_config_file.write(dumps(config, sort_keys=True, indent=2, separators=(',', ': ')))
 
     return message
+
+
+def add_basemap(name):
+    existing_basemaps = _get_config()['basemaps']
+    new_basemaps = list(set(existing_basemaps + [name]))
+
+    set_config_prop('basemaps', new_basemaps)
+
+    return 'Added "{}" basemap. Current basemaps: {}'.format(name, ', '.join(new_basemaps))
+
+
+def remove_basemap(name):
+    basemaps = _get_config()['basemaps']
+
+    try:
+        basemaps.remove(name)
+    except ValueError:
+        return '"{}" is not a valid basemap name! Current basemaps: {}'.format(name, ', '.join(basemaps))
+
+    set_config_prop('basemaps', basemaps)
+
+    return 'Removed "{}" basemap. Current basemaps: {}'.format(name, ', '.join(basemaps))
