@@ -37,16 +37,16 @@ setup(
     dependency_links=[
     ],
     extras_require={
+        'test': [
+            'pytest',
+            'pytest-watch',
+            'pytest-cov',
+            'pytest-flake8'
+        ]
     },
     entry_points={
         "console_scripts": [
             "honeycomb = honeycomb.__main__:main"
         ]
-    },
-    test_require=[
-        'pytest',
-        'pytest-watch',
-        'pytest-cov',
-        'pytest-flake8'
-    ]
+    }
 )
