@@ -2,7 +2,6 @@ import glob
 from os.path import basename
 from os.path import splitext
 
-from setuptools import find_packages
 from setuptools import setup
 
 
@@ -15,9 +14,7 @@ setup(
     author="Scott Davis",
     author_email="stdavis@utah.gov",
     url="https://github.com/agrc/honeycomb",
-    packages=find_packages("src"),
-    package_dir={"": "src"},
-    py_modules=[splitext(basename(i))[0] for i in glob.glob("src/*.py")],
+    packages=['honeycomb'],
     include_package_data=True,
     zip_safe=False,
     classifiers=[
@@ -45,5 +42,11 @@ setup(
         "console_scripts": [
             "honeycomb = honeycomb.__main__:main"
         ]
-    }
+    },
+    test_require=[
+        'pytest',
+        'pytest-watch',
+        'pytest-cov',
+        'pytest-flake8'
+    ]
 )
