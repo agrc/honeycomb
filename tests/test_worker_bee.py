@@ -10,10 +10,11 @@ from honeycomb.worker_bee import WorkerBee
 from mock import patch
 
 
+@patch('honeycomb.worker_bee.WorkerBee.cache')
 @patch('honeycomb.worker_bee.WorkerBee.cache_test_extent')
 @patch('honeycomb.worker_bee.WorkerBee.get_bundles_count')
-def test_init(get_bundles_count, cache_test_extent):
+def test_init(get_bundles_count, cache_test_extent, cache):
     WorkerBee('Terrain', skip_update=True)
 
-    assert get_bundles_count.call_count == 3
+    get_bundles_count.assert_called_once()
     cache_test_extent.assert_called_once()
