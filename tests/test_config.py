@@ -74,3 +74,7 @@ def test_remove_basemap():
 
 def test_remove_invalid_basemap():
     assert config.remove_basemap('bad name') == '"bad name" is not a valid basemap name! Current basemaps: '
+
+
+def test_get_config_value():
+    assert not config.get_config_value('sendEmails')

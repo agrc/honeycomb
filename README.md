@@ -11,17 +11,22 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 
 # Installation
 1. Clone repository to local folder.
-1. Update `src/honeycomb/settings/__init__.py` with the secret values.
 1. From project folder base:
 `pip install . --upgrade`
-1. Add an environmental variable called `HONEYCOMB_HNAS` with the the dns name as the value (e.g. "some.dns.name").
+1. Add the following environmental variables:
+
+| Name | Description | Example |
+| --- | --- | --- |
+| `HONEYCOMB_HNAS` | the DNS name for HNAS | some.dns.name |
+| `HONEYCOMB_SMTP_SERVER` | your smtp server | send.yourdomain.com |
+| `HONEYCOMB_SMTP_PORT` | your smtp port | 25 |
 
 # Usage
 Run `honeycomb -help` to see the help for this tool.
 
 # Development
 ### Unit Tests & Linting
-Test dependencies: `pip install pytest pytest-watch pytest-cov pytest-flake8 --upgrade`
+Test dependencies: `pip install .[test] --upgrade`
 
 Running tests/linting:
 ```

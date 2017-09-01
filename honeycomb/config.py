@@ -79,3 +79,7 @@ def remove_basemap(name):
     set_config_prop('basemaps', basemaps)
 
     return 'Removed "{}" basemap. Current basemaps: {}'.format(name, ', '.join(basemaps))
+
+
+def get_config_value(key):
+    return _get_config()[key]

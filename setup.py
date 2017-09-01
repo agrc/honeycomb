@@ -1,7 +1,3 @@
-import glob
-from os.path import basename
-from os.path import splitext
-
 from setuptools import setup
 
 
