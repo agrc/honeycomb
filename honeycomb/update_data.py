@@ -8,7 +8,7 @@ A module that contains code for updating the data for base maps.
 
 import arcpy
 from os.path import join
-import settings
+from . import settings
 
 LOCAL = r'C:\Cache\MapData'
 HNAS = join(settings.HNAS, r'BaseMaps\Data')
