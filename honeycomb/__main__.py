@@ -8,6 +8,7 @@ Usage:
     honeycomb config set --key <key> --value <value>
     honeycomb config basemaps --add <basemap>
     honeycomb config basemaps --remove <basemap>
+    honeycomb config open
     honeycomb update-data
     honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test]
     [unimplemented] honeycomb loop
@@ -26,6 +27,7 @@ Examples:
     honeycomb config set --key sendEmails --value True          Write a value for a specific key to the config file.
     honeycomb config basemaps --add Terrain                     Adds "Terrain" to the "basemaps" array in the config file.
     honeycomb config basemaps --remove Terrain                  Removes "Terrain" from the "basemaps" array in the config file.
+    honeycomb config open                                       Opens the config file in your default editor.
     honeycomb update-data                                       Refreshes the data in the local FGDBs from SGID.
     honeycomb Terrain                                           Builds a single base map.
     honeycomb loop                                              Kicks off the honeycomb process and loops through all of the base maps.
@@ -33,10 +35,11 @@ Examples:
     honeycomb config open                                       Opens the config file in your default program for .json files.
 '''
 
-from .worker_bee import WorkerBee
 from . import config
 from . import update_data
+from .worker_bee import WorkerBee
 from docopt import docopt
+from os import startfile
 import sys
 
 
@@ -53,6 +56,8 @@ def main():
                 print(config.add_basemap(args['<basemap>']))
             elif args['--remove']:
                 print(config.remove_basemap(args['<basemap>']))
+        elif args['open']:
+            startfile(config.config_location)
     elif args['update-data']:
         update_data.main()
     elif args['<basemap>']:
