@@ -14,9 +14,10 @@ if os.getenv(HNAS_ENV_NAME) is not None:
 else:
     print('Please set the "HONEYCOMP_HNAS" environmental variable!')
 PREVIEW_URL = r'http://{}/arcgis/rest/services/{}/MapServer?f=jsapi'
-EXTENTSFGDB = r'C:\Cache\MapData\Extents.gdb'
+EXTENTSFGDB = os.path.join(os.path.dirname(__file__), 'data', 'Extents.gdb')
 CACHE_DIR = r'C:\arcgisserver\directories\arcgiscache'
 TEST_EXTENT = os.path.join(EXTENTSFGDB, 'test_extent')
+
 COMPLETE_NUM_BUNDLES_LU = {
     'Lite': 21885,
     'Terrain': 22136,
@@ -28,49 +29,49 @@ COMPLETE_NUM_BUNDLES_LU = {
 
 NUM_INSTANCES = 6
 SCALES = [
-    591657527.591555,
-    295828763.795777,
-    147914381.897889,
-    73957190.948944,
-    36978595.474472,
+    591657527.591555,   #: 0
+    295828763.795777,   #: 1
+    147914381.897889,   #: 2
+    73957190.948944,    #: 3
+    36978595.474472,    #: 4
+    1.8489297737236E7,  #: 5
+    9244648.868618,     #: 6
+    4622324.434309,     #: 7
 
-    1.8489297737236E7,
-    9244648.868618,
-    4622324.434309,
-    2311162.217155,
-    1155581.108577,
-    577790.554289,
-    288895.277144,
-    144447.638572,
-    72223.819286,
-    36111.909643,
-    18055.954822,
-    9027.977411,
-    4513.988705,
-    2256.994353,
-    1128.497176
+    2311162.217155,     #: 8
+    1155581.108577,     #: 9
+
+    577790.554289,      #: 10
+    288895.277144,      #: 11
+    144447.638572,      #: 12
+    72223.819286,       #: 13
+    36111.909643,       #: 14
+
+    18055.954822,       #: 15
+    9027.977411,        #: 16
+    4513.988705,        #: 17
+    2256.994353,        #: 18
+    1128.497176         #: 19
 ]
 
-EXTENT_0_2 = 'CacheExtent_0_2'
-EXTENT_3_4 = 'CacheExtent_3_4'
-EXTENT_5_10 = 'CacheExtent_5_9'
+EXTENT_0_7 = 'CacheExtent_0_7'
+EXTENT_8_9 = 'CacheExtent_8_9'
+EXTENT_10_14 = 'CacheExtent_10_17'
 CACHE_EXTENTS = [
-    [EXTENT_0_2, SCALES[0:8]],
-    [EXTENT_3_4, SCALES[8:10]],
-    [EXTENT_5_10, SCALES[10:15]]
+    [EXTENT_0_7, SCALES[0:8]],
+    [EXTENT_8_9, SCALES[8:10]],
+    [EXTENT_10_14, SCALES[10:15]]
 ]
 
-GRIDS10 = 'CacheGrids_10'
-GRIDS11 = 'CacheGrids_11'
-GRIDS12 = 'CacheGrids_12'
-GRIDS13 = 'CacheGrids_13'
-GRIDS14 = 'CacheGrids_14'
 GRIDS15 = 'CacheGrids_15'
 GRIDS16 = 'CacheGrids_16'
+GRIDS17 = 'CacheGrids_17'
+GRIDS18 = 'CacheGrids_18'
+GRIDS19 = 'CacheGrids_19'
 GRIDS = [
-    [GRIDS10, SCALES[10]],
-    [GRIDS11, SCALES[11]],
-    [GRIDS12, SCALES[12]],
-    [GRIDS13, SCALES[13]],
-    [GRIDS14, SCALES[14]]
+    [GRIDS15, SCALES[15]],
+    [GRIDS16, SCALES[16]],
+    [GRIDS17, SCALES[17]],
+    [GRIDS18, SCALES[18]],
+    [GRIDS19, SCALES[19]]
 ]
