@@ -60,7 +60,7 @@ class WorkerBee(object):
         except arcpy.ExecuteError:
             self.errors.append([scales, aoi, name])
             print(arcpy.GetMessages())
-            send_email('Cache Update ({}) - arcpy.ExecuteError'.format(self.service_name))
+            send_email('Cache Update ({}) - arcpy.ExecuteError'.format(self.service_name), arcpy.GetMessages())
 
     def get_progress(self):
         total_bundles = self.get_bundles_count()
