@@ -27,8 +27,7 @@ class WorkerBee(object):
             ip = 'localhost'
         self.preview_url = settings.PREVIEW_URL.format(ip, self.service_name)
 
-        self.service = r'C:\Users\agrc-arcgis\AppData\Roaming\ESRI\Desktop10.4\ArcCatalog\arcgis on localhost_6080 (admin)\{}.MapServer'.format(
-            self.service_name)
+        self.service = os.path.join(config.get_ags_connection(), '{}.MapServer'.format(self.service_name))
         self.email_subject = 'Cache Update ({})'.format(self.service_name)
 
         if skip_update:

@@ -5,15 +5,15 @@ config.py
 A module that contains logic for reading and writing the config file
 '''
 
-from os import makedirs
-from os.path import abspath
-from os.path import dirname
-from os.path import exists
-from os.path import join
 from json import dumps, loads
+from os import makedirs, getenv
+from os.path import abspath, dirname, exists, join, basename
+import arcpy
 
 
-config_location = join(abspath(dirname(__file__)), '..', 'honeycomb-hive', 'config.json')
+config_folder = abspath(dirname(__file__))
+config_location = join(config_folder, '..', 'honeycomb-hive', 'config.json')
+ags_connection_file = join(config_folder, 'arcgisserver.ags')
 
 
 def create_default_config():
@@ -88,3 +88,22 @@ def get_config_value(key):
 def is_dev():
     return _get_config()['configuration'] == 'dev'
 
+
+def get_ags_connection():
+    '''
+    creates a server connection file if needed and returns the path to it
+    '''
+
+    if not exists(ags_connection_file):
+        for variable in ['HONEYCOMB_AGS_SERVER', 'HONEYCOMB_AGS_USERNAME', 'HONEYCOMB_AGS_PASSWORD']:
+            if getenv(variable) is None:
+                raise Exception('{} environment variable is not set!'.format(variable))
+
+        arcpy.mapping.CreateGISServerConnectionFile('PUBLISH_GIS_SERVICES',
+                                                    dirname(ags_connection_file),
+                                                    basename(ags_connection_file),
+                                                    getenv('HONEYCOMB_AGS_SERVER'),
+                                                    username=getenv('HONEYCOMB_AGS_USERNAME'),
+                                                    password=getenv('HONEYCOMB_AGS_PASSWORD'))
+
+    return ags_connection_file

@@ -4,6 +4,7 @@
 test_config.py
 A module that contains tests for config.py
 '''
+import arcpy
 
 from honeycomb import config
 from os.path import exists, join, abspath, dirname
@@ -15,14 +16,18 @@ import pytest
 config.config_location = join(abspath(dirname(__file__)), 'config.json')
 
 
+def cleanup():
+    for clean_file in [config.config_location, config.ags_connection_file]:
+        if exists(clean_file):
+            remove(clean_file)
+
+
 def setup_function():
-    if exists(config.config_location):
-        remove(config.config_location)
+    cleanup()
 
 
 def teardown_function():
-    if exists(config.config_location):
-        remove(config.config_location)
+    cleanup()
 
 
 def test_set_config_prop_overrides_default():
@@ -84,3 +89,11 @@ def test_is_dev():
     config.set_config_prop('configuration', 'dev')
 
     assert config.is_dev()
+
+
+@patch('arcpy.mapping.CreateGISServerConnectionFile', wraps=arcpy.mapping.CreateGISServerConnectionFile)
+def test_get_ags_connection(mock):
+    config.get_ags_connection()
+    config.get_ags_connection()
+
+    mock.assert_called_once()

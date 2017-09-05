@@ -6,9 +6,17 @@ arcpy.py
 A module that contains a mock for the arcpy library so that tests can be run without it.
 '''
 
+from os.path import join
+
 
 class env(object):
     workspace = None
+
+
+class mapping(object):
+    @staticmethod
+    def CreateGISServerConnectionFile(one, folder, filename, four, username='', password=''):
+        open(join(folder, filename), 'a').close()
 
 
 class management(object):
