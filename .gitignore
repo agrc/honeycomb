@@ -89,3 +89,4 @@ ENV/
 .ropeproject
 .noseids
 honeycomb-hive/
+honeycomb/data/**/*.lock
