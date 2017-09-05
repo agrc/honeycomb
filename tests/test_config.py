@@ -7,27 +7,8 @@ A module that contains tests for config.py
 import arcpy
 
 from honeycomb import config
-from os.path import exists, join, abspath, dirname
-from os import remove
 from mock import patch
 import pytest
-
-
-config.config_location = join(abspath(dirname(__file__)), 'config.json')
-
-
-def cleanup():
-    for clean_file in [config.config_location, config.ags_connection_file]:
-        if exists(clean_file):
-            remove(clean_file)
-
-
-def setup_function():
-    cleanup()
-
-
-def teardown_function():
-    cleanup()
 
 
 def test_set_config_prop_overrides_default():
