@@ -6,7 +6,7 @@ worker_bee.py
 A module that contains logic for building traditional image-based caches.
 '''
 
-from . import settings, update_data
+from . import settings, update_data, config
 from .messaging import send_email
 import arcpy
 import os
@@ -52,6 +52,9 @@ class WorkerBee(object):
 
     def cache_extent(self, scales, aoi, name):
         print('caching {} at {}'.format(name, scales))
+
+        if config.is_dev():
+            aoi = settings.TEST_EXTENT
 
         try:
             arcpy.server.ManageMapServerCacheTiles(self.service, scales, self.update_mode, settings.NUM_INSTANCES, aoi)

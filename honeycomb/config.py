@@ -27,7 +27,7 @@ def create_default_config():
             'sendEmails': False,
             'basemaps': [],
             'notify': ['stdavis@utah.gov'],
-            'baseFolder': None
+            'configuration': 'dev'
         }
 
         json_config_file.write(dumps(data, sort_keys=True, indent=2, separators=(',', ': ')))
@@ -83,3 +83,8 @@ def remove_basemap(name):
 
 def get_config_value(key):
     return _get_config()[key]
+
+
+def is_dev():
+    return _get_config()['configuration'] == 'dev'
+

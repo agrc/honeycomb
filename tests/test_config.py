@@ -78,3 +78,9 @@ def test_remove_invalid_basemap():
 
 def test_get_config_value():
     assert not config.get_config_value('sendEmails')
+
+
+def test_is_dev():
+    config.set_config_prop('configuration', 'dev')
+
+    assert config.is_dev()

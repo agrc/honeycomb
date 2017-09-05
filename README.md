@@ -22,7 +22,14 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 | `HONEYCOMB_SMTP_PORT` | your smtp port | 25 |
 
 # Usage
-Run `honeycomb -help` to see the help for this tool.
+Run `honeycomb -help` to see documentation for the various commands.
+
+# Config file
+Run `honeycomb config open` (TODO) to open the config file.
+
+| Property | Description |
+| --- | --- |
+| `configuration` | Affects a few code paths for differences between production and development. Possible values: `prod` and `dev` (default).
 
 # Development
 ### Unit Tests & Linting
