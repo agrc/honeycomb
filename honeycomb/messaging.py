@@ -8,7 +8,6 @@ A module that contains a method for sending emails
 
 from .config import get_config_value
 from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from os import environ
 from smtplib import SMTP
 
@@ -18,7 +17,7 @@ def send_email(subject, body):
     subject: string
     body: string | MIMEMultipart
     '''
-    from_address = 'busybee@utah.gov'
+    from_address = 'honeycomb@utah.gov'
     smtp_server = environ.get('HONEYCOMB_SMTP_SERVER')
     smtp_port = environ.get('HONEYCOMB_SMTP_PORT')
 
@@ -32,12 +31,7 @@ def send_email(subject, body):
     else:
         to_addresses = to
 
-    if isinstance(body, str):
-        message = MIMEMultipart()
-        message.attach(MIMEText(body, 'html'))
-    else:
-        message = body
-
+    message = MIMEText(body)
     message['Subject'] = subject
     message['From'] = from_address
     message['To'] = to_addresses
