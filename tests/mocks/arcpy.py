@@ -15,7 +15,7 @@ class env(object):
 
 class mapping(object):
     @staticmethod
-    def CreateGISServerConnectionFile(one, folder, filename, four, username='', password=''):
+    def CreateGISServerConnectionFile(one, folder, filename, four, five, username='', password=''):
         open(join(folder, filename), 'a').close()
 
 

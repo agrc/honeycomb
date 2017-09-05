@@ -11,8 +11,8 @@ from os.path import abspath, dirname, exists, join, basename
 import arcpy
 
 
-config_folder = abspath(dirname(__file__))
-config_location = join(config_folder, '..', 'honeycomb-hive', 'config.json')
+config_folder = join(abspath(dirname(__file__)), '..', 'honeycomb-hive')
+config_location = join(config_folder, 'config.json')
 ags_connection_file = join(config_folder, 'arcgisserver.ags')
 
 
@@ -103,7 +103,8 @@ def get_ags_connection():
                                                     dirname(ags_connection_file),
                                                     basename(ags_connection_file),
                                                     getenv('HONEYCOMB_AGS_SERVER'),
+                                                    'ARCGIS_SERVER',
                                                     username=getenv('HONEYCOMB_AGS_USERNAME'),
                                                     password=getenv('HONEYCOMB_AGS_PASSWORD'))
 
-    return ags_connection_file
+    return ags_connection_file.replace('.ags', '')
