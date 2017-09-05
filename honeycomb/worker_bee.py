@@ -19,7 +19,11 @@ class WorkerBee(object):
         self.errors = []
         self.start_time = time.time()
         self.service_name = s_name
-        self.complete_num_bundles = settings.COMPLETE_NUM_BUNDLES_LU[self.service_name]
+
+        if config.is_dev():
+            self.complete_num_bundles = 19
+        else:
+            self.complete_num_bundles = settings.COMPLETE_NUM_BUNDLES_LU[self.service_name]
 
         try:
             ip = socket.gethostbyname(socket.gethostname())
@@ -112,6 +116,8 @@ class WorkerBee(object):
         send_email(self.email_subject,
                    'Levels 0-9 completed.\n{}\n{}'.format(self.get_progress(), self.preview_url))
 
+        if config.is_dev():
+            settings.GRIDS = settings.GRIDS[:-4]
         for grid in settings.GRIDS:
             total_grids = int(arcpy.management.GetCount(grid[0])[0])
             grid_count = 0
