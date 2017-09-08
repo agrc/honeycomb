@@ -11,6 +11,7 @@ Usage:
     honeycomb config open
     honeycomb update-data
     honeycomb loop
+    honeycomb upload <basemap>
     honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test]
     [unimplemented] honeycomb publish <basemap>
 
@@ -32,6 +33,7 @@ Examples:
     honeycomb config open                                       Opens the config file in your default editor.
     honeycomb update-data                                       Refreshes the data in the local FGDBs from SGID.
     honeycomb loop                                              Kicks off the honeycomb process and loops through all of the base maps.
+    honeycomb upload Terrain                                    ETLs and uploads the tiles for the Terrain cache to GCP.
     honeycomb Terrain                                           Builds a single base map and pushes to GCP.
     honeycomb publish Lite                                      Publishes a base map's associated MXD to ArcGIS Server (raster base maps only).
 '''
@@ -59,6 +61,9 @@ def main():
             WorkerBee(basemap, False, True, True)
             recache = prompt_recache()
 
+        upload(basemap)
+
+    def upload(basemap):
         basemap_info = config.get_basemap(basemap)
         swarm(basemap, basemap_info['bucket'], basemap_info['image_type'])
 
@@ -76,8 +81,8 @@ def main():
             startfile(config.config_location)
     elif args['update-data']:
         update_data.main()
-    elif args['<basemap>']:
-        cache(args['<basemap>'])
+    elif args['upload'] and args['<basemap>']:
+        upload(args['<basemap>'])
     elif args['loop']:
         stop = False
         basemaps = config.get_config_value('basemaps')
@@ -91,6 +96,8 @@ def main():
                 else:
                     stop = True
                     break
+    elif args['<basemap>']:
+        cache(args['<basemap>'])
 
 
 if __name__ == '__main__':
