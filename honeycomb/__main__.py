@@ -56,7 +56,7 @@ def main():
 
         recache = prompt_recache()
         while recache:
-            # WorkerBee(basemap, False, True, True)
+            WorkerBee(basemap, False, True, True)
             recache = prompt_recache()
 
         basemap_info = config.get_basemap(basemap)
@@ -82,7 +82,7 @@ def main():
         stop = False
         basemaps = config.get_config_value('basemaps')
         while not stop:
-            for basemap in basemaps.keys():
+            for basemap in [key for key in basemaps.keys() if basemaps[key]['loop']]:
                 action = raw_input('cache {} (C), skip to the next base map (S) or exit (E)? '.format(basemap))
                 if action == 'C':
                     cache(basemap)
