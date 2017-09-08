@@ -25,10 +25,7 @@ class WorkerBee(object):
         else:
             self.complete_num_bundles = settings.COMPLETE_NUM_BUNDLES_LU[self.service_name]
 
-        try:
-            ip = socket.gethostbyname(socket.gethostname())
-        except:
-            ip = 'localhost'
+        ip = socket.gethostbyname(socket.gethostname())
         self.preview_url = settings.PREVIEW_URL.format(ip, self.service_name)
 
         self.service = os.path.join(config.get_ags_connection(), '{}.MapServer'.format(self.service_name))

@@ -10,10 +10,11 @@ from honeycomb.worker_bee import WorkerBee
 from mock import patch
 
 
+@patch('honeycomb.worker_bee.socket.gethostbyname', return_value='')
 @patch('honeycomb.worker_bee.WorkerBee.cache')
 @patch('honeycomb.worker_bee.WorkerBee.cache_test_extent')
 @patch('honeycomb.worker_bee.WorkerBee.get_bundles_count')
-def test_init(get_bundles_count, cache_test_extent, cache):
+def test_init(get_bundles_count, cache_test_extent, cache, hostmock):
     WorkerBee('Terrain', skip_update=True)
 
     get_bundles_count.assert_called_once()
