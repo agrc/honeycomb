@@ -16,6 +16,7 @@ import time
 
 class WorkerBee(object):
     def __init__(self, s_name, missing_only=False, skip_update=False, skip_test=False):
+        print('caching {}'.format(s_name))
         self.errors = []
         self.start_time = time.time()
         self.service_name = s_name

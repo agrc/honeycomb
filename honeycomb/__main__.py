@@ -10,9 +10,9 @@ Usage:
     honeycomb config basemaps --remove <basemap>
     honeycomb config open
     honeycomb update-data
+    honeycomb loop
     honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test]
     [unimplemented] honeycomb publish <basemap>
-    [unimplemented] honeycomb loop
 
 Arguments:
     -h --help               Show this screen.
@@ -31,9 +31,9 @@ Examples:
     honeycomb config basemaps --remove Terrain                  Removes "Terrain" from the "basemaps" array in the config file.
     honeycomb config open                                       Opens the config file in your default editor.
     honeycomb update-data                                       Refreshes the data in the local FGDBs from SGID.
-    honeycomb Terrain                                           Builds a single base map.
-    honeycomb publish Lite                                      Publishes a base map's associated MXD to ArcGIS Server (raster base maps only).
     honeycomb loop                                              Kicks off the honeycomb process and loops through all of the base maps.
+    honeycomb Terrain                                           Builds a single base map and pushes to GCP.
+    honeycomb publish Lite                                      Publishes a base map's associated MXD to ArcGIS Server (raster base maps only).
 '''
 
 from . import config
@@ -47,6 +47,20 @@ import sys
 
 def main():
     args = docopt(__doc__, version='0.0.0')
+
+    def cache(basemap):
+        WorkerBee(basemap, args['--missing-only'], args['--skip-update'], args['--skip-test'])
+
+        def prompt_recache():
+            return raw_input('Caching complete. Publish to production (P) or recache (R)? ') != 'P'
+
+        recache = prompt_recache()
+        while recache:
+            # WorkerBee(basemap, False, True, True)
+            recache = prompt_recache()
+
+        basemap_info = config.get_basemap(basemap)
+        swarm(basemap, basemap_info['bucket'], basemap_info['image_type'])
 
     if args['config']:
         if args['init']:
@@ -63,18 +77,20 @@ def main():
     elif args['update-data']:
         update_data.main()
     elif args['<basemap>']:
-        WorkerBee(args['<basemap>'], args['--missing-only'], args['--skip-update'], args['--skip-test'])
-
-        def prompt_recache():
-            return raw_input('Caching complete. Publish to production (P) or recache (R)? ') != 'P'
-
-        recache = prompt_recache()
-        while recache:
-            WorkerBee(args['<basemap>'], False, True, True)
-            recache = prompt_recache()
-
-        basemap = config.get_basemap(args['<basemap>'])
-        swarm(args['<basemap>'], basemap['bucket'], basemap['image_type'])
+        cache(args['<basemap>'])
+    elif args['loop']:
+        stop = False
+        basemaps = config.get_config_value('basemaps')
+        while not stop:
+            for basemap in basemaps.keys():
+                action = raw_input('cache {} (C), skip to the next base map (S) or exit (E)? '.format(basemap))
+                if action == 'C':
+                    cache(basemap)
+                elif action == 'S':
+                    continue
+                else:
+                    stop = True
+                    break
 
 
 if __name__ == '__main__':
