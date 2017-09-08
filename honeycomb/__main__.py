@@ -38,6 +38,7 @@ Examples:
 
 from . import config
 from . import update_data
+from .swarm import swarm
 from .worker_bee import WorkerBee
 from docopt import docopt
 from os import startfile
@@ -63,6 +64,17 @@ def main():
         update_data.main()
     elif args['<basemap>']:
         WorkerBee(args['<basemap>'], args['--missing-only'], args['--skip-update'], args['--skip-test'])
+
+        def prompt_recache():
+            return raw_input('Caching complete. Publish to production (P) or recache (R)? ') != 'P'
+
+        recache = prompt_recache()
+        while recache:
+            WorkerBee(args['<basemap>'], False, True, True)
+            recache = prompt_recache()
+
+        basemap = config.get_basemap(args['<basemap>'])
+        swarm(args['<basemap>'], basemap['bucket'], basemap['image_type'])
 
 
 if __name__ == '__main__':

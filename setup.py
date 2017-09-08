@@ -28,7 +28,10 @@ setup(
     ],
     install_requires=[
         'colorama==0.3.7',
-        'docopt==0.6.2'
+        'docopt==0.6.2',
+        'multiprocess==0.70.5',
+        'dill==0.2.7.1',
+        'gsutil==4.27'
     ],
     dependency_links=[
     ],

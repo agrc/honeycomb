@@ -27,7 +27,8 @@ def create_default_config():
             'sendEmails': False,
             'basemaps': {},
             'notify': ['stdavis@utah.gov'],
-            'configuration': 'dev'
+            'configuration': 'dev',
+            'num_processes': 20
         }
 
         json_config_file.write(dumps(data, sort_keys=True, indent=2, separators=(',', ': ')))
