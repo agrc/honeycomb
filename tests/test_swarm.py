@@ -27,7 +27,7 @@ def test_etl():
 
     settings.CACHE_DIR = conftest.temp_folder
 
-    column_folders = swarm.etl(service)
+    swarm.etl(service)
 
     def get_files(folder):
         entries = []
@@ -40,7 +40,6 @@ def test_etl():
     expected_files = get_files(join(conftest.test_data_folder, service + '_GCS'))
 
     assert etled_files == expected_files
-    assert len(column_folders) == 10
 
 
 @patch('honeycomb.swarm.subprocess.check_call')

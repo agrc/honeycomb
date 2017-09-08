@@ -8,6 +8,7 @@ A module that contains logic for building traditional image-based caches.
 
 from . import settings, update_data, config
 from .messaging import send_email
+from shutil import rmtree
 import arcpy
 import os
 import socket
@@ -20,6 +21,12 @@ class WorkerBee(object):
         self.errors = []
         self.start_time = time.time()
         self.service_name = s_name
+
+        try:
+            print('deleting previous *_GCS folder, if any')
+            rmtree(os.path.join(settings.CACHE_DIR, s_name + '_GCS'))
+        except:
+            pass
 
         if config.is_dev():
             self.complete_num_bundles = 19
