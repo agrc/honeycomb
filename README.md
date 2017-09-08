@@ -10,9 +10,12 @@ A python CLI tool used to generate and publish AGRC base maps including:
 This is an effort to polish/standardize/automate a mishmash of stand-alone python scripts currently used to update base maps.
 
 # Installation
+1. Install [`gcloud`](https://cloud.google.com/sdk/docs/)
+    - Do *not* include the bundled python.
+1. [`crcmode`](https://cloud.google.com/storage/docs/gsutil/addlhelp/CRC32CandInstallingcrcmod).
 1. Clone repository to local folder.
 1. From project folder base:
-`pip install . --upgrade`
+`pip install . --upgrade` (make sure that you install into the 32bit version of python (required for crcmode))
 1. Add the following environmental variables:
 
 | Name | Description | Example |
