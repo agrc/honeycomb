@@ -25,7 +25,7 @@ def create_default_config():
     with open(config_location, 'w') as json_config_file:
         data = {
             'sendEmails': False,
-            'basemaps': [],
+            'basemaps': {},
             'notify': ['stdavis@utah.gov'],
             'configuration': 'dev'
         }
@@ -59,21 +59,25 @@ def set_config_prop(key, value):
     return message
 
 
-def add_basemap(name):
-    existing_basemaps = _get_config()['basemaps']
-    new_basemaps = list(set(existing_basemaps + [name]))
+def add_basemap(name, bucket=None, image_type=None, loop=False):
+    basemaps = _get_config()['basemaps']
+    basemaps[name] = {
+        'bucket': bucket,
+        'image_type': image_type,
+        'loop': loop
+    }
 
-    set_config_prop('basemaps', new_basemaps)
+    set_config_prop('basemaps', basemaps)
 
-    return 'Added "{}" basemap. Current basemaps: {}'.format(name, ', '.join(new_basemaps))
+    return 'Added "{}" basemap. Current basemaps: {}'.format(name, ', '.join(basemaps))
 
 
 def remove_basemap(name):
     basemaps = _get_config()['basemaps']
 
     try:
-        basemaps.remove(name)
-    except ValueError:
+        basemaps.pop(name)
+    except KeyError:
         return '"{}" is not a valid basemap name! Current basemaps: {}'.format(name, ', '.join(basemaps))
 
     set_config_prop('basemaps', basemaps)
@@ -108,3 +112,11 @@ def get_ags_connection():
                                                     password=getenv('HONEYCOMB_AGS_PASSWORD'))
 
     return ags_connection_file.replace('.ags', '')
+
+
+def get_basemap(name):
+    basemaps = _get_config()['basemaps']
+    try:
+        return basemaps[name]
+    except KeyError:
+        raise KeyError('Invalid basemap! Current basemaps: {}'.format(', '.join(basemaps)))

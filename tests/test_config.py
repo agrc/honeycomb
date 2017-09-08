@@ -43,18 +43,30 @@ def test_set_config_prop_appends_items_from_list_if_not_overriding(mock_obj):
 
 def test_add_basemap():
     config.add_basemap('Lite')
-    message = config.add_basemap('Terrain')
+    config.add_basemap('Terrain')
+    message = config.add_basemap('Terrain', 'state-of-utah-test', 'jpeg', True)
 
-    assert config._get_config()['basemaps'] == ['Lite', 'Terrain']
+    assert config._get_config()['basemaps'] == {
+        'Lite': {
+            'bucket': None,
+            'image_type': None,
+            'loop': False
+        },
+        'Terrain': {
+            'bucket': 'state-of-utah-test',
+            'image_type': 'jpeg',
+            'loop': True
+        }
+    }
     assert message == 'Added "Terrain" basemap. Current basemaps: Lite, Terrain'
 
 
 def test_remove_basemap():
-    config.set_config_prop('basemaps', ['Lite', 'Terrain'])
+    config.set_config_prop('basemaps', {'Lite': {}, 'Terrain': {}})
 
     message = config.remove_basemap('Lite')
 
-    assert config._get_config()['basemaps'] == ['Terrain']
+    assert config._get_config()['basemaps'] == {'Terrain': {}}
     assert message == 'Removed "Lite" basemap. Current basemaps: Terrain'
 
 
@@ -78,3 +90,12 @@ def test_get_ags_connection(mock):
     config.get_ags_connection()
 
     mock.assert_called_once()
+
+
+def test_get_basemap():
+    config.set_config_prop('basemaps', {'Lite': {}, 'Terrain': {}})
+
+    assert config.get_basemap('Lite') == {}
+
+    with pytest.raises(KeyError):
+        config.get_basemap('Bad')

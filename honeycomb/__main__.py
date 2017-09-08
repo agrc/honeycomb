@@ -6,18 +6,20 @@ honeycomb 🐝  # NOQA
 Usage:
     honeycomb config init
     honeycomb config set --key <key> --value <value>
-    honeycomb config basemaps --add <basemap>
+    honeycomb config basemaps --add <basemap> [<bucket-name>] [<image-type>] [--loop]
     honeycomb config basemaps --remove <basemap>
     honeycomb config open
     honeycomb update-data
     honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test]
-    [unimplemented] honeycomb loop
     [unimplemented] honeycomb publish <basemap>
-    [unimplemented] honeycomb config open
+    [unimplemented] honeycomb loop
 
 Arguments:
     -h --help               Show this screen.
     basemap                 The name of a registered base map (e.g. Terrain).
+    bucket-name             The name of the GCP bucket were you want the tiles to be pushed to.
+    image-type              The output image type of the cache tiles ("jpeg" or "png")
+    --loop                  Include the base map in the loop command.
     --missing-only          Only missing tiles are generated.
     --skip-update           Skip update vector data from SGID.
     --skip-test             Skip running a test cache.
@@ -30,9 +32,8 @@ Examples:
     honeycomb config open                                       Opens the config file in your default editor.
     honeycomb update-data                                       Refreshes the data in the local FGDBs from SGID.
     honeycomb Terrain                                           Builds a single base map.
-    honeycomb loop                                              Kicks off the honeycomb process and loops through all of the base maps.
     honeycomb publish Lite                                      Publishes a base map's associated MXD to ArcGIS Server (raster base maps only).
-    honeycomb config open                                       Opens the config file in your default program for .json files.
+    honeycomb loop                                              Kicks off the honeycomb process and loops through all of the base maps.
 '''
 
 from . import config
@@ -53,7 +54,7 @@ def main():
             print(config.set_config_prop(args['<key>'], args['<value>']))
         elif args['basemaps'] and args['<basemap>']:
             if args['--add']:
-                print(config.add_basemap(args['<basemap>']))
+                print(config.add_basemap(args['<basemap>'], args['<bucket-name>'], args['<image-type>'], args['--loop']))
             elif args['--remove']:
                 print(config.remove_basemap(args['<basemap>']))
         elif args['open']:
