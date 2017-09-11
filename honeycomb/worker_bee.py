@@ -68,8 +68,8 @@ class WorkerBee(object):
             arcpy.server.ManageMapServerCacheTiles(self.service, scales, self.update_mode, settings.NUM_INSTANCES, aoi)
         except arcpy.ExecuteError:
             self.errors.append([scales, aoi, name])
-            print(arcpy.GetMessages())
-            send_email('Cache Update ({}) - arcpy.ExecuteError'.format(self.service_name), arcpy.GetMessages())
+            print(arcpy.GetMessages(2))
+            send_email('Cache Update ({}) - arcpy.ExecuteError'.format(self.service_name), arcpy.GetMessages(2))
 
     def get_progress(self):
         total_bundles = self.get_bundles_count()
@@ -102,8 +102,8 @@ class WorkerBee(object):
             if raw_input('Recache test extent (T) or continue with full cache (F): ') == 'T':
                 self.cache_test_extent()
         except arcpy.ExecuteError:
-            print(arcpy.GetMessages())
-            send_email('Cache Test Extent Error ({}) - arcpy.ExecuteError'.format(self.service_name), arcpy.GetMessages())
+            print(arcpy.GetMessages(2))
+            send_email('Cache Test Extent Error ({}) - arcpy.ExecuteError'.format(self.service_name), arcpy.GetMessages(2))
             raise arcpy.ExecuteError
 
     def cache(self):
