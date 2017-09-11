@@ -10,7 +10,7 @@ import os
 
 HNAS_ENV_NAME = 'HONEYCOMB_HNAS'
 if os.getenv(HNAS_ENV_NAME) is not None:
-    HNAS = os.getenv('HONEYCOMB_HNAS')
+    HNAS = r'\\' + os.getenv('HONEYCOMB_HNAS')
 else:
     print('Please set the "HONEYCOMP_HNAS" environmental variable!')
 PREVIEW_URL = r'http://{}/arcgis/rest/services/{}/MapServer?f=jsapi'
