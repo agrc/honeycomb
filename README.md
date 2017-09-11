@@ -12,7 +12,7 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 # Installation
 1. Install [`gcloud`](https://cloud.google.com/sdk/docs/)
     - Do *not* include the bundled python.
-1. [`crcmode`](https://cloud.google.com/storage/docs/gsutil/addlhelp/CRC32CandInstallingcrcmod).
+1. Install [`crcmode`](https://cloud.google.com/storage/docs/gsutil/addlhelp/CRC32CandInstallingcrcmod).
 1. Clone repository to local folder.
 1. From project folder base:
 `pip install . --upgrade` (make sure that you install into the 32bit version of python (required for crcmode))
@@ -26,6 +26,7 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 | `HONEYCOMB_AGS_SERVER` | your ArcGIS server url | http://localhost:6080/arcgis/admin |
 | `HONEYCOMB_AGS_USERNAME` | your ArcGIS Server username | name |
 | `HONEYCOMB_AGS_PASSWORD` | your ArcGIS Server password | password |
+1. Run `honeycomb config open`. This will initialize your config with default values and open it in your text editor.
 
 # Usage
 Run `honeycomb -help` to see documentation for the various commands.
