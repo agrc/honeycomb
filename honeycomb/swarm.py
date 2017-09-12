@@ -6,15 +6,17 @@ swarm.py
 A module that contains code for etl-ing tiles into WMTS format and uploading to GCP.
 '''
 
-from . import settings, config
-from .messaging import send_email
-from functools import partial
-from multiprocess import Pool
 import glob
 import os
 import shutil
 import subprocess
 import traceback
+from functools import partial
+
+from multiprocess import Pool
+
+from . import config, settings
+from .messaging import send_email
 
 
 def swarm(name, bucket, image_type):

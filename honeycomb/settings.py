@@ -7,7 +7,6 @@ A module that contains settings for honeycomb.
 '''
 import os
 
-
 HNAS_ENV_NAME = 'HONEYCOMB_HNAS'
 if os.getenv(HNAS_ENV_NAME) is not None:
     HNAS = r'\\' + os.getenv('HONEYCOMB_HNAS')

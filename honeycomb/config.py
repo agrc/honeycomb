@@ -6,10 +6,10 @@ A module that contains logic for reading and writing the config file
 '''
 
 from json import dumps, loads
-from os import makedirs, getenv
-from os.path import abspath, dirname, exists, join, basename
-import arcpy
+from os import getenv, makedirs
+from os.path import abspath, basename, dirname, exists, join
 
+import arcpy
 
 config_folder = join(abspath(dirname(__file__)), '..', 'honeycomb-hive')
 config_location = join(config_folder, 'config.json')

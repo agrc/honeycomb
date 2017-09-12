@@ -6,10 +6,11 @@ messaging.py
 A module that contains a method for sending emails
 '''
 
-from .config import get_config_value
 from email.mime.text import MIMEText
 from os import environ
 from smtplib import SMTP
+
+from .config import get_config_value
 
 
 def send_email(subject, body):

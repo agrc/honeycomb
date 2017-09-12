@@ -6,8 +6,9 @@ test_worker_bee.py
 A module that contains tests for the cache module.
 '''
 
-from honeycomb.worker_bee import WorkerBee
 from mock import patch
+
+from honeycomb.worker_bee import WorkerBee
 
 
 @patch('honeycomb.worker_bee.socket.gethostbyname', return_value='')

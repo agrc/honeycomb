@@ -38,13 +38,14 @@ Examples:
     honeycomb publish Lite                                      Publishes a base map's associated MXD to ArcGIS Server (raster base maps only).
 '''
 
-from . import config
-from . import update_data
+import sys
+from os import startfile
+
+from docopt import docopt
+
+from . import config, update_data
 from .swarm import swarm
 from .worker_bee import WorkerBee
-from docopt import docopt
-from os import startfile
-import sys
 
 
 def main():

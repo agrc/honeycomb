@@ -6,8 +6,10 @@ update_data.py
 A module that contains code for updating the data for base maps.
 '''
 
-import arcpy
 from os.path import join
+
+import arcpy
+
 from . import settings
 
 LOCAL = r'C:\Cache\MapData'

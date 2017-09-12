@@ -1,6 +1,5 @@
 from setuptools import setup
 
-
 setup(
     name="honeycomb",
     version="0.0.0",

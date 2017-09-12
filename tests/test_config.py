@@ -4,11 +4,11 @@
 test_config.py
 A module that contains tests for config.py
 '''
-import arcpy
-
-from honeycomb import config
-from mock import patch
 import pytest
+from mock import patch
+
+import arcpy
+from honeycomb import config
 
 
 def test_set_config_prop_overrides_default():

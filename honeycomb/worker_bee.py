@@ -6,13 +6,15 @@ worker_bee.py
 A module that contains logic for building traditional image-based caches.
 '''
 
-from . import settings, update_data, config
-from .messaging import send_email
-from shutil import rmtree
-import arcpy
 import os
 import socket
 import time
+from shutil import rmtree
+
+import arcpy
+
+from . import config, settings, update_data
+from .messaging import send_email
 
 
 class WorkerBee(object):

@@ -6,12 +6,15 @@ test_swarm.py
 A module that contains tests for the swarm module
 '''
 
-from . import conftest
-from honeycomb import swarm, settings
-from mock import patch
-from os import walk
-from os.path import join, exists
 import shutil
+from os import walk
+from os.path import exists, join
+
+from mock import patch
+
+from honeycomb import settings, swarm
+
+from . import conftest
 
 
 @patch('honeycomb.swarm.etl', return_value=[])
