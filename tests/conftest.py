@@ -4,10 +4,9 @@ from shutil import rmtree
 
 import pytest
 
-from honeycomb import config  # NOQA
-
 #: mock arcpy
 sys.path.insert(0, path.join(path.dirname(__file__), 'mocks'))
+from honeycomb import config  # NOQA
 
 
 config.config_location = path.join(path.abspath(path.dirname(__file__)), 'config.json')
