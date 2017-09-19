@@ -1,9 +1,14 @@
 language: python
 python:
     - "2.7"
-install: "pip install . && pip install .[test]"
+install:
+    - pip install codecov
+    - pip install .
+    - pip install .[test]
 script: "pytest -s --cov=honeycomb --flake8"
 notifications:
     email:
         on_success: change
         on_failure: change
+after_success:
+    - codecov
