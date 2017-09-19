@@ -1,5 +1,6 @@
 # honeycomb
 [![Build Status](https://travis-ci.org/agrc/honeycomb.svg?branch=master)](https://travis-ci.org/agrc/honeycomb)
+[![codecov](https://codecov.io/gh/agrc/honeycomb/branch/master/graph/badge.svg)](https://codecov.io/gh/agrc/honeycomb)
 
 A python CLI tool used to generate and publish AGRC base maps including:
 - raster tile cache generation
