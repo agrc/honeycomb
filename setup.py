@@ -35,6 +35,7 @@ setup(
     ],
     extras_require={
         'test': [
+            'mock',
             'pytest',
             'pytest-watch',
             'pytest-cov',
