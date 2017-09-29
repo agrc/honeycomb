@@ -41,7 +41,8 @@ def etl(name):
         print('etl-ing level: {}'.format(level))
         new_level = str(int(level[1:]))
         new_level_folder = os.path.join(new_folder, new_level)
-        os.makedirs(new_level_folder)
+        if not os.path.exists(new_level_folder):
+            os.makedirs(new_level_folder)
 
         print('globbing')
         paths = glob.glob('{}/{}/**/*.*[!.lock]'.format(base_folder, level))
