@@ -41,7 +41,7 @@ Run `honeycomb config open` (TODO) to open the config file.
 
 # Development
 ### Unit Tests & Linting
-Test dependencies: `pip install .[test] --upgrade`
+Test dependencies: `pip install ".[test]" --upgrade`
 
 Running tests/linting:
 ```
