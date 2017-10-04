@@ -36,10 +36,11 @@ setup(
     extras_require={
         'test': [
             'mock',
-            'pytest',
-            'pytest-watch',
+            'pytest-benchmark',
             'pytest-cov',
-            'pytest-flake8'
+            'pytest-flake8',
+            'pytest-watch',
+            'pytest'
         ]
     },
     entry_points={
