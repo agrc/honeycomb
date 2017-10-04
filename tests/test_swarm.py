@@ -24,13 +24,13 @@ def test_swarm(mock):
     mock.assert_called_once()
 
 
-def test_etl():
+def test_etl(benchmark):
     service = 'JPG_Service'
     shutil.copytree(join(conftest.test_data_folder, service), join(conftest.temp_folder, service))
 
     settings.CACHE_DIR = conftest.temp_folder
 
-    swarm.etl(service)
+    benchmark(swarm.etl, service)
 
     def get_files(folder):
         entries = []

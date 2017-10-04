@@ -43,10 +43,7 @@ Run `honeycomb config open` (TODO) to open the config file.
 ### Unit Tests & Linting
 Test dependencies: `pip install ".[test]" --upgrade`
 
-Running tests/linting:
-```
-ptw -- -s --cov=honeycomb --flake8
-```
+Running tests/linting: `pytest` or `ptw` to automatically run tests when files change.
 
 ### Running Source Version
 From `root` directory: `python -m honeycomb <...>`
