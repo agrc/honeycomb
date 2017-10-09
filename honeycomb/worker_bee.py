@@ -69,6 +69,7 @@ class WorkerBee(object):
         try:
             arcpy.server.ManageMapServerCacheTiles(self.service, scales, self.update_mode, settings.NUM_INSTANCES, aoi)
         except arcpy.ExecuteError:
+            import pdb; pdb.set_trace()
             self.errors.append([scales, aoi, name])
             print(arcpy.GetMessages().encode('utf-8'))
             send_email('Cache Update ({}) - arcpy.ExecuteError'.format(self.service_name), arcpy.GetMessages().encode('utf-8'))
