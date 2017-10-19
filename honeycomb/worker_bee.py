@@ -68,7 +68,8 @@ class WorkerBee(object):
 
         try:
             arcpy.server.ManageMapServerCacheTiles(self.service, scales, self.update_mode, settings.NUM_INSTANCES, aoi)
-        except arcpy.ExecuteError:
+        except arcpy.ExecuteError as e:
+            print('try using "!import sys; exc=sys.exc_info()"')
             import pdb; pdb.set_trace()
             self.errors.append([scales, aoi, name])
             print(arcpy.GetMessages().encode('utf-8'))
