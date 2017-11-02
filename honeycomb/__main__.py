@@ -12,7 +12,7 @@ Usage:
     honeycomb update-data
     honeycomb loop
     honeycomb upload <basemap>
-    honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test]
+    honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test] [--spot <path>]
     [unimplemented] honeycomb publish <basemap>
 
 Arguments:
@@ -24,6 +24,7 @@ Arguments:
     --missing-only          Only missing tiles are generated.
     --skip-update           Skip update vector data from SGID.
     --skip-test             Skip running a test cache.
+    --spot <path>           Cache only a specific extent. <path> is a path to a polygon feature class.
 
 Examples:
     honeycomb config init                                       Create a default config file.
@@ -35,6 +36,8 @@ Examples:
     honeycomb loop                                              Kicks off the honeycomb process and loops through all of the base maps.
     honeycomb upload Terrain                                    ETLs and uploads the tiles for the Terrain cache to GCP.
     honeycomb Terrain                                           Builds a single base map and pushes to GCP.
+    honeycomb Terrain --skip-update                             Builds a single base map (skipping data update) and pushes to GCP.
+    honeycomb Terrain --skip-test --spot C:\test.gdb\extent     Builds a single base map (skipping test and for a specific extent) and pushes to GCP.
     honeycomb publish Lite                                      Publishes a base map's associated MXD to ArcGIS Server (raster base maps only).
 '''
 
@@ -52,7 +55,7 @@ def main():
     args = docopt(__doc__, version='0.0.0')
 
     def cache(basemap):
-        WorkerBee(basemap, args['--missing-only'], args['--skip-update'], args['--skip-test'])
+        WorkerBee(basemap, args['--missing-only'], args['--skip-update'], args['--skip-test'], args['--spot'])
 
         def prompt_recache():
             return raw_input('Caching complete. Publish to production (P) or recache (R)? ') != 'P'

@@ -16,9 +16,11 @@ import arcpy
 from . import config, settings, update_data
 from .messaging import send_email
 
+spot_cache_name = 'spot cache'
+
 
 class WorkerBee(object):
-    def __init__(self, s_name, missing_only=False, skip_update=False, skip_test=False):
+    def __init__(self, s_name, missing_only=False, skip_update=False, skip_test=False, spot_path=False):
         print('caching {}'.format(s_name))
         self.errors = []
         self.start_time = time.time()
@@ -58,12 +60,22 @@ class WorkerBee(object):
         self.missing_only = missing_only
         self.start_bundles = self.get_bundles_count()
 
-        self.cache()
+        if self.missing_only:
+            self.update_mode = 'RECREATE_EMPTY_TILES'
+            print('Caching empty tiles only')
+        else:
+            self.update_mode = 'RECREATE_ALL_TILES'
+            print('Caching all tiles')
+
+        if not spot_path:
+            self.cache()
+        else:
+            self.cache_extent(settings.SCALES, spot_path, spot_cache_name)
 
     def cache_extent(self, scales, aoi, name):
         print('caching {} at {}'.format(name, scales))
 
-        if config.is_dev():
+        if config.is_dev() and name != spot_cache_name:
             aoi = settings.TEST_EXTENT
 
         try:
@@ -113,12 +125,6 @@ class WorkerBee(object):
 
     def cache(self):
         arcpy.env.workspace = settings.EXTENTSFGDB
-        if self.missing_only:
-            self.update_mode = 'RECREATE_EMPTY_TILES'
-            print('Caching empty tiles only')
-        else:
-            self.update_mode = 'RECREATE_ALL_TILES'
-            print('Caching all tiles')
 
         for extent in settings.CACHE_EXTENTS:
             self.cache_extent(extent[1], extent[0], extent[0])
