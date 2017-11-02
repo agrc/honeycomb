@@ -47,3 +47,7 @@ Running tests/linting: `pytest` or `ptw` to automatically run tests when files c
 
 ### Running Source Version
 From `root` directory: `python -m honeycomb <...>`
+
+# Changelog
+#### v1.0.0 - 11/2/2017
+Initial release

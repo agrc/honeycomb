@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="honeycomb",
-    version="0.0.0",
+    version="1.0.0",
     license="MIT",
     description="CLI tool for managing AGRC base map caches (vector & raster).",
     long_description="",
