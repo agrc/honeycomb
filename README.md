@@ -33,17 +33,21 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 Run `honeycomb -help` to see documentation for the various commands.
 
 # Config file
-Run `honeycomb config open` (TODO) to open the config file.
+Run `honeycomb config open` to open the config file.
 
 | Property | Description |
 | --- | --- |
+| `basemaps` | Object defining the registered base maps. Use the cli to manage this list.
 | `configuration` | Affects a few code paths for differences between production and development. Possible values: `prod` and `dev` (default).
+| `notify` | A list of email addresses to whom honeycomb sends status updates.
+| `sendEmails` | A boolean that determines whether emails are actually sent or not. Useful during development.
+| `num_processes` | A number that indicates the maximum number of parallel processes to use when uploading files to GCP.
 
 # Development
 ### Unit Tests & Linting
-Test dependencies: `pip install ".[test]" --upgrade`
+Install test dependencies: `pip install ".[test]" --upgrade`
 
-Running tests/linting: `pytest` or `ptw` to automatically run tests when files change.
+Running tests/linting: `pytest` or `ptw` to automatically run tests on file changes.
 
 ### Running Source Version
 From `root` directory: `python -m honeycomb <...>`
