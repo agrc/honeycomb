@@ -88,7 +88,7 @@ def upload(bucket, image_type, column_folder):
         try:
             print('removing local folder')
             shutil.rmtree(column_folder)
-        except:
+        except Exception:
             print('error removing folders, they will need to be removed manually')
     except Exception:
         trace = traceback.format_exc()

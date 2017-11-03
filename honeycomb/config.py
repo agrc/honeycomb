@@ -19,7 +19,7 @@ ags_connection_file = join(config_folder, 'arcgisserver.ags')
 def create_default_config():
     try:
         makedirs(dirname(config_location))
-    except:
+    except Exception:
         pass
 
     with open(config_location, 'w') as json_config_file:

@@ -20,7 +20,7 @@ def cleanup():
         if path.exists(clean_path):
             try:
                 remove(clean_path)
-            except:
+            except Exception:
                 rmtree(clean_path)
 
 

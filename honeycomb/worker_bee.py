@@ -29,7 +29,7 @@ class WorkerBee(object):
         try:
             print('deleting previous *_GCS folder, if any')
             rmtree(os.path.join(settings.CACHE_DIR, s_name + '_GCS'))
-        except:
+        except Exception:
             pass
 
         if config.is_dev():
