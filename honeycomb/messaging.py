@@ -42,6 +42,8 @@ def send_email(subject, body):
         smtp.sendmail(from_address, to, message.as_string())
         smtp.quit()
 
-        return smtp
+        return False
 
     print('sendEmails is False. No email sent.')
+
+    return True
