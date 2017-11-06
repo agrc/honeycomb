@@ -17,6 +17,7 @@ from . import config, settings, update_data
 from .messaging import send_email
 
 spot_cache_name = 'spot cache'
+error_001470_message = 'ERROR 001470: Failed to retrieve the job status from server. The Job is running on the server, please use the above URL to check the job status.\nFailed to execute (ManageMapServerCacheTiles).\n'  # noqa
 
 
 class WorkerBee(object):
@@ -81,12 +82,14 @@ class WorkerBee(object):
         try:
             arcpy.server.ManageMapServerCacheTiles(self.service, scales, self.update_mode, settings.NUM_INSTANCES, aoi)
         except arcpy.ExecuteError as e:
-            print('try using "!import sys; exc=sys.exc_info()[0]"')
-            import pdb; pdb.set_trace()  # noqa
-            print(e)
-            self.errors.append([scales, aoi, name])
-            print(arcpy.GetMessages().encode('utf-8'))
-            send_email('Cache Update ({}) - arcpy.ExecuteError'.format(self.service_name), arcpy.GetMessages().encode('utf-8'))
+            if e.message == error_001470_message:
+                msg = 'ERROR 001470 thrown. Moving on and hoping the job completes successfully.'
+                print(msg)
+                send_email('Cache Warning (ERROR 001470)', 'e.message\n\narcpy.GetMessages:\n{}'.format(arcpy.GetMessages().encode('utf-8')))
+            else:
+                self.errors.append([scales, aoi, name])
+                print(arcpy.GetMessages().encode('utf-8'))
+                send_email('Cache Update ({}) - arcpy.ExecuteError'.format(self.service_name), arcpy.GetMessages().encode('utf-8'))
 
     def get_progress(self):
         total_bundles = self.get_bundles_count()
