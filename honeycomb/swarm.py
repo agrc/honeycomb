@@ -23,7 +23,7 @@ def swarm(name, bucket, image_type):
     print('processing: {}'.format(name))
 
     etl(name)
-    column_folders = glob.glob('{}/**/*'.format(os.path.join(settings.CACHE_DIR, name + '_GCS')))
+    column_folders = glob.iglob('{}/**/*'.format(os.path.join(settings.CACHE_DIR, name + '_GCS')))
 
     pool = Pool(config.get_config_value('num_processes'))
     pool.map(partial(upload, bucket, image_type), column_folders)
@@ -45,7 +45,7 @@ def etl(name):
             os.makedirs(new_level_folder)
 
         print('globbing')
-        paths = glob.glob('{}/{}/**/*.*[!.lock]'.format(base_folder, level))
+        paths = glob.iglob('{}/{}/**/*.*[!.lock]'.format(base_folder, level))
 
         print('processing folders')
         for file_path in paths:
