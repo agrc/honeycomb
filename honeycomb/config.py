@@ -11,7 +11,7 @@ from os.path import abspath, basename, dirname, exists, join
 
 import arcpy
 
-config_folder = join(abspath(dirname(__file__)), '..', 'honeycomb-hive')
+config_folder = abspath(join(abspath(dirname(__file__)), '..', 'honeycomb-hive'))
 config_location = join(config_folder, 'config.json')
 ags_connection_file = join(config_folder, 'arcgisserver.ags')
 
@@ -28,7 +28,8 @@ def create_default_config():
             'basemaps': {},
             'notify': ['stdavis@utah.gov'],
             'configuration': 'dev',
-            'num_processes': 20
+            'num_processes': 20,
+            'mxdFolder': 'C:\\temp'
         }
 
         json_config_file.write(dumps(data, sort_keys=True, indent=2, separators=(',', ': ')))

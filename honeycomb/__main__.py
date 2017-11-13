@@ -13,7 +13,7 @@ Usage:
     honeycomb loop
     honeycomb upload <basemap>
     honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test] [--spot <path>]
-    [unimplemented] honeycomb publish <basemap>
+    honeycomb publish <basemap>
 
 Arguments:
     -h --help               Show this screen.
@@ -47,6 +47,7 @@ from os import startfile
 from docopt import docopt
 
 from . import config, update_data
+from .publish import publish
 from .swarm import swarm
 from .worker_bee import WorkerBee
 
@@ -100,6 +101,8 @@ def main():
                 else:
                     stop = True
                     break
+    elif args['publish']:
+        publish(args['<basemap>'])
     elif args['<basemap>']:
         cache(args['<basemap>'])
 
