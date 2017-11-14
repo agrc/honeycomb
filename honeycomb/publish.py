@@ -7,7 +7,7 @@ A module that contains code for publishing mxd's to ArcGIS Server for raster cac
 '''
 
 from os import mkdir, remove
-from os.path import abspath, dirname, exists, join
+from os.path import exists, join
 
 import arcpy
 
@@ -42,6 +42,26 @@ def publish(basemap):
                         print(layer.name + '\n')
 
     if analysis['errors'] == {}:
+        print('updating sddraft values')
+
+        with open(sddraft_path, 'r') as sddraft_file:
+            txt = sddraft_file.read()
+
+            txt = txt.replace('<{0}>{1}</{0}>'.format('KeepExistingMapCache', 'false'), '<{0}>{1}</{0}>'.format('KeepExistingMapCache', 'true'))
+            is_cached = '<Key>isCached</Key><Value xsi:type=\'xs:string\'>false</Value>'
+            txt = txt.replace(is_cached, is_cached.replace('false', 'true'))
+            min_instances = '<Key>MinInstances</Key><Value xsi:type=\'xs:string\'>1</Value>'
+            txt = txt.replace(min_instances, min_instances.replace('1', '0'))
+            anti_aliasing = '<Key>antialiasingMode</Key><Value xsi:type=\'xs:string\'>None</Value>'
+            txt = txt.replace(anti_aliasing, anti_aliasing.replace('None', 'Fast'))
+            storage_format = '<StorageFormat>esriMapCacheStorageModeCompactV2</StorageFormat>'
+            txt = txt.replace(storage_format, storage_format.replace('esriMapCacheStorageModeCompactV2', 'esriMapCacheStorageModeExploded'))
+            tile_format = '<CacheTileFormat>PNG</CacheTileFormat>'
+            txt = txt.replace(tile_format, tile_format.replace('PNG', config.get_basemap(basemap)['image_type'].upper()))
+
+        with open(sddraft_path, 'w') as sddraft_file:
+            sddraft_file.write(txt)
+
         print('staging')
         sd_path = sddraft_path.replace('.sddraft', '.sd')
         if exists(sd_path):
@@ -51,17 +71,6 @@ def publish(basemap):
         print('uploading')
         arcpy.server.UploadServiceDefinition(sd_path, config.ags_connection_file)
 
-        print('defining cache scheme')
-        service = join(config.ags_connection_file.replace('.ags', ''), basemap + '.MapServer')
-        print(service)
-        arcpy.server.CreateMapServerCache(service,
-                                          r'C:\arcgisserver\directories\arcgiscache',
-                                          'PREDEFINED',
-                                          'STANDARD',
-                                          20,
-                                          96,
-                                          "256 x 256",
-                                          predefined_tiling_scheme=join(abspath(dirname(__file__)), 'data', 'Conf.xml'))
         print('service published successfully!')
     else:
         print('Service could not be published because of errors found during analysis. Please fix them and republish.')
