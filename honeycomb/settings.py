@@ -18,7 +18,7 @@ CACHE_DIR = r'C:\arcgisserver\directories\arcgiscache'
 TEST_EXTENT = os.path.join(EXTENTSFGDB, 'test_extent')
 
 COMPLETE_NUM_BUNDLES_LU = {
-    'Lite': 21885,
+    'Lite': 20509,
     'Terrain': 22136,
     'Overlay': 20511,
     'AddressPoints': 18924,
