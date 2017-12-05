@@ -27,6 +27,7 @@ def swarm(name, bucket, image_type):
 
     pool = Pool(config.get_config_value('num_processes'))
     pool.map(partial(upload, bucket, image_type), column_folders)
+    pool.close()
 
 
 def etl(name):
