@@ -19,7 +19,7 @@ TEST_EXTENT = os.path.join(EXTENTSFGDB, 'test_extent')
 
 COMPLETE_NUM_BUNDLES_LU = {
     'Lite': 20509,
-    'Terrain': 22136,
+    'Terrain': 20511,
     'Overlay': 20511,
     'AddressPoints': 18924,
     'NAIP2016_Color1Meter_4Band': 9670,
