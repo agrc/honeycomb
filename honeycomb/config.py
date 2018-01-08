@@ -29,7 +29,9 @@ def create_default_config():
             'notify': ['stdavis@utah.gov'],
             'configuration': 'dev',
             'num_processes': 20,
-            'mxdFolder': 'C:\\temp'
+            'mxdFolder': 'C:\\temp',
+            'vectorTilesFolder': 'C:\\temp',
+            'vectorBaseMaps': {}
         }
 
         json_config_file.write(dumps(data, sort_keys=True, indent=2, separators=(',', ': ')))

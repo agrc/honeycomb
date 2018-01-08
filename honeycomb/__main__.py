@@ -14,6 +14,7 @@ Usage:
     honeycomb upload <basemap>
     honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test] [--spot <path>]
     honeycomb publish <basemap>
+    honeycomb vector <basemap>
 
 Arguments:
     -h --help               Show this screen.
@@ -39,10 +40,12 @@ Examples:
     honeycomb Terrain --skip-update                             Builds a single base map (skipping data update) and pushes to GCP.
     honeycomb Terrain --skip-test --spot C:\test.gdb\extent     Builds a single base map (skipping test and for a specific extent) and pushes to GCP.
     honeycomb publish Lite                                      Publishes a base map's associated MXD to ArcGIS Server (raster base maps only).
+    honeycomb vector UtahAddressPoints                          Builds a new vector tile package and uploads to AGOL.
 '''
 
+import subprocess
 import sys
-from os import startfile
+from os import path, startfile
 
 from docopt import docopt
 
@@ -103,6 +106,15 @@ def main():
                     break
     elif args['publish']:
         publish(args['<basemap>'])
+    elif args['vector']:
+        basemap = args['<basemap>']
+        vector_basemaps = config.get_config_value('vectorBaseMaps')
+        vector_module = path.join(path.abspath(path.dirname(__file__)), 'vector_py3.py')
+        summary = vector_basemaps[basemap]['summary']
+        tags = vector_basemaps[basemap]['tags']
+
+        print('building and publishing: {} | {} | {}'.format(basemap, summary, tags))
+        subprocess.check_output(['propy', vector_module, basemap, summary, tags], shell=True)
     elif args['<basemap>']:
         cache(args['<basemap>'])
 
