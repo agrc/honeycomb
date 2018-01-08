@@ -53,6 +53,9 @@ Running tests/linting: `pytest` or `ptw` to automatically run tests on file chan
 From `root` directory: `python -m honeycomb <...>`
 
 # Changelog
+#### v1.1.1 - 1/8/2018
+- fix issue with vector_py3 trying to import py2 arcpy
+
 #### v1.1.0 - 1/8/2018
 - glob - iglob to help with memory usage
 - new commands: publish, vector
