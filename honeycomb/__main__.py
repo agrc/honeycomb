@@ -56,7 +56,7 @@ from .worker_bee import WorkerBee
 
 
 def main():
-    args = docopt(__doc__, version='1.0.0')
+    args = docopt(__doc__, version='1.1.0')
 
     def cache(basemap):
         WorkerBee(basemap, args['--missing-only'], args['--skip-update'], args['--skip-test'], args['--spot'])
