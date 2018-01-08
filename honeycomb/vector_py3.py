@@ -26,7 +26,7 @@ def main(base_map_name, summary, tags):
     promap = arcpy.mp.ArcGISProject(join(project_path, base_map_name + '.aprx')).listMaps()[0]
     tile_package = join(project_path, base_map_name + '.vtpk')
 
-    print('building tiles')
+    print('building package...')
     if arcpy.Exists(tile_package):
         arcpy.management.Delete(tile_package)
 
@@ -37,11 +37,13 @@ def main(base_map_name, summary, tags):
                                              summary=summary,
                                              tags=tags)
 
-    print('publishing')
+    print('publishing...')
     arcpy.management.SharePackage(tile_package, '', '', summary, tags,
                                   credits='Utah AGRC',
                                   public='EVERYBODY',
                                   organization='EVERYBODY')
+
+    print('vector tile package successfully built and published!')
 
 
 if __name__ == '__main__':

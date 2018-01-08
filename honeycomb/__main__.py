@@ -113,8 +113,18 @@ def main():
         summary = vector_basemaps[basemap]['summary']
         tags = vector_basemaps[basemap]['tags']
 
-        print('building and publishing: {} | {} | {}'.format(basemap, summary, tags))
-        subprocess.check_output(['propy', vector_module, basemap, summary, tags], shell=True)
+        print('building and publishing: ' + basemap)
+        print('summary: ' + summary)
+        print('tags: ' + tags)
+
+        command = ['propy', '-E', vector_module, basemap, summary, tags]
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        output, error = process.communicate()
+
+        if output:
+            print(output)
+        if error:
+            print(error)
     elif args['<basemap>']:
         cache(args['<basemap>'])
 
