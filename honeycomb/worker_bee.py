@@ -9,6 +9,7 @@ A module that contains logic for building traditional image-based caches.
 import os
 import socket
 import time
+from os.path import join
 from shutil import rmtree
 
 import arcpy
@@ -71,7 +72,17 @@ class WorkerBee(object):
         if not spot_path:
             self.cache()
         else:
-            self.cache_extent(settings.SCALES, spot_path, spot_cache_name)
+            #: levels 0-17 include the entire state
+            print('spot caching levels 0-17...')
+            self.cache_extent(settings.SCALES[:18], spot_path, spot_cache_name)
+
+            #: levels 18-19 intersect with cache extent
+            print('intersecting spot cache polygon with level 18-19 cache extent...')
+            intersect = arcpy.analysis.Intersect([spot_path, join(settings.EXTENTSFGDB, settings.EXTENT_18_19)],
+                                                 'in_memory/spot_cache_intersect',
+                                                 join_attributes='ONLY_FID')
+            print('spot caching levels 18-19...')
+            self.cache_extent(settings.SCALES[18:], intersect, spot_cache_name)
 
     def cache_extent(self, scales, aoi, name):
         print('caching {} at {}'.format(name, scales))
