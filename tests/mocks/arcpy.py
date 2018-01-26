@@ -68,6 +68,12 @@ class SpatialReference(object):
         pass
 
 
+class analysis(object):
+    @staticmethod
+    def Intersect(in_features, out_features, join_attributes):
+        pass
+
+
 def ListFeatureClasses():
     if env.workspace.endswith('.sde'):
         return ['SGID10.BOUNDARIES.CountyBoundaries', 'SGID10.LOCATION.Schools']

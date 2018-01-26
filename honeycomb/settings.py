@@ -62,6 +62,8 @@ CACHE_EXTENTS = [
     [EXTENT_10_14, SCALES[10:15]]
 ]
 
+EXTENT_18_19 = 'CacheExtent_18_19'
+
 GRIDS15 = 'CacheGrids_15'
 GRIDS16 = 'CacheGrids_16'
 GRIDS17 = 'CacheGrids_17'
