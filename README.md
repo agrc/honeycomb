@@ -27,6 +27,8 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 | `HONEYCOMB_AGS_SERVER` | your ArcGIS server url | http://localhost:6080/arcgis/admin |
 | `HONEYCOMB_AGS_USERNAME` | your ArcGIS Server username | name |
 | `HONEYCOMB_AGS_PASSWORD` | your ArcGIS Server password | password |
+| `HONEYCOMB_GIZA_USERNAME` | your Giza (discover) username | name |
+| `HONEYCOMB_GIZA_PASSWORD` | your Giza (discover) password | password |
 1. Run `honeycomb config open`. This will initialize your config with default values and open it in your text editor.
 
 # Usage
