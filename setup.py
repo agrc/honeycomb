@@ -29,7 +29,8 @@ setup(
         'colorama==0.3.7',
         'docopt==0.6.2',
         'multiprocess==0.70.5',
-        'dill==0.2.7.1'
+        'dill==0.2.7.1',
+        'requests==2.18.4'
     ],
     dependency_links=[
     ],
@@ -40,7 +41,8 @@ setup(
             'pytest-cov',
             'pytest-flake8',
             'pytest-watch',
-            'pytest'
+            'pytest',
+            'requests_mock'
         ]
     },
     entry_points={

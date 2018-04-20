@@ -31,7 +31,8 @@ def create_default_config():
             'num_processes': 20,
             'mxdFolder': 'C:\\temp',
             'vectorTilesFolder': 'C:\\temp',
-            'vectorBaseMaps': {}
+            'vectorBaseMaps': {},
+            'gizaInstance': 'https://discover.agrc.utah.gov'
         }
 
         json_config_file.write(dumps(data, sort_keys=True, indent=2, separators=(',', ': ')))

@@ -13,6 +13,7 @@ import subprocess
 import traceback
 from functools import partial
 
+import requests
 from multiprocess import Pool
 
 from . import config, settings
@@ -28,6 +29,8 @@ def swarm(name, bucket, image_type):
     pool = Pool(config.get_config_value('num_processes'))
     pool.map(partial(upload, bucket, image_type), column_folders)
     pool.close()
+
+    bust_discover_cache()
 
 
 def etl(name):
@@ -95,3 +98,17 @@ def upload(bucket, image_type, column_folder):
         trace = traceback.format_exc()
         send_email('Uploading error. Level: {}'.format(level), trace)
         print(trace)
+
+
+def bust_discover_cache():
+    giza_instance = config.get_config_value('gizaInstance')
+
+    with requests.Session() as session:
+        response = session.post('{}/login'.format(giza_instance),
+                                data={'user': os.getenv('HONEYCOMB_GIZA_USERNAME'),
+                                      'password': os.getenv('HONEYCOMB_GIZA_PASSWORD')})
+
+        if response.status_code != 200:
+            raise Exception('Login failed')
+
+        response = session.get('{}/reset'.format(giza_instance))

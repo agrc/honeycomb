@@ -10,18 +10,30 @@ import shutil
 from os import walk
 from os.path import exists, join
 
+import requests_mock
+from honeycomb import config, settings, swarm
 from mock import patch
-
-from honeycomb import settings, swarm
+from pytest import raises
 
 from . import conftest
 
+giza_instance = config.get_config_value('gizaInstance')
+login_path = '{}/login'.format(giza_instance)
 
-@patch('honeycomb.swarm.etl', return_value=[])
-def test_swarm(mock):
+
+def mock_success(requests_mock):
+    requests_mock.post(login_path, status_code=200)
+    requests_mock.get('{}/reset'.format(giza_instance), status_code=200)
+
+
+@patch('honeycomb.swarm.etl')
+@patch('honeycomb.swarm.upload')
+@requests_mock.mock()
+def test_swarm(upload_mock, etl_mock, requests_mock):
+    mock_success(requests_mock)
     swarm.swarm('Terrain', 'bucket', 'png')
 
-    mock.assert_called_once()
+    etl_mock.assert_called_once()
 
 
 def test_etl(benchmark):
@@ -54,3 +66,15 @@ def test_upload(check_call_mock):
 
     check_call_mock.assert_called_once()
     assert not exists(column_folder)
+
+
+@requests_mock.mock()
+def test_bust_discover_cache(mock):
+    mock_success(mock)
+
+    swarm.bust_discover_cache()
+
+    mock.post(login_path, status_code=304)
+
+    with raises(Exception):
+        swarm.bust_discover_cache()
