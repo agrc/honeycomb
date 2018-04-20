@@ -45,6 +45,8 @@ Run `honeycomb config open` to open the config file.
 
 # Development
 ### Unit Tests & Linting
+`arcpy` is mocked for the tests so this should all work without it.
+
 Install test dependencies: `pip install ".[test]" --upgrade`
 
 Running tests/linting: `pytest` or `ptw` to automatically run tests on file changes.
