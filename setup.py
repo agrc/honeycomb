@@ -40,7 +40,7 @@ setup(
             'pytest-benchmark',
             'pytest-cov',
             'pytest-env',
-            'pytest-flake8',
+            'pytest-flake8==1.0.0',
             'pytest-watch',
             'pytest',
             'requests_mock'
