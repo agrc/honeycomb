@@ -7,11 +7,11 @@ A module that contains settings for honeycomb.
 '''
 import os
 
-HNAS_ENV_NAME = 'HONEYCOMB_HNAS'
-if os.getenv(HNAS_ENV_NAME) is not None:
-    HNAS = r'\\' + os.getenv('HONEYCOMB_HNAS')
+SHARE_ENV_NAME = 'HONEYCOMB_SHARE'
+if os.getenv(SHARE_ENV_NAME) is not None:
+    SHARE = r'\\' + os.getenv(SHARE_ENV_NAME)
 else:
-    print('Please set the "HONEYCOMP_HNAS" environmental variable!')
+    raise Exception('Please set the "{}" environmental variable!'.format(SHARE_ENV_NAME))
 PREVIEW_URL = r'http://{}/arcgis/rest/services/{}/MapServer?f=jsapi'
 EXTENTSFGDB = os.path.join(os.path.dirname(__file__), 'data', 'Extents.gdb')
 CACHE_DIR = r'C:\arcgisserver\directories\arcgiscache'
