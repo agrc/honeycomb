@@ -39,6 +39,7 @@ setup(
             'mock',
             'pytest-benchmark',
             'pytest-cov',
+            'pytest-env',
             'pytest-flake8',
             'pytest-watch',
             'pytest',
