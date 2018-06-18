@@ -57,6 +57,9 @@ Running tests/linting: `pytest` or `ptw` to automatically run tests on file chan
 From `root` directory: `python -m honeycomb <...>`
 
 # Changelog
+#### v1.2.0 - 6/18/2018
+- remove HNAS in favor of a generic server file share
+
 #### v1.1.1 - 1/8/2018
 - fix issue with vector_py3 trying to import py2 arcpy
 
