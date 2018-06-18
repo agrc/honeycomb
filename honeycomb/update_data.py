@@ -13,8 +13,8 @@ import arcpy
 from . import settings
 
 LOCAL = r'C:\Cache\MapData'
-HNAS = join(settings.HNAS, r'BaseMaps\Data')
-SGID = join(HNAS, 'SGID10.sde')
+SHARE = join(settings.SHARE, 'Maps', 'Data')
+SGID = join(SHARE, 'SGID10.sde')
 SGID_GDB_NAME = 'SGID10_WGS.gdb'
 
 
@@ -35,8 +35,8 @@ def get_SGID_lookup():
 def main():
     sgid_fcs = get_SGID_lookup()
 
-    print('updating SGID data on HNAS')
-    arcpy.env.workspace = join(HNAS, SGID_GDB_NAME)
+    print('updating SGID data on SHARE')
+    arcpy.env.workspace = join(SHARE, SGID_GDB_NAME)
     for fc in arcpy.ListFeatureClasses():
         print(fc)
         arcpy.management.Delete(fc)
@@ -45,8 +45,8 @@ def main():
     print('copying databases locally')
     for db in [SGID_GDB_NAME, 'UtahBaseMap-Data_WGS.gdb']:
         local_db = join(LOCAL, db)
-        hnas_db = join(HNAS, db)
+        SHARE_db = join(SHARE, db)
         arcpy.management.Delete(local_db)
-        arcpy.management.Copy(hnas_db, local_db)
+        arcpy.management.Copy(SHARE_db, local_db)
 
     arcpy.env.workspace = None
