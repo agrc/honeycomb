@@ -151,8 +151,10 @@ class WorkerBee(object):
 
     def cache_test_extent(self):
         print('caching test extent')
+        cache_scales = intersect_scales(settings.SCALES, self.restrict_scales)
+
         try:
-            arcpy.server.ManageMapServerCacheTiles(self.service, settings.SCALES, 'RECREATE_ALL_TILES', settings.NUM_INSTANCES, settings.TEST_EXTENT)
+            arcpy.server.ManageMapServerCacheTiles(self.service, cache_scales, 'RECREATE_ALL_TILES', settings.NUM_INSTANCES, settings.TEST_EXTENT)
             send_email('Cache Test Extent Complete ({})'.format(self.service_name), self.preview_url)
             if raw_input('Recache test extent (T) or continue with full cache (F): ') == 'T':
                 self.cache_test_extent()
