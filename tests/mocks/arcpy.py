@@ -81,5 +81,9 @@ def ListFeatureClasses():
         return ['CountyBoundaries', 'Schools']
 
 
+def GetMessages():
+    return 'GetMessages mock response'
+
+
 def ExecuteError(Exception):
     pass

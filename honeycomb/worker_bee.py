@@ -21,12 +21,31 @@ spot_cache_name = 'spot cache'
 error_001470_message = 'ERROR 001470: Failed to retrieve the job status from server. The Job is running on the server, please use the above URL to check the job status.\nFailed to execute (ManageMapServerCacheTiles).\n'  # noqa
 
 
+def parse_levels(levels_txt):
+    #: parse the levels parameter text into an array of scales
+    min, max = map(int, levels_txt.split('-'))
+
+    return settings.SCALES[min:max + 1]
+
+
+def intersect_scales(scales, restrict_scales):
+    #: return the intersection of between scales and restrict_scales
+    intersection = set(scales) & set(restrict_scales)
+
+    return list(intersection)
+
+
 class WorkerBee(object):
-    def __init__(self, s_name, missing_only=False, skip_update=False, skip_test=False, spot_path=False):
+    def __init__(self, s_name, missing_only=False, skip_update=False, skip_test=False, spot_path=False, levels=False):
         print('caching {}'.format(s_name))
         self.errors = []
         self.start_time = time.time()
         self.service_name = s_name
+
+        if not levels:
+            self.restrict_scales = settings.SCALES
+        else:
+            self.restrict_scales = parse_levels(levels)
 
         try:
             print('deleting previous *_GCS folder, if any')
@@ -70,7 +89,7 @@ class WorkerBee(object):
             print('Caching all tiles')
 
         if not spot_path:
-            self.cache()
+            self.cache(not levels)
         else:
             #: levels 0-17 include the entire state
             print('spot caching levels 0-17...')
@@ -85,20 +104,25 @@ class WorkerBee(object):
             self.cache_extent(settings.SCALES[18:], intersect, spot_cache_name)
 
     def cache_extent(self, scales, aoi, name):
-        print('caching {} at {}'.format(name, scales))
+        cache_scales = intersect_scales(scales, self.restrict_scales)
+
+        if len(cache_scales) == 0:
+            return
+
+        print('caching {} at {}'.format(name, cache_scales))
 
         if config.is_dev() and name != spot_cache_name:
             aoi = settings.TEST_EXTENT
 
         try:
-            arcpy.server.ManageMapServerCacheTiles(self.service, scales, self.update_mode, settings.NUM_INSTANCES, aoi)
+            arcpy.server.ManageMapServerCacheTiles(self.service, cache_scales, self.update_mode, settings.NUM_INSTANCES, aoi)
         except arcpy.ExecuteError as e:
             if e.message == error_001470_message:
                 msg = 'ERROR 001470 thrown. Moving on and hoping the job completes successfully.'
                 print(msg)
                 send_email('Cache Warning (ERROR 001470)', 'e.message\n\narcpy.GetMessages:\n{}'.format(arcpy.GetMessages().encode('utf-8')))
             else:
-                self.errors.append([scales, aoi, name])
+                self.errors.append([cache_scales, aoi, name])
                 print(arcpy.GetMessages().encode('utf-8'))
                 send_email('Cache Update ({}) - arcpy.ExecuteError'.format(self.service_name), arcpy.GetMessages().encode('utf-8'))
 
@@ -137,11 +161,11 @@ class WorkerBee(object):
             send_email('Cache Test Extent Error ({}) - arcpy.ExecuteError'.format(self.service_name), arcpy.GetMessages().encode('utf-8'))
             raise arcpy.ExecuteError
 
-    def cache(self):
+    def cache(self, run_all_levels):
         arcpy.env.workspace = settings.EXTENTSFGDB
 
-        for extent in settings.CACHE_EXTENTS:
-            self.cache_extent(extent[1], extent[0], extent[0])
+        for fc_name, scales in settings.CACHE_EXTENTS:
+            self.cache_extent(scales, fc_name, fc_name)
 
         send_email(self.email_subject,
                    'Levels 0-9 completed.\n{}\n{}'.format(self.get_progress(), self.preview_url))
@@ -156,7 +180,7 @@ class WorkerBee(object):
                 for row in cur:
                     grid_count += 1
                     grid_percent = int(round((float(grid_count) / total_grids) * 100))
-                    self.cache_extent(grid[1], row[0], '{}: OBJECTID: {}'.format(grid[0], row[1]))
+                    self.cache_extent([grid[1]], row[0], '{}: OBJECTID: {}'.format(grid[0], row[1]))
                     grit_percent_msg = 'Grids for this level completed: {}%'.format(grid_percent)
                     print(grit_percent_msg)
                     progress = self.get_progress()
@@ -169,7 +193,7 @@ class WorkerBee(object):
             self.cache_extent(*self.errors.pop())
 
         bundles = self.get_bundles_count()
-        if bundles < self.complete_num_bundles:
+        if bundles < self.complete_num_bundles and run_all_levels:
             msg = 'Only {} out of {} bundles completed. Recaching...'.format(bundles, self.complete_num_bundles)
             print(msg)
             send_email(self.email_subject, msg)
