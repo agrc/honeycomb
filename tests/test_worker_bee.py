@@ -6,9 +6,8 @@ test_worker_bee.py
 A module that contains tests for the cache module.
 '''
 
+from honeycomb.worker_bee import WorkerBee, intersect_scales, parse_levels
 from mock import patch
-
-from honeycomb.worker_bee import WorkerBee
 
 
 @patch('honeycomb.worker_bee.socket.gethostbyname', return_value='')
@@ -37,3 +36,11 @@ def test_get_progress(get_bundles_count, cache, host_mock):
     bee = WorkerBee('Terrain', skip_update=True, skip_test=True)
 
     assert bee.get_progress() == '0 of 19 (0%) bundle files created.\nEstimated hours remaining: ??'
+
+
+def test_parse_levels():
+    assert parse_levels('5-7') == [1.8489297737236E7, 9244648.868618, 4622324.434309]
+
+
+def test_intersect_scales():
+    assert intersect_scales([1, 2, 4], [1, 2, 3]) == [1, 2]

@@ -12,7 +12,7 @@ Usage:
     honeycomb update-data
     honeycomb loop
     honeycomb upload <basemap>
-    honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test] [--spot <path>]
+    honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test] [--spot <path>] [--levels <levels>]
     honeycomb publish <basemap>
     honeycomb vector <basemap>
 
@@ -26,6 +26,7 @@ Arguments:
     --skip-update           Skip update vector data from SGID.
     --skip-test             Skip running a test cache.
     --spot <path>           Cache only a specific extent. <path> is a path to a polygon feature class.
+    --levels <levels>       Cache only specific levels
 
 Examples:
     honeycomb config init                                       Create a default config file.
@@ -39,6 +40,7 @@ Examples:
     honeycomb Terrain                                           Builds a single base map and pushes to GCP.
     honeycomb Terrain --skip-update                             Builds a single base map (skipping data update) and pushes to GCP.
     honeycomb Terrain --skip-test --spot C:\test.gdb\extent     Builds a single base map (skipping test and for a specific extent) and pushes to GCP.
+    honeycomb Terrain --levels 5-7                              Builds a single base map for levels 5, 6 & 7 and pushes to GCP.
     honeycomb publish Lite                                      Publishes a base map's associated MXD to ArcGIS Server (raster base maps only).
     honeycomb vector UtahAddressPoints                          Builds a new vector tile package and uploads to AGOL.
 '''
@@ -59,7 +61,7 @@ def main():
     args = docopt(__doc__, version='1.1.1')
 
     def cache(basemap):
-        WorkerBee(basemap, args['--missing-only'], args['--skip-update'], args['--skip-test'], args['--spot'])
+        WorkerBee(basemap, args['--missing-only'], args['--skip-update'], args['--skip-test'], args['--spot'], args['--levels'])
 
         def prompt_recache():
             return raw_input('Caching complete. Publish to production (P) or recache (R)? ') != 'P'
