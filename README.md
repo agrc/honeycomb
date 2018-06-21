@@ -57,6 +57,9 @@ Running tests/linting: `pytest` or `ptw` to automatically run tests on file chan
 From `root` directory: `python -m honeycomb <...>`
 
 # Changelog
+#### v1.3.0 - 6/21/2018
+- Add `--levels` parameter for restricting cache jobs to certain levels
+
 #### v1.2.0 - 6/18/2018
 - remove HNAS in favor of a generic server file share
 
