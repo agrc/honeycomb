@@ -14,7 +14,7 @@ else:
     raise Exception('Please set the "{}" environmental variable!'.format(SHARE_ENV_NAME))
 PREVIEW_URL = r'http://{}/arcgis/rest/services/{}/MapServer?f=jsapi'
 EXTENTSFGDB = os.path.join(os.path.dirname(__file__), 'data', 'Extents.gdb')
-CACHE_DIR = r'C:\arcgisserver\directories\arcgiscache'
+CACHE_DIR = r'D:\\'
 TEST_EXTENT = os.path.join(EXTENTSFGDB, 'test_extent')
 
 COMPLETE_NUM_BUNDLES_LU = {
