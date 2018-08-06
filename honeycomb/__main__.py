@@ -47,7 +47,10 @@ Examples:
 
 import subprocess
 import sys
-from os import path, startfile
+from os import path, startfile, getenv
+from time import sleep
+import requests
+import urllib3
 
 from docopt import docopt
 
@@ -55,10 +58,40 @@ from . import config, update_data
 from .publish import publish
 from .swarm import swarm
 from .worker_bee import WorkerBee
+from .messaging import send_email
 
+
+#: not worried about SSL issues since we are only making requests to
+#: arcgis server
+#: ref: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warnings
+urllib3.disable_warnings()
+
+
+def wait_for_server():
+    # check if arcgis server is running
+    # True: still waiting, False: server is ready
+    try:
+        r = requests.get(getenv('HONEYCOMB_AGS_SERVER'), verify=False)
+    except requests.exceptions.ConnectionError:
+        return True
+
+    return r.status_code != 200
 
 def main():
     args = docopt(__doc__, version='1.1.1')
+
+    max_tries = 100
+    trys = 0
+    while wait_for_server():
+        trys = trys + 1
+
+        if trys == max_tries:
+            print('giving up on waiting for ArcGIS Server')
+            send_email('Problem with Honeycomb!', 'Gave up waiting for ArcGIS Server to start up')
+            raise Exception('ArcGIS Server isn\'t waking up')
+
+        print('waiting for ArcGIS Server to start up...')
+        sleep(60)
 
     def cache(basemap):
         WorkerBee(basemap, args['--missing-only'], args['--skip-update'], args['--skip-test'], args['--spot'], args['--levels'])
