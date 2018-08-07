@@ -37,7 +37,7 @@ def intersect_scales(scales, restrict_scales):
 
 class WorkerBee(object):
     def __init__(self, s_name, missing_only=False, skip_update=False, skip_test=False, spot_path=False, levels=False):
-        print('caching {}'.format(s_name))
+        logger.info('caching {}'.format(s_name))
         self.errors = []
         self.start_time = time.time()
         self.service_name = s_name
@@ -48,7 +48,7 @@ class WorkerBee(object):
             self.restrict_scales = parse_levels(levels)
 
         try:
-            print('deleting previous *_GCS folder, if any')
+            logger.info('deleting previous *_GCS folder, if any')
             rmtree(os.path.join(settings.CACHE_DIR, s_name + '_GCS'))
         except Exception:
             pass
@@ -65,42 +65,42 @@ class WorkerBee(object):
         self.email_subject = 'Cache Update ({})'.format(self.service_name)
 
         if skip_update:
-            print('skipping data update...')
+            logger.info('skipping data update...')
         else:
             update_data.main()
             logger.info('Data update complete. Proceeding with caching...')
 
         if skip_test:
-            print('skipping test cache...')
+            logger.info('skipping test cache...')
         else:
             self.cache_test_extent()
 
         if missing_only:
-            print('caching empty tiles only...')
+            logger.info('caching empty tiles only...')
 
         self.missing_only = missing_only
         self.start_bundles = self.get_bundles_count()
 
         if self.missing_only:
             self.update_mode = 'RECREATE_EMPTY_TILES'
-            print('Caching empty tiles only')
+            logger.info('Caching empty tiles only')
         else:
             self.update_mode = 'RECREATE_ALL_TILES'
-            print('Caching all tiles')
+            logger.info('Caching all tiles')
 
         if not spot_path:
             self.cache(not levels)
         else:
             #: levels 0-17 include the entire state
-            print('spot caching levels 0-17...')
+            logger.info('spot caching levels 0-17...')
             self.cache_extent(settings.SCALES[:18], spot_path, spot_cache_name)
 
             #: levels 18-19 intersect with cache extent
-            print('intersecting spot cache polygon with level 18-19 cache extent...')
+            logger.info('intersecting spot cache polygon with level 18-19 cache extent...')
             intersect = arcpy.analysis.Intersect([spot_path, join(settings.EXTENTSFGDB, settings.EXTENT_18_19)],
                                                  'in_memory/spot_cache_intersect',
                                                  join_attributes='ONLY_FID')
-            print('spot caching levels 18-19...')
+            logger.info('spot caching levels 18-19...')
             self.cache_extent(settings.SCALES[18:], intersect, spot_cache_name)
 
     def cache_extent(self, scales, aoi, name):
@@ -109,7 +109,7 @@ class WorkerBee(object):
         if len(cache_scales) == 0:
             return
 
-        print('caching {} at {}'.format(name, cache_scales))
+        logger.info('caching {} at {}'.format(name, cache_scales))
 
         if config.is_dev() and name != spot_cache_name:
             aoi = settings.TEST_EXTENT
@@ -136,7 +136,7 @@ class WorkerBee(object):
         percent = int(round(float(total_bundles) / self.complete_num_bundles * 100.00))
         msg = '{} of {} ({}%) bundle files created.\nEstimated hours remaining: {}'.format(
             total_bundles, self.complete_num_bundles, percent, hours_remaining)
-        print(msg)
+        logger.info(msg)
         return msg
 
     def get_bundles_count(self):
@@ -148,7 +148,7 @@ class WorkerBee(object):
         return totalfiles
 
     def cache_test_extent(self):
-        print('caching test extent')
+        logger.info('caching test extent')
         cache_scales = intersect_scales(settings.SCALES, self.restrict_scales)
 
         try:
@@ -157,7 +157,6 @@ class WorkerBee(object):
             if raw_input('Recache test extent (T) or continue with full cache (F): ') == 'T':
                 self.cache_test_extent()
         except arcpy.ExecuteError:
-            print(arcpy.GetMessages().encode('utf-8'))
             logger.error('Cache Test Extent Error ({}) - arcpy.ExecuteError; arcpy.GetMessages: {}'.format(self.service_name, arcpy.GetMessages().encode('utf-8')))
             raise arcpy.ExecuteError
 
@@ -181,20 +180,18 @@ class WorkerBee(object):
                     grid_percent = int(round((float(grid_count) / total_grids) * 100))
                     self.cache_extent([grid[1]], row[0], '{}: OBJECTID: {}'.format(grid[0], row[1]))
                     grit_percent_msg = 'Grids for this level completed: {}%'.format(grid_percent)
-                    print(grit_percent_msg)
+                    logger.info(grit_percent_msg)
                     progress = self.get_progress()
             logger.info('Level {} completed.\n{}\n{}\nNumber of errors: {}'.format(grid[0], progress, self.preview_url, len(self.errors)))
 
         while (len(self.errors) > 0):
             msg = 'Recaching errors. Errors left: {}'.format(len(self.errors))
-            print(msg)
             logger.info(msg)
             self.cache_extent(*self.errors.pop())
 
         bundles = self.get_bundles_count()
         if bundles < self.complete_num_bundles and run_all_levels:
             msg = 'Only {} out of {} bundles completed. Recaching...'.format(bundles, self.complete_num_bundles)
-            print(msg)
             logger.info(msg)
             self.cache()
 
