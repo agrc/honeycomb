@@ -107,8 +107,6 @@ def main():
     def cache(basemap):
         WorkerBee(basemap, args['--missing-only'], args['--skip-update'], args['--skip-test'], args['--spot'], args['--levels'])
 
-        WorkerBee(basemap, False, True, True)
-
         upload(basemap)
 
     def upload(basemap):
