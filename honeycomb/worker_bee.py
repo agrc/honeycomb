@@ -169,7 +169,7 @@ class WorkerBee(object):
         logger.info('Levels 0-9 completed.\n{}\n{}'.format(self.get_progress(), self.preview_url))
 
         if config.is_dev():
-            settings.GRIDS = settings.GRIDS[:-4]
+            settings.GRIDS = settings.GRIDS[1:2]
         for grid in settings.GRIDS:
             total_grids = int(arcpy.management.GetCount(grid[0])[0])
             grid_count = 0
