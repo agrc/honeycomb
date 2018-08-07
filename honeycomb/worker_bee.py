@@ -15,7 +15,7 @@ from shutil import rmtree
 import arcpy
 
 from . import config, settings, update_data
-from .messaging import send_email
+import logger
 
 spot_cache_name = 'spot cache'
 error_001470_message = 'ERROR 001470: Failed to retrieve the job status from server. The Job is running on the server, please use the above URL to check the job status.\nFailed to execute (ManageMapServerCacheTiles).\n'  # noqa
@@ -68,7 +68,7 @@ class WorkerBee(object):
             print('skipping data update...')
         else:
             update_data.main()
-            send_email(self.email_subject, 'Data update complete. Proceeding with caching...')
+            logger.info('Data update complete. Proceeding with caching...')
 
         if skip_test:
             print('skipping test cache...')
@@ -119,12 +119,10 @@ class WorkerBee(object):
         except arcpy.ExecuteError as e:
             if e.message == error_001470_message:
                 msg = 'ERROR 001470 thrown. Moving on and hoping the job completes successfully.'
-                print(msg)
-                send_email('Cache Warning (ERROR 001470)', 'e.message\n\narcpy.GetMessages:\n{}'.format(arcpy.GetMessages().encode('utf-8')))
+                logger.warn('Cache Warning (ERROR 001470). e.message\n\narcpy.GetMessages:\n{}'.format(arcpy.GetMessages().encode('utf-8')))
             else:
                 self.errors.append([cache_scales, aoi, name])
-                print(arcpy.GetMessages().encode('utf-8'))
-                send_email('Cache Update ({}) - arcpy.ExecuteError'.format(self.service_name), arcpy.GetMessages().encode('utf-8'))
+                logger.error('Cache Update ({}) - arcpy.ExecuteError. arcpy.GetMessages: {}'.format(self.service_name, arcpy.GetMessages().encode('utf-8')))
 
     def get_progress(self):
         total_bundles = self.get_bundles_count()
@@ -155,12 +153,12 @@ class WorkerBee(object):
 
         try:
             arcpy.server.ManageMapServerCacheTiles(self.service, cache_scales, 'RECREATE_ALL_TILES', settings.NUM_INSTANCES, settings.TEST_EXTENT)
-            send_email('Cache Test Extent Complete ({})'.format(self.service_name), self.preview_url)
+            logger.info('Cache Test Extent Complete ({})'.format(self.service_name), self.preview_url)
             if raw_input('Recache test extent (T) or continue with full cache (F): ') == 'T':
                 self.cache_test_extent()
         except arcpy.ExecuteError:
             print(arcpy.GetMessages().encode('utf-8'))
-            send_email('Cache Test Extent Error ({}) - arcpy.ExecuteError'.format(self.service_name), arcpy.GetMessages().encode('utf-8'))
+            logger.error('Cache Test Extent Error ({}) - arcpy.ExecuteError; arcpy.GetMessages: {}'.format(self.service_name, arcpy.GetMessages().encode('utf-8')))
             raise arcpy.ExecuteError
 
     def cache(self, run_all_levels):
@@ -169,8 +167,7 @@ class WorkerBee(object):
         for fc_name, scales in settings.CACHE_EXTENTS:
             self.cache_extent(scales, fc_name, fc_name)
 
-        send_email(self.email_subject,
-                   'Levels 0-9 completed.\n{}\n{}'.format(self.get_progress(), self.preview_url))
+        logger.info('Levels 0-9 completed.\n{}\n{}'.format(self.get_progress(), self.preview_url))
 
         if config.is_dev():
             settings.GRIDS = settings.GRIDS[:-4]
@@ -186,19 +183,19 @@ class WorkerBee(object):
                     grit_percent_msg = 'Grids for this level completed: {}%'.format(grid_percent)
                     print(grit_percent_msg)
                     progress = self.get_progress()
-            send_email(self.email_subject, 'Level {} completed.\n{}\n{}\nNumber of errors: {}'.format(grid[0], progress, self.preview_url, len(self.errors)))
+            logger.info('Level {} completed.\n{}\n{}\nNumber of errors: {}'.format(grid[0], progress, self.preview_url, len(self.errors)))
 
         while (len(self.errors) > 0):
             msg = 'Recaching errors. Errors left: {}'.format(len(self.errors))
             print(msg)
-            send_email(self.email_subject, msg)
+            logger.info(msg)
             self.cache_extent(*self.errors.pop())
 
         bundles = self.get_bundles_count()
         if bundles < self.complete_num_bundles and run_all_levels:
             msg = 'Only {} out of {} bundles completed. Recaching...'.format(bundles, self.complete_num_bundles)
             print(msg)
-            send_email(self.email_subject, msg)
+            logger.info(msg)
             self.cache()
 
-        send_email(self.email_subject + ' Finished', 'Caching complete!\n\n{}'.format(self.preview_url))
+        logger.info('Caching complete!\n\n{}'.format(self.preview_url))

@@ -17,11 +17,11 @@ import requests
 from multiprocess import Pool
 
 from . import config, settings
-from .messaging import send_email
+import logger
 
 
 def swarm(name, bucket, image_type):
-    print('processing: {}'.format(name))
+    logger.info('processing: {}'.format(name))
 
     etl(name)
     column_folders = glob.iglob('{}/**/*'.format(os.path.join(settings.CACHE_DIR, name + '_GCS')))
@@ -42,16 +42,16 @@ def etl(name):
     base_folder = os.path.join(settings.CACHE_DIR, name, 'Layers', '_alllayers')
 
     for level in os.listdir(base_folder):
-        print('etl-ing level: {}'.format(level))
+        logger.info('etl-ing level: {}'.format(level))
         new_level = str(int(level[1:]))
         new_level_folder = os.path.join(new_folder, new_level)
         if not os.path.exists(new_level_folder):
             os.makedirs(new_level_folder)
 
-        print('globbing')
+        logger.info('globbing')
         paths = glob.iglob('{}/{}/**/*.*[!.lock]'.format(base_folder, level))
 
-        print('processing folders')
+        logger.info('processing folders')
         for file_path in paths:
             parts = file_path.split(os.path.sep)[-2:]
             row = str(int(parts[0][1:], 16))
@@ -62,7 +62,7 @@ def etl(name):
 
             shutil.copy(os.path.join(base_folder, level, file_path), os.path.join(column_folder, row))
 
-        print('cleaning up AGS tiles')
+        logger.info('cleaning up AGS tiles')
 
         shutil.rmtree(os.path.join(base_folder, level))
 
@@ -71,7 +71,7 @@ def upload(bucket, image_type, column_folder):
     '''
     upload all tile in folder to GCP, then clean up the folder
     '''
-    print('uploading: ' + column_folder)
+    logger.info('uploading: ' + column_folder)
     content_type = 'image/{}'.format(image_type)
     level = os.path.basename(os.path.dirname(column_folder))
 
@@ -90,14 +90,13 @@ def upload(bucket, image_type, column_folder):
         ], shell=True)
 
         try:
-            print('removing local folder')
+            logger.info('removing local folder')
             shutil.rmtree(column_folder)
         except Exception:
-            print('error removing folders, they will need to be removed manually')
+            logger.error('error removing folders, they will need to be removed manually')
     except Exception:
         trace = traceback.format_exc()
-        send_email('Uploading error. Level: {}'.format(level), trace)
-        print(trace)
+        logger.error('Uploading error. Level: {}. Traceback: {}'.format(level, trace))
 
 
 def bust_discover_cache():

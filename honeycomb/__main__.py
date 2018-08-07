@@ -47,7 +47,7 @@ Examples:
 
 import subprocess
 import sys
-from os import path, startfile, getenv
+from os import path, startfile, getenv, linesep
 from time import sleep
 import requests
 import urllib3
@@ -58,7 +58,7 @@ from . import config, update_data
 from .publish import publish
 from .swarm import swarm
 from .worker_bee import WorkerBee
-from .messaging import send_email
+import logger
 
 
 #: not worried about SSL issues since we are only making requests to
@@ -77,20 +77,31 @@ def wait_for_server():
 
     return r.status_code != 200
 
+
+def global_exception_handler(ex_cls, ex, tb):
+    import traceback
+
+    last_traceback = (traceback.extract_tb(tb))[-1]
+    line_number = last_traceback[1]
+    file_name = last_traceback[0].split(".")[0]
+    error = linesep.join(traceback.format_exception(ex_cls, ex, tb))
+
+    logger.error(error)
+
+
 def main():
+    sys.excepthook = global_exception_handler
     args = docopt(__doc__, version='1.1.1')
 
-    max_tries = 100
+    max_tries = 15
     trys = 0
     while wait_for_server():
         trys = trys + 1
 
         if trys == max_tries:
-            print('giving up on waiting for ArcGIS Server')
-            send_email('Problem with Honeycomb!', 'Gave up waiting for ArcGIS Server to start up')
             raise Exception('ArcGIS Server isn\'t waking up')
 
-        print('waiting for ArcGIS Server to start up...')
+        logger.info('waiting for ArcGIS Server to start up...')
         sleep(60)
 
     def cache(basemap):
@@ -112,14 +123,14 @@ def main():
 
     if args['config']:
         if args['init']:
-            print('config file: {}'.format(config.create_default_config()))
+            logger.info('config file: {}'.format(config.create_default_config()))
         elif args['set'] and args['<key>'] and args['<value>']:
-            print(config.set_config_prop(args['<key>'], args['<value>']))
+            logger.info(config.set_config_prop(args['<key>'], args['<value>']))
         elif args['basemaps'] and args['<basemap>']:
             if args['--add']:
-                print(config.add_basemap(args['<basemap>'], args['<bucket-name>'], args['<image-type>'], args['--loop']))
+                logger.info(config.add_basemap(args['<basemap>'], args['<bucket-name>'], args['<image-type>'], args['--loop']))
             elif args['--remove']:
-                print(config.remove_basemap(args['<basemap>']))
+                logger.info(config.remove_basemap(args['<basemap>']))
         elif args['open']:
             startfile(config.config_location)
     elif args['update-data']:
@@ -148,18 +159,18 @@ def main():
         summary = vector_basemaps[basemap]['summary']
         tags = vector_basemaps[basemap]['tags']
 
-        print('building and publishing: ' + basemap)
-        print('summary: ' + summary)
-        print('tags: ' + tags)
+        logger.info('building and publishing: ' + basemap)
+        logger.info('summary: ' + summary)
+        logger.info('tags: ' + tags)
 
         command = ['propy', '-E', vector_module, basemap, summary, tags]
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         output, error = process.communicate()
 
         if output:
-            print(output)
+            logger.info(output)
         if error:
-            print(error)
+            logger.error(error)
     elif args['<basemap>']:
         cache(args['<basemap>'])
 
