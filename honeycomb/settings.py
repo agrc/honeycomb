@@ -55,24 +55,19 @@ SCALES = [
 
 EXTENT_0_7 = 'CacheExtent_0_7'
 EXTENT_8_9 = 'CacheExtent_8_9'
-EXTENT_10_14 = 'CacheExtent_10_17'
+EXTENT_10_16 = 'CacheExtent_10_17'
 CACHE_EXTENTS = [
     [EXTENT_0_7, SCALES[0:8]],
     [EXTENT_8_9, SCALES[8:10]],
-    [EXTENT_10_14, SCALES[10:15]]
+    [EXTENT_10_16, SCALES[10:17]]
 ]
 
 EXTENT_18_19 = 'CacheExtent_18_19'
 
-GRIDS15 = 'CacheGrids_15'
-GRIDS16 = 'CacheGrids_16'
 GRIDS17 = 'CacheGrids_17'
-GRIDS18 = 'CacheGrids_18'
-GRIDS19 = 'CacheGrids_19'
+GRIDS18_19 = 'CacheGrids_18_19'
 GRIDS = [
-    [GRIDS15, SCALES[15]],
-    [GRIDS16, SCALES[16]],
     [GRIDS17, SCALES[17]],
-    [GRIDS18, SCALES[18]],
-    [GRIDS19, SCALES[19]]
+    [GRIDS18_19, SCALES[18]],
+    [GRIDS18_19, SCALES[19]]
 ]
