@@ -107,13 +107,7 @@ def main():
     def cache(basemap):
         WorkerBee(basemap, args['--missing-only'], args['--skip-update'], args['--skip-test'], args['--spot'], args['--levels'])
 
-        def prompt_recache():
-            return raw_input('Caching complete. Publish to production (P) or recache (R)? ') != 'P'
-
-        recache = prompt_recache()
-        while recache:
-            WorkerBee(basemap, False, True, True)
-            recache = prompt_recache()
+        WorkerBee(basemap, False, True, True)
 
         upload(basemap)
 
@@ -142,14 +136,7 @@ def main():
         basemaps = config.get_config_value('basemaps')
         while not stop:
             for basemap in [key for key in basemaps.keys() if basemaps[key]['loop']]:
-                action = raw_input('cache {} (C), skip to the next base map (S) or exit (E)? '.format(basemap))
-                if action == 'C':
-                    cache(basemap)
-                elif action == 'S':
-                    continue
-                else:
-                    stop = True
-                    break
+                cache(basemap)
     elif args['publish']:
         publish(args['<basemap>'])
     elif args['vector']:
