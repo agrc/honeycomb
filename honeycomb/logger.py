@@ -16,7 +16,7 @@ def _log(message, severity):
 
 
 def info(message):
-    _log(message, None)
+    _log(message, 'INFO')
 
 
 def error(message):
