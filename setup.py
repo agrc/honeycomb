@@ -36,6 +36,7 @@ setup(
     ],
     extras_require={
         'test': [
+            'flake8',
             'mock',
             'pytest-benchmark',
             'pytest-cov',
