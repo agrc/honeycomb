@@ -81,12 +81,14 @@ def upload(bucket, image_type, column_folder):
             '-m',
             '-h',
             'Content-Type:' + content_type,
-            'cp',
+            'rsync',
             '-a',
             'public-read',
-            '-r',
+            '-r',  #: recursive
+            '-c',  #: force hashing for change detection
+            '-d',  #: delete extra files in destination not found in source
             column_folder,
-            'gs://{}/{}/'.format(bucket, level)
+            'gs://{}/{}'.format(bucket, level)
         ], shell=True)
 
         try:
