@@ -39,7 +39,7 @@ Examples:
     honeycomb upload Terrain                                    ETLs and uploads the tiles for the Terrain cache to GCP.
     honeycomb Terrain                                           Builds a single base map and pushes to GCP.
     honeycomb Terrain --skip-update                             Builds a single base map (skipping data update) and pushes to GCP.
-    honeycomb Terrain --skip-test --spot C:\test.gdb\extent     Builds a single base map (skipping test and for a specific extent) and pushes to GCP.
+    honeycomb Terrain --skip-test --spot C:\\\\test.gdb\\extent Builds a single base map (skipping test and for a specific extent) and pushes to GCP.
     honeycomb Terrain --levels 5-7                              Builds a single base map for levels 5, 6 & 7 and pushes to GCP.
     honeycomb publish Lite                                      Publishes a base map's associated MXD to ArcGIS Server (raster base maps only).
     honeycomb vector UtahAddressPoints                          Builds a new vector tile package and uploads to AGOL.
