@@ -199,6 +199,6 @@ class WorkerBee(object):
             msg = 'Only {} out of {} bundles completed. Recaching...'.format(bundles, self.complete_num_bundles)
             print(msg)
             send_email(self.email_subject, msg)
-            self.cache()
+            self.cache(True)
 
         send_email(self.email_subject + ' Finished', 'Caching complete!\n\n{}'.format(self.preview_url))
