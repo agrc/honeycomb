@@ -88,7 +88,7 @@ def upload(bucket, image_type, column_folder):
             '-c',  #: force hashing for change detection
             '-d',  #: delete extra files in destination not found in source
             column_folder,
-            'gs://{}/{}'.format(bucket, level)
+            'gs://{}/{}/{}'.format(bucket, level, os.path.basename(column_folder))
         ], shell=True)
 
         try:
