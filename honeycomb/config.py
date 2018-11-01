@@ -28,7 +28,7 @@ def create_default_config():
             'basemaps': {},
             'notify': ['stdavis@utah.gov'],
             'configuration': 'dev',
-            'num_processes': 20,
+            'num_processes': 4,
             'mxdFolder': 'C:\\temp',
             'vectorTilesFolder': 'C:\\temp',
             'vectorBaseMaps': {},
