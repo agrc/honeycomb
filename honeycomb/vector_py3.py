@@ -13,13 +13,17 @@ Arguments:
 import config
 import sys
 from os.path import join
+import os
 
 import arcpy
+import arcgis
 
 BASE_FOLDER = config.get_config_value('vectorTilesFolder')
+USERNAME = os.getenv('HONEYCOMB_AGOL_USERNAME')
+PASSWORD = os.getenv('HONEYCOMB_AGOL_PASSWORD')
 
 
-def main(base_map_name, summary, tags):
+def main(id, base_map_name, summary, tags):
     print('building tiles for: ' + base_map_name)
 
     project_path = join(BASE_FOLDER, base_map_name)
@@ -38,13 +42,12 @@ def main(base_map_name, summary, tags):
                                              tags=tags)
 
     print('publishing...')
-    arcpy.management.SharePackage(tile_package, '', '', summary, tags,
-                                  credits='Utah AGRC',
-                                  public='EVERYBODY',
-                                  organization='EVERYBODY')
+    gis = arcgis.gis.GIS(username=USERNAME, password=PASSWORD)
+    item = arcgis.gis.Item(gis, id)
+    item.update(data=tile_package)
 
     print('vector tile package successfully built and published!')
 
 
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2], sys.argv[3])
+    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
