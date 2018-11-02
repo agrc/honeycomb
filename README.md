@@ -29,6 +29,8 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 | `HONEYCOMB_AGS_PASSWORD` | your ArcGIS Server password | password |
 | `HONEYCOMB_GIZA_USERNAME` | your Giza (discover) username | name |
 | `HONEYCOMB_GIZA_PASSWORD` | your Giza (discover) password | password |
+| `HONEYCOMB_AGOL_USERNAME` | your AGOL username | name |
+| `HONEYCOMB_AGOL_PASSWORD` | your AGOL password | password |
 1. Run `honeycomb config open`. This will initialize your config with default values and open it in your text editor.
 
 # Usage

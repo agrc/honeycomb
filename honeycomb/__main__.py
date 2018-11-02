@@ -114,12 +114,13 @@ def main():
         vector_module = path.join(path.abspath(path.dirname(__file__)), 'vector_py3.py')
         summary = vector_basemaps[basemap]['summary']
         tags = vector_basemaps[basemap]['tags']
+        id = vector_basemaps[basemap]['id']
 
         print('building and publishing: ' + basemap)
         print('summary: ' + summary)
         print('tags: ' + tags)
 
-        command = ['propy', '-E', vector_module, basemap, summary, tags]
+        command = ['propy', '-E', vector_module, id, basemap, summary, tags]
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         output, error = process.communicate()
 
