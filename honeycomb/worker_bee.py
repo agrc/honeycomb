@@ -193,6 +193,7 @@ class WorkerBee(object):
         if bundles < self.complete_num_bundles and run_all_levels:
             msg = 'Only {} out of {} bundles completed. Recaching...'.format(bundles, self.complete_num_bundles)
             logger.info(msg)
-            self.cache()
+            send_email(self.email_subject, msg)
+            self.cache(True)
 
         logger.info('Caching complete!\n\n{}'.format(self.preview_url))

@@ -39,7 +39,7 @@ Examples:
     honeycomb upload Terrain                                    ETLs and uploads the tiles for the Terrain cache to GCP.
     honeycomb Terrain                                           Builds a single base map and pushes to GCP.
     honeycomb Terrain --skip-update                             Builds a single base map (skipping data update) and pushes to GCP.
-    honeycomb Terrain --skip-test --spot C:\test.gdb\extent     Builds a single base map (skipping test and for a specific extent) and pushes to GCP.
+    honeycomb Terrain --skip-test --spot C:\\\\test.gdb\\extent Builds a single base map (skipping test and for a specific extent) and pushes to GCP.
     honeycomb Terrain --levels 5-7                              Builds a single base map for levels 5, 6 & 7 and pushes to GCP.
     honeycomb publish Lite                                      Publishes a base map's associated MXD to ArcGIS Server (raster base maps only).
     honeycomb vector UtahAddressPoints                          Builds a new vector tile package and uploads to AGOL.
@@ -143,12 +143,13 @@ def main():
         vector_module = path.join(path.abspath(path.dirname(__file__)), 'vector_py3.py')
         summary = vector_basemaps[basemap]['summary']
         tags = vector_basemaps[basemap]['tags']
+        id = vector_basemaps[basemap]['id']
 
         logger.info('building and publishing: ' + basemap)
         logger.info('summary: ' + summary)
         logger.info('tags: ' + tags)
 
-        command = ['propy', '-E', vector_module, basemap, summary, tags]
+        command = ['propy', '-E', vector_module, id, basemap, summary, tags]
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         output, error = process.communicate()
 
