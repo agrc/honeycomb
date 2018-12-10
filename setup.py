@@ -31,7 +31,8 @@ setup(
         'multiprocess==0.70.5',
         'dill==0.2.7.1',
         'requests==2.18.4',
-        'google-cloud-logging==1.6.0'
+        'google-cloud-logging==1.6.0',
+        'psycopg2==2.7.6.1'
     ],
     dependency_links=[
     ],

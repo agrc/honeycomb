@@ -7,14 +7,16 @@ A module that contains code for updating the data for base maps.
 '''
 
 from os.path import join
+import psycopg2
 
 import arcpy
 
 from . import settings
+from config import config_folder
+import logger
 
-LOCAL = r'C:\Cache\MapData'
-SHARE = join(settings.SHARE, 'Maps', 'Data')
-SGID = join(SHARE, 'SGID10.sde')
+LOCAL = r'C:\MapData'
+SGID = join(config_folder, 'SGID10.sde')
 SGID_GDB_NAME = 'SGID10_WGS.gdb'
 
 
@@ -23,11 +25,16 @@ def get_SGID_lookup():
     Get a dictionary of all of the feature classes in SGID for matching
     them with the local FGDB feature classes.
     '''
-    print('getting SGID fc lookup')
+    logger.info('getting SGID fc lookup')
     sgid_fcs = {}
-    arcpy.env.workspace = SGID
-    for fc in arcpy.ListFeatureClasses():
-        sgid_fcs[fc.split('.')[-1]] = fc
+    connection = psycopg2.connect(dbname='sgid', user='agrc', password='agrc', host='35.235.99.102')
+    cursor = connection.cursor()
+    cursor.execute('SELECT table_schema, table_name FROM information_schema.tables')
+    for schema, name in cursor.fetchall():
+        sgid_fcs[name.upper()] = 'sgid.{}.{}'.format(schema, name)
+
+    cursor.close()
+    connection.close()
 
     return sgid_fcs
 
@@ -35,18 +42,11 @@ def get_SGID_lookup():
 def main():
     sgid_fcs = get_SGID_lookup()
 
-    print('updating SGID data on SHARE')
-    arcpy.env.workspace = join(SHARE, SGID_GDB_NAME)
+    logger.info('updating SGID data')
+    arcpy.env.workspace = join(LOCAL, SGID_GDB_NAME)
     for fc in arcpy.ListFeatureClasses():
-        print(fc)
+        logger.info(fc)
         arcpy.management.Delete(fc)
-        arcpy.management.Project(join(SGID, sgid_fcs[fc]), fc, arcpy.SpatialReference(3857), 'NAD_1983_To_WGS_1984_5')
-
-    print('copying databases locally')
-    for db in [SGID_GDB_NAME, 'UtahBaseMap-Data_WGS.gdb']:
-        local_db = join(LOCAL, db)
-        SHARE_db = join(SHARE, db)
-        arcpy.management.Delete(local_db)
-        arcpy.management.Copy(SHARE_db, local_db)
+        arcpy.management.Project(join(SGID, sgid_fcs[fc.upper()]), fc, arcpy.SpatialReference(3857), 'NAD_1983_To_WGS_1984_5')
 
     arcpy.env.workspace = None
