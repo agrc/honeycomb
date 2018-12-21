@@ -86,7 +86,8 @@ def upload(bucket, image_type, column_folder):
             'public-read',
             '-r',  #: recursive
             '-c',  #: force hashing for change detection
-            '-d',  #: delete extra files in destination not found in source
+            #: add this back for caches of the entire state only, not spot caches
+            # '-d',  #: delete extra files in destination not found in source
             column_folder,
             'gs://{}/{}/{}'.format(bucket, level, os.path.basename(column_folder))
         ], shell=True)
