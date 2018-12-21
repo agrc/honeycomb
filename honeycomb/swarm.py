@@ -8,6 +8,7 @@ A module that contains code for etl-ing tiles into WMTS format and uploading to 
 
 import glob
 import os
+import re
 import shutil
 import subprocess
 import traceback
@@ -33,15 +34,14 @@ def swarm(name, bucket, image_type):
     bust_discover_cache()
 
 
-def process_path(new_level_folder, base_folder, level, file_path):
-    parts = file_path.split(os.path.sep)[-2:]
-    row = str(int(parts[0][1:], 16))
-    column = str(int(parts[1][1:-4], 16))
+def process_column(new_level_folder, base_folder, level, column_item):
+    column, row_mappings = column_item
     column_folder = os.path.join(new_level_folder, column)
     if not os.path.exists(column_folder):
         os.mkdir(column_folder)
 
-    shutil.copy(os.path.join(base_folder, level, file_path), os.path.join(column_folder, row))
+    for file_path, wmts_row in row_mappings:
+        shutil.copy(os.path.join(base_folder, level, file_path), os.path.join(column_folder, wmts_row))
 
 
 def etl(name):
@@ -62,9 +62,18 @@ def etl(name):
         logger.info('globbing')
         paths = glob.iglob('{}/{}/**/*.*[!.lock]'.format(base_folder, level))
 
+        logger.info('building level column, row dictionary')
+        columns = {}
+        file_extension = re.compile(r'\..*')
+        for path in paths:
+            parts = path.split(os.path.sep)[-2:]
+            wmts_row, wmts_column = [str(int(re.sub(file_extension, '', part[1:]), 16)) for part in parts]
+            column_mappings = columns.setdefault(wmts_column, [])
+            column_mappings.append([path, wmts_row])
+
         logger.info('processing folders')
         pool = Pool(config.get_config_value('num_processes'))
-        pool.map(partial(process_path, new_level_folder, base_folder, level), paths)
+        pool.map(partial(process_column, new_level_folder, base_folder, level), columns.iteritems())
         pool.close()
 
         logger.info('cleaning up AGS tiles')
