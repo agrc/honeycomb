@@ -33,6 +33,17 @@ def swarm(name, bucket, image_type):
     bust_discover_cache()
 
 
+def process_path(new_level_folder, base_folder, level, file_path):
+    parts = file_path.split(os.path.sep)[-2:]
+    row = str(int(parts[0][1:], 16))
+    column = str(int(parts[1][1:-4], 16))
+    column_folder = os.path.join(new_level_folder, column)
+    if not os.path.exists(column_folder):
+        os.mkdir(column_folder)
+
+    shutil.copy(os.path.join(base_folder, level, file_path), os.path.join(column_folder, row))
+
+
 def etl(name):
     '''
     copies all tiles into WMTS format as a sibling folder to the AGS cache folder
@@ -52,18 +63,11 @@ def etl(name):
         paths = glob.iglob('{}/{}/**/*.*[!.lock]'.format(base_folder, level))
 
         logger.info('processing folders')
-        for file_path in paths:
-            parts = file_path.split(os.path.sep)[-2:]
-            row = str(int(parts[0][1:], 16))
-            column = str(int(parts[1][1:-4], 16))
-            column_folder = os.path.join(new_level_folder, column)
-            if not os.path.exists(column_folder):
-                os.mkdir(column_folder)
-
-            shutil.copy(os.path.join(base_folder, level, file_path), os.path.join(column_folder, row))
+        pool = Pool(config.get_config_value('num_processes'))
+        pool.map(partial(process_path, new_level_folder, base_folder, level), paths)
+        pool.close()
 
         logger.info('cleaning up AGS tiles')
-
         shutil.rmtree(os.path.join(base_folder, level))
 
 
