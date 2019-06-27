@@ -21,7 +21,7 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 
 | Name | Description | Example |
 | --- | --- | --- |
-| `HONEYCOMB_SHARE` | the DNS name for share used to share mxd's and data with Zach (hint it's on 56) | 999.99.99.99 |
+| `HONEYCOMB_SHARE` | the DNS name for share used to share mxd's and data with Zach | 999.99.99.99 |
 | `HONEYCOMB_SMTP_SERVER` | your smtp server | send.yourdomain.com |
 | `HONEYCOMB_SMTP_PORT` | your smtp port | 25 |
 | `HONEYCOMB_AGS_SERVER` | your ArcGIS server url | http://localhost:6080/arcgis/admin |
