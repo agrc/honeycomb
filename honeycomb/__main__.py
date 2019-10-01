@@ -63,13 +63,13 @@ def main():
     def cache(basemap):
         WorkerBee(basemap, args['--missing-only'], args['--skip-update'], args['--skip-test'], args['--spot'], args['--levels'])
 
-        def prompt_recache():
-            return raw_input('Caching complete. Publish to production (P) or recache (R)? ') != 'P'
-
-        recache = prompt_recache()
-        while recache:
-            WorkerBee(basemap, False, True, True)
-            recache = prompt_recache()
+        # def prompt_recache():
+        #     return raw_input('Caching complete. Publish to production (P) or recache (R)? ') != 'P'
+        #
+        # recache = prompt_recache()
+        # while recache:
+        #     WorkerBee(basemap, False, True, True)
+        #     recache = prompt_recache()
 
         upload(basemap)
 
