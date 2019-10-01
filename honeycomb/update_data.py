@@ -13,7 +13,7 @@ import arcpy
 from . import settings
 
 LOCAL = r'C:\Cache\MapData'
-SHARE = join(settings.SHARE, 'Maps', 'Data')
+SHARE = join(settings.SHARE, 'Data')
 SGID = join(SHARE, 'SGID10.sde')
 SGID_GDB_NAME = 'SGID10_WGS.gdb'
 
