@@ -24,6 +24,7 @@ def swarm(name, bucket, image_type):
     print('processing: {}'.format(name))
 
     etl(name)
+    send_email('honeycomb update', '{}: etl is complete'.format(name))
     column_folders = glob.iglob('{}/**/*'.format(os.path.join(settings.CACHE_DIR, name + '_GCS')))
 
     pool = Pool(config.get_config_value('num_processes'))
@@ -31,6 +32,7 @@ def swarm(name, bucket, image_type):
     pool.close()
 
     bust_discover_cache()
+    send_email('honeycomb update', '{} has been pushed to production'.format(name))
 
 
 def etl(name):
@@ -86,7 +88,6 @@ def upload(bucket, image_type, column_folder):
             'public-read',
             '-r',  #: recursive
             '-c',  #: force hashing for change detection
-            '-d',  #: delete extra files in destination not found in source
             column_folder,
             'gs://{}/{}/{}'.format(bucket, level, os.path.basename(column_folder))
         ], shell=True)
