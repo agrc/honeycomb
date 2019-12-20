@@ -28,7 +28,7 @@ def main(id, base_map_name, summary, tags):
 
     project_path = join(BASE_FOLDER, base_map_name)
     promap = arcpy.mp.ArcGISProject(join(project_path, base_map_name + '.aprx')).listMaps()[0]
-    tile_package = join(project_path, base_map_name + '.vtpk')
+    tile_package = join(project_path, base_map_name + '_temp' + '.vtpk')
 
     print('building package...')
     if arcpy.Exists(tile_package):
@@ -41,10 +41,19 @@ def main(id, base_map_name, summary, tags):
                                              summary=summary,
                                              tags=tags)
 
-    print('publishing...')
+    print('publishing new tile package item...')
     gis = arcgis.gis.GIS(username=USERNAME, password=PASSWORD)
-    item = arcgis.gis.Item(gis, id)
-    item.update(data=tile_package)
+    item = gis.content.add({}, data=tile_package)
+
+    print('publishing new vector tiles service...')
+    temp_item = item.publish()
+
+    print('replacing production service...')
+    prod_item = arcgis.gis.Item(gis, id)
+    gis.content.replace_service(prod_item, temp_item)
+
+    print('removing temporary items...')
+    gis.content.delete_items([item, temp_item])
 
     print('vector tile package successfully built and published!')
 
