@@ -1,1 +1,2 @@
 recursive-include honeycomb/data *
+include honeycomb/deq-enviro-key.json
