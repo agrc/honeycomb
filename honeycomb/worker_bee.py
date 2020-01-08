@@ -9,8 +9,10 @@ A module that contains logic for building traditional image-based caches.
 import os
 import socket
 import time
-from os.path import join
+from os.path import join, dirname, realpath
 from shutil import rmtree
+import pygsheets
+from datetime import date
 
 import arcpy
 
@@ -202,3 +204,24 @@ class WorkerBee(object):
             self.cache(True)
 
         send_email(self.email_subject + ' Finished', 'Caching complete!\n\n{}'.format(self.preview_url))
+
+        print('updating google spreadsheets')
+
+        client = pygsheets.authorize(service_file=join(dirname(realpath(__file__)), 'deq-enviro-key.json'))
+        sgid_sheet = client.open_by_key('11ASS7LnxgpnD0jN4utzklREgMf1pcvYjcXcIcESHweQ')
+        sgid_worksheet = sgid_sheet[0]
+        base_maps_sheet = client.open_by_key('1XnncmhWrIjntlaMfQnMrlcCTyl9e2i-ztbvqryQYXDc')
+        base_maps_worksheet = base_maps_sheet[0]
+
+        #: update sgid changelog
+        today = date.today().strftime(r'%m/%d/%Y')
+        matrix = sgid_worksheet.get_all_values(include_tailing_empty_rows=False, include_tailing_empty=False)
+        row = [today, 'Complete', self.service_name, 'Recache', 'Statewide cache rebuild and upload to GCP', 'stdavis', 'no', 'no', 'no', 'no', 'no', 'no', 'yes']
+        sgid_worksheet.insert_rows(len(matrix), values=row, inherit=True)
+
+        #: update base maps spreadsheet embedded in gis.utah.gov page
+        this_month = date.today().strftime(r'%b %Y')
+        results = base_maps_worksheet.find(self.service_name, matchEntireCell=True)
+        cell = results[0]
+
+        base_maps_worksheet.update_value((cell.row + 1, cell.col), this_month)

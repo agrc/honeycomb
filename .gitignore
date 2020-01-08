@@ -94,3 +94,4 @@ honeycomb/data/**/*.lock
 .pytest_cache/
 
 .vscode/
+honeycomb/deq-enviro-key.json

@@ -17,11 +17,15 @@ import os
 
 import arcpy
 import arcgis
+import pygsheets
 
 BASE_FOLDER = config.get_config_value('vectorTilesFolder')
 USERNAME = os.getenv('HONEYCOMB_AGOL_USERNAME')
 PASSWORD = os.getenv('HONEYCOMB_AGOL_PASSWORD')
 
+client = pygsheets.authorize(service_file=join(dirname(realpath(__file__)), 'deq-enviro-key.json'))
+base_maps_sheet = client.open_by_key('1XnncmhWrIjntlaMfQnMrlcCTyl9e2i-ztbvqryQYXDc')
+base_maps_worksheet = base_maps_sheet[0]
 
 def main(id, base_map_name, summary, tags):
     print('building tiles for: ' + base_map_name)
@@ -56,6 +60,13 @@ def main(id, base_map_name, summary, tags):
     gis.content.delete_items([item, temp_item])
 
     print('vector tile package successfully built and published!')
+
+    print('updating base maps spreadsheet')
+    today = date.today().strftime(r'%m/%d/%Y')
+    results = base_maps_worksheet.find(base_map_name, matchEntireCell=True)
+    cell = results[0]
+
+    base_maps_worksheet.update_value((cell.row + 1, cell.col), today)
 
 
 if __name__ == '__main__':
