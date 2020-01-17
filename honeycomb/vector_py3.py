@@ -11,8 +11,9 @@ Arguments:
 '''
 
 import config
+from datetime import date
 import sys
-from os.path import join
+from os.path import join, dirname, realpath
 import os
 
 import arcpy
