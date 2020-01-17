@@ -64,7 +64,7 @@ def main(id, base_map_name, summary, tags):
     base_maps_worksheet = base_maps_sheet[0]
 
     today = date.today().strftime(r'%m/%d/%Y')
-    results = base_maps_worksheet.find(base_map_name, matchEntireCell=True)
+    results = base_maps_worksheet.find(base_map_name, includeFormulas=True)
     cell = results[0]
 
     base_maps_worksheet.update_value((cell.row + 1, cell.col), today)
