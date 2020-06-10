@@ -59,7 +59,7 @@ def main(id, base_map_name, summary, tags):
     print('vector tile package successfully built and published!')
 
     print('updating base maps spreadsheet')
-    client = pygsheets.authorize(service_file=join(dirname(realpath(__file__)), 'deq-enviro-key.json'))
+    client = pygsheets.authorize(service_file=join(dirname(realpath(__file__)), 'ut-dts-agrc-tf-state-prod-a484d5118976.json'))
     base_maps_sheet = client.open_by_key('1XnncmhWrIjntlaMfQnMrlcCTyl9e2i-ztbvqryQYXDc')
     base_maps_worksheet = base_maps_sheet[0]
 
