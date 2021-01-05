@@ -14,7 +14,7 @@ from . import settings
 
 LOCAL = r'C:\Cache\MapData'
 SHARE = join(settings.SHARE, 'Data')
-SGID = join(SHARE, 'SGID10.sde')
+SGID = join(SHARE, 'SGID.sde')
 SGID_GDB_NAME = 'SGID10_WGS.gdb'
 
 
