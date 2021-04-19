@@ -94,4 +94,4 @@ honeycomb/data/**/*.lock
 .pytest_cache/
 
 .vscode/
-honeycomb/ut-dts-agrc-tf-state-prod-a484d5118976.json
+honeycomb/service-account.json
