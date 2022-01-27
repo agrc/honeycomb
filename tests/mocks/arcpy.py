@@ -47,7 +47,7 @@ class _cursor(object):
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         raise StopIteration
 
 

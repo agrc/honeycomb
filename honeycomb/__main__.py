@@ -97,8 +97,8 @@ def main():
         stop = False
         basemaps = config.get_config_value('basemaps')
         while not stop:
-            for basemap in [key for key in basemaps.keys() if basemaps[key]['loop']]:
-                action = raw_input('cache {} (C), skip to the next base map (S) or exit (E)? '.format(basemap))
+            for basemap in [key for key in list(basemaps.keys()) if basemaps[key]['loop']]:
+                action = input('cache {} (C), skip to the next base map (S) or exit (E)? '.format(basemap))
                 if action == 'C':
                     cache(basemap)
                 elif action == 'S':

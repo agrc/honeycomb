@@ -25,7 +25,7 @@ error_001470_message = 'ERROR 001470: Failed to retrieve the job status from ser
 
 def parse_levels(levels_txt):
     #: parse the levels parameter text into an array of scales
-    min, max = map(int, levels_txt.split('-'))
+    min, max = list(map(int, levels_txt.split('-')))
 
     return settings.SCALES[min:max + 1]
 

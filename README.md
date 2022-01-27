@@ -13,10 +13,11 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 # Installation
 1. Install [`gcloud`](https://cloud.google.com/sdk/docs/)
     - Do *not* include the bundled python.
-1. Install [`crcmode`](https://cloud.google.com/storage/docs/gsutil/addlhelp/CRC32CandInstallingcrcmod).
 1. Clone repository to local folder.
+1. Create new python 3.7 conda environment and activate
+1. `conda install arcpy -c esri`
 1. From project folder base:
-`pip install . --upgrade` (make sure that you install into the 32bit version of python (required for crcmode))
+`pip install . --upgrade`
 1. Add the following environmental variables:
 
 | Name | Description | Example |
