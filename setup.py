@@ -30,7 +30,8 @@ setup(
         'docopt==0.6.2',
         'multiprocess==0.70.5',
         'dill==0.2.7.1',
-        'requests==2.18.4'
+        'requests==2.18.4',
+        'pygsheets==2.0.5'
     ],
     dependency_links=[
     ],
