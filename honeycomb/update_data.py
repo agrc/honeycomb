@@ -6,15 +6,15 @@ update_data.py
 A module that contains code for updating the data for base maps.
 '''
 
-from os.path import join
+from pathlib import Path
 
 import arcpy
 
 from . import settings
 
-LOCAL = r'C:\Cache\MapData'
-SHARE = join(settings.SHARE, 'Data')
-SGID = join(SHARE, 'SGID.sde')
+LOCAL = Path(r'C:\Cache\MapData')
+SHARE = Path(settings.SHARE) / 'Data'
+SGID = SHARE / 'SGID.sde'
 SGID_GDB_NAME = 'SGID10_WGS.gdb'
 
 
@@ -25,7 +25,7 @@ def get_SGID_lookup():
     '''
     print('getting SGID fc lookup')
     sgid_fcs = {}
-    arcpy.env.workspace = SGID
+    arcpy.env.workspace = str(SGID)
     for fc in arcpy.ListFeatureClasses():
         sgid_fcs[fc.split('.')[-1]] = fc
 
@@ -35,17 +35,25 @@ def get_SGID_lookup():
 def main():
     sgid_fcs = get_SGID_lookup()
 
+    if not LOCAL.exists:
+        print('creating local folder')
+        LOCAL.mkdir(parents=True)
+
     print('updating SGID data on SHARE')
-    arcpy.env.workspace = join(SHARE, SGID_GDB_NAME)
+    arcpy.env.workspace = str(SHARE / SGID_GDB_NAME)
     for fc in arcpy.ListFeatureClasses():
         print(fc)
         arcpy.management.Delete(fc)
-        arcpy.management.Project(join(SGID, sgid_fcs[fc]), fc, arcpy.SpatialReference(3857), 'NAD_1983_To_WGS_1984_5')
+        arcpy.management.Project(str(SGID / sgid_fcs[fc]), fc, arcpy.SpatialReference(3857), 'NAD_1983_To_WGS_1984_5')
 
     print('copying databases locally')
     for db in [SGID_GDB_NAME, 'UtahBaseMap-Data_WGS.gdb']:
-        local_db = join(LOCAL, db)
-        SHARE_db = join(SHARE, db)
+        local_db = str(LOCAL / db)
+        if not arcpy.Exists(local_db):
+            print(f'creating: {local_db}')
+            arcpy.CreateFileGDB_management(LOCAL, db)
+
+        SHARE_db = str(SHARE / db)
         arcpy.management.Delete(local_db)
         arcpy.management.Copy(SHARE_db, local_db)
 

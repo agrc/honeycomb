@@ -33,7 +33,7 @@ def publish(basemap):
         items = analysis[key]
         if len(items) > 0:
             print(key.upper())
-            for ((message, code), layerlist) in items.iteritems():
+            for ((message, code), layerlist) in items.items():
                 print('{} (CODE {})'.format(message, code))
 
                 if len(layerlist) > 0:
