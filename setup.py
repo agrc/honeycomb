@@ -31,7 +31,8 @@ setup(
         'multiprocess==0.70.5',
         'dill==0.2.7.1',
         'requests==2.18.4',
-        'pygsheets==2.0.5'
+        'pygsheets==2.0.5',
+        'tqdm==4.62.3'
     ],
     dependency_links=[
     ],
