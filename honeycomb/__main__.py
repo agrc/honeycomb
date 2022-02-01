@@ -9,7 +9,7 @@ Usage:
     honeycomb config basemaps --add <basemap> [<bucket-name>] [<image-type>] [--loop]
     honeycomb config basemaps --remove <basemap>
     honeycomb config open
-    honeycomb update-data
+    honeycomb update-data [--static-only] [--sgid-only]
     honeycomb loop
     honeycomb upload <basemap>
     honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test] [--spot <path>] [--levels <levels>]
@@ -27,6 +27,8 @@ Arguments:
     --skip-test             Skip running a test cache.
     --spot <path>           Cache only a specific extent. <path> is a path to a polygon feature class.
     --levels <levels>       Cache only specific levels
+    --static-only           Copy static data from the SHARE to your local machine.
+    --sgid-only             Copy vector data from the SGID to your local machine.
 
 Examples:
     honeycomb config init                                       Create a default config file.
@@ -34,7 +36,8 @@ Examples:
     honeycomb config basemaps --add Terrain                     Adds "Terrain" to the "basemaps" array in the config file.
     honeycomb config basemaps --remove Terrain                  Removes "Terrain" from the "basemaps" array in the config file.
     honeycomb config open                                       Opens the config file in your default editor.
-    honeycomb update-data                                       Refreshes the data in the local FGDBs from SGID.
+    honeycomb update-data                                       Refreshes the data on your computer from SGID and the static data on the share.
+    honeycomb update-data --static-only                         Refreshes the data on your computer from the static data on the share only.
     honeycomb loop                                              Kicks off the honeycomb process and loops through all of the base maps.
     honeycomb upload Terrain                                    ETLs and uploads the tiles for the Terrain cache to GCP.
     honeycomb Terrain                                           Builds a single base map and pushes to GCP.
@@ -90,7 +93,7 @@ def main():
         elif args['open']:
             startfile(config.config_location)
     elif args['update-data']:
-        update_data.main()
+        update_data.main(args['--static-only'], args['--sgid-only'])
     elif args['upload'] and args['<basemap>']:
         upload(args['<basemap>'])
     elif args['loop']:
