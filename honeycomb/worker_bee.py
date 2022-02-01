@@ -13,6 +13,7 @@ from os.path import join, dirname, realpath
 from shutil import rmtree
 import pygsheets
 from datetime import date
+from pathlib import Path
 
 import arcpy
 
@@ -145,7 +146,8 @@ class WorkerBee(object):
 
     def get_bundles_count(self):
         totalfiles = 0
-        basefolder = os.path.join(settings.CACHE_DIR, self.service_name.replace('/', '_'), 'Layers', '_alllayers')
+        name = self.service_name.replace('/', '_')
+        basefolder = Path(settings.CACHE_DIR) / name / name / '_alllayers'
         for d in os.listdir(basefolder):
             if d != 'missing.jpg':
                 totalfiles += len(os.listdir(os.path.join(basefolder, d)))
