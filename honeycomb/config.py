@@ -108,6 +108,7 @@ def get_ags_connection():
             if getenv(variable) is None:
                 raise Exception('{} environment variable is not set!'.format(variable))
 
+        #: TODO: this tool is not available in Pro. I couldn't quickly find an alternative.
         arcpy.mapping.CreateGISServerConnectionFile('PUBLISH_GIS_SERVICES',
                                                     dirname(ags_connection_file),
                                                     basename(ags_connection_file),
