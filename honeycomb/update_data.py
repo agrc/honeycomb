@@ -7,7 +7,6 @@ A module that contains code for updating the data for base maps.
 '''
 
 from pathlib import Path
-from threading import local
 from tqdm import tqdm
 
 import arcpy
