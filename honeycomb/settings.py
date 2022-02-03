@@ -12,7 +12,7 @@ SHARE = os.getenv(SHARE_ENV_NAME)
 if SHARE is None:
     raise Exception('Please set the "{}" environmental variable!'.format(SHARE_ENV_NAME))
 PREVIEW_URL = r'http://{}/arcgis/rest/services/{}/MapServer?f=jsapi'
-EXTENTSFGDB = os.path.join(os.path.dirname(__file__), 'data', 'Extents.gdb')
+EXTENTSFGDB = os.path.join(os.path.dirname(__file__), 'data', 'Extents.geodatabase')
 CACHE_DIR = r'E:\arcgisserver\directories\arcgiscache'
 TEST_EXTENT = os.path.join(EXTENTSFGDB, 'test_extent')
 
