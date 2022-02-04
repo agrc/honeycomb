@@ -39,7 +39,7 @@ def get_layers():
     '''
     Get a list of SGID layers that are sources in any of the cache map documents
     '''
-    layers = {}
+    layers = set()
 
     print('getting unique data sources from layers')
     project = arcpy.mp.ArcGISProject(str(PRO_PROJECT))
@@ -61,11 +61,14 @@ def sgid():
         print(f'creating: {local_db}')
         arcpy.CreateFileGDB_management(str(LOCAL), SGID_GDB_NAME)
 
+    sgid_layers = get_layers()
     print(f'updating: {local_db}...')
     with arcpy.EnvManager(workspace=local_db):
-        for fc in tqdm(get_layers()):
-            print(fc)
-            arcpy.management.Delete(fc)
+        progress_bar = tqdm(sgid_layers)
+        for fc in progress_bar:
+            progress_bar.set_postfix_str(fc)
+            if arcpy.Exists(fc):
+                arcpy.management.Delete(fc)
             arcpy.management.Project(str(SGID / sgid_fcs[fc]), fc, arcpy.SpatialReference(3857), 'NAD_1983_To_WGS_1984_5')
 
 
