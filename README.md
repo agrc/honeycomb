@@ -36,6 +36,7 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 | `HONEYCOMB_AGOL_USERNAME` | your AGOL username | name |
 | `HONEYCOMB_AGOL_PASSWORD` | your AGOL password | password |
 
+1. Download GCP service account credentials and place them here: `honeycomb/service-account.json`
 1. Run `honeycomb config open`. This will initialize your config with default values and open it in your text editor.
 
 ## Usage
