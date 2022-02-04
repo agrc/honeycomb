@@ -17,7 +17,7 @@ LOCAL = Path(r'C:\Cache\MapData')
 SHARE = Path(settings.SHARE) / 'Data'
 SGID = SHARE / 'SGID.sde'
 SGID_GDB_NAME = 'SGID10_WGS.gdb'
-PRO_PROJECT = SHARE / 'Maps' / 'Maps.aprx'
+PRO_PROJECT = Path(settings.SHARE) / 'Maps' / 'Maps.aprx'
 STATIC_GDB_NAME = 'UtahBaseMap-Data_WGS.gdb'
 
 
