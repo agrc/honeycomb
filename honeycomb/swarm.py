@@ -41,7 +41,7 @@ def etl(name):
     returns a list of all of the column folders
     '''
     new_folder = os.path.join(settings.CACHE_DIR, name + '_GCS')
-    base_folder = os.path.join(settings.CACHE_DIR, name, 'Layers', '_alllayers')
+    base_folder = os.path.join(settings.CACHE_DIR, name, name, '_alllayers')
 
     for level in os.listdir(base_folder):
         print('etl-ing level: {}'.format(level))
