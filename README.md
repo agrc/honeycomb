@@ -43,6 +43,8 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 
 Run `honeycomb -help` to see documentation for the various commands.
 
+Note: in order for honeycomb to modify files in the arcgis server cache directories, your terminal must be run as an administrator.
+
 ## Config file
 
 Run `honeycomb config open` to open the config file.
