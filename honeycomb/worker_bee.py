@@ -209,7 +209,7 @@ class WorkerBee(object):
 
         print('updating google spreadsheets')
 
-        client = pygsheets.authorize(service_file=join(dirname(realpath(__file__)), 'service_account.json'))
+        client = pygsheets.authorize(service_file=join(dirname(realpath(__file__)), 'service-account.json'))
         sgid_sheet = client.open_by_key('11ASS7LnxgpnD0jN4utzklREgMf1pcvYjcXcIcESHweQ')
         sgid_worksheet = sgid_sheet[0]
         base_maps_sheet = client.open_by_key('1XnncmhWrIjntlaMfQnMrlcCTyl9e2i-ztbvqryQYXDc')
