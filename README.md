@@ -41,6 +41,7 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 
 1. Download GCP service account credentials and place them here: `honeycomb/service-account.json`
 1. Run `honeycomb config open`. This will initialize your config with default values and open it in your text editor.
+1. Set map services to be dedicated instances with a min of 0 to prevent schema locks when updating the data.
 
 ## Usage
 
