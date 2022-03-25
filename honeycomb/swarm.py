@@ -16,20 +16,24 @@ from functools import partial
 import requests
 from multiprocess import Pool
 
-from . import config, settings
+from . import config, settings, stats
 from .messaging import send_email
 
 
 def swarm(name, bucket, image_type):
     print('processing: {}'.format(name))
 
+    stats.record_start(name, 'etl')
     etl(name)
+    stats.record_finish(name, 'etl')
     send_email('honeycomb update', '{}: etl is complete'.format(name))
     column_folders = glob.iglob('{}/**/*'.format(os.path.join(settings.CACHE_DIR, name + '_GCS')))
 
+    stats.record_start(name, 'upload')
     pool = Pool(config.get_config_value('num_processes'))
     pool.map(partial(upload, bucket, image_type), column_folders)
     pool.close()
+    stats.record_finish(name, 'upload')
 
     bust_discover_cache()
     send_email('honeycomb update', '{} has been pushed to production'.format(name))

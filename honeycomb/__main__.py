@@ -12,6 +12,7 @@ Usage:
     honeycomb update-data [--static-only] [--sgid-only]
     honeycomb loop
     honeycomb upload <basemap>
+    honeycomb stats
     honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test] [--spot <path>] [--levels <levels>]
     honeycomb publish <basemap>
     honeycomb vector <basemap>
@@ -54,7 +55,7 @@ from os import path, startfile
 
 from docopt import docopt
 
-from . import config, update_data
+from . import config, update_data, stats
 from .publish import publish
 from .swarm import swarm
 from .worker_bee import WorkerBee
@@ -64,7 +65,9 @@ def main():
     args = docopt(__doc__, version='1.1.1')
 
     def cache(basemap):
+        stats.record_start(basemap, 'cache')
         WorkerBee(basemap, args['--missing-only'], args['--skip-update'], args['--skip-test'], args['--spot'], args['--levels'])
+        stats.record_finish(basemap, 'cache')
 
         # def prompt_recache():
         #     return raw_input('Caching complete. Publish to production (P) or recache (R)? ') != 'P'
@@ -123,9 +126,11 @@ def main():
         print('summary: ' + summary)
         print('tags: ' + tags)
 
+        stats.record_start(basemap, 'cache')
         command = ['propy', '-E', vector_module, id, basemap, summary, tags]
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         output, error = process.communicate()
+        stats.record_finish(basemap, 'cache')
 
         if output:
             print(output)
@@ -133,6 +138,8 @@ def main():
             print(error)
     elif args['<basemap>']:
         cache(args['<basemap>'])
+    elif args['stats']:
+        stats.print_stats()
 
 
 if __name__ == '__main__':
