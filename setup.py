@@ -30,8 +30,10 @@ setup(
         'docopt==0.6.2',
         'multiprocess==0.70.5',
         'dill==0.2.7.1',
+        'humanize==4.0.0',
         'requests==2.18.4',
         'pygsheets==2.0.5',
+        'tabulate==0.8.9',
         'tqdm==4.62.3'
     ],
     dependency_links=[
