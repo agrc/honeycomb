@@ -22,10 +22,6 @@ def get_basemap(basemap):
             'start': 0,
             'runs': []
         },
-        'etl': {
-            'start': 0,
-            'runs': []
-        },
         'upload': {
             'start': 0,
             'runs': []
@@ -45,7 +41,7 @@ def record_start(basemap, task):
     save_basemap(basemap, basemap_stats)
 
 def validate_task(task):
-    if (task not in ['cache', 'etl', 'upload']):
+    if (task not in ['cache', 'upload']):
         raise ValueError(f'invalid task: {task}')
 
 def record_finish(basemap, task):

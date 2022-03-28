@@ -9,8 +9,6 @@ from json import dumps, loads
 from os import getenv, makedirs
 from os.path import abspath, basename, dirname, exists, join
 
-import arcpy
-
 config_folder = abspath(join(abspath(dirname(__file__)), '..', 'honeycomb-hive'))
 config_location = join(config_folder, 'config.json')
 ags_connection_file = join(config_folder, 'arcgisserver.ags')
@@ -24,15 +22,16 @@ def create_default_config():
 
     with open(config_location, 'w') as json_config_file:
         data = {
-            'sendEmails': False,
             'basemaps': {},
-            'notify': ['stdavis@utah.gov'],
             'configuration': 'dev',
-            'num_processes': 4,
+            'gcpProject': '',
+            'gizaInstance': 'https://discover.agrc.utah.gov',
             'mxdFolder': 'C:\\temp',
-            'vectorTilesFolder': 'C:\\temp',
+            'notify': ['stdavis@utah.gov'],
+            'num_processes': 4,
+            'sendEmails': False,
             'vectorBaseMaps': {},
-            'gizaInstance': 'https://discover.agrc.utah.gov'
+            'vectorTilesFolder': 'C:\\temp',
         }
 
         json_config_file.write(dumps(data, sort_keys=True, indent=2, separators=(',', ': ')))
@@ -102,6 +101,7 @@ def get_ags_connection():
     '''
     creates a server connection file if needed and returns the path to it
     '''
+    import arcpy #: this is not imported at the top of the file to save it being imported in child processes in swarm.py
 
     if not exists(ags_connection_file):
         for variable in ['HONEYCOMB_AGS_SERVER', 'HONEYCOMB_AGS_USERNAME', 'HONEYCOMB_AGS_PASSWORD']:
