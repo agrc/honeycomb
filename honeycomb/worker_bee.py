@@ -113,7 +113,7 @@ class WorkerBee(object):
         try:
             arcpy.server.ManageMapServerCacheTiles(self.service, cache_scales, self.update_mode, settings.NUM_INSTANCES, aoi)
         except arcpy.ExecuteError as e:
-            if e.message == error_001470_message:
+            if hasattr(e) and e.message == error_001470_message:
                 msg = 'ERROR 001470 thrown. Moving on and hoping the job completes successfully.'
                 print(msg)
                 send_email('Cache Warning (ERROR 001470)', 'e.message\n\narcpy.GetMessages:\n{}'.format(arcpy.GetMessages().encode('utf-8')))
