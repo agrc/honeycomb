@@ -51,12 +51,6 @@ class WorkerBee(object):
         else:
             self.restrict_scales = parse_levels(levels)
 
-        try:
-            print('deleting previous *_GCS folder, if any')
-            rmtree(os.path.join(settings.CACHE_DIR, s_name + '_GCS'))
-        except Exception:
-            pass
-
         if config.is_dev():
             self.complete_num_bundles = 19
         else:
