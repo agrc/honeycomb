@@ -28,10 +28,10 @@ setup(
     install_requires=[
         'colorama==0.3.7',
         'docopt==0.6.2',
-        'multiprocess==0.70.5',
-        'dill==0.2.7.1',
+        'google-cloud-storage==2.2.1',
         'humanize==4.0.0',
         'requests==2.18.4',
+        'p_tqdm==1.3.3',
         'pygsheets==2.0.5',
         'tabulate==0.8.9',
         'tqdm==4.62.3'

@@ -6,101 +6,52 @@ swarm.py
 A module that contains code for etl-ing tiles into WMTS format and uploading to GCP.
 '''
 
-import glob
 import os
-import shutil
-import subprocess
 import traceback
 from functools import partial
+from pathlib import Path
 
 import requests
-from multiprocess import Pool
+from google.cloud import storage
+from google.oauth2 import service_account
+from p_tqdm import p_map
 
-from . import config, settings, stats
+from . import config, settings
 from .messaging import send_email
 
+credentials = service_account.Credentials.from_service_account_file(Path(__file__).parent / 'service-account.json')
+storage_client = storage.Client(config.get_config_value('gcpProject'), credentials)
 
-def swarm(name, bucket, image_type):
-    print('processing: {}'.format(name))
+def swarm(name, bucket_name):
+    '''
+    copies all tiles into WMTS format as a sibling folder to the AGS cache folder
+    returns a list of all of the column folders
+    '''
+    base_folder = Path(settings.CACHE_DIR) / name / name / '_alllayers'
 
-    stats.record_start(name, 'etl')
-    etl(name)
-    stats.record_finish(name, 'etl')
-    send_email('honeycomb update', '{}: etl is complete'.format(name))
-    column_folders = glob.iglob('{}/**/*'.format(os.path.join(settings.CACHE_DIR, name + '_GCS')))
+    for level_folder in sorted(base_folder.iterdir()):
+        level = str(int(level_folder.name[1:]))
+        print('uploading level: {}'.format(level))
 
-    stats.record_start(name, 'upload')
-    pool = Pool(config.get_config_value('num_processes'))
-    pool.map(partial(upload, bucket, image_type), column_folders)
-    pool.close()
-    stats.record_finish(name, 'upload')
+        row_folders = [folder for folder in level_folder.iterdir()]
+        if len(row_folders) > 0:
+            p_map(partial(process_row_folder, name, bucket_name, level), row_folders)
 
     bust_discover_cache()
     send_email('honeycomb update', '{} has been pushed to production'.format(name))
 
 
-def etl(name):
-    '''
-    copies all tiles into WMTS format as a sibling folder to the AGS cache folder
-    returns a list of all of the column folders
-    '''
-    new_folder = os.path.join(settings.CACHE_DIR, name + '_GCS')
-    base_folder = os.path.join(settings.CACHE_DIR, name, name, '_alllayers')
-
-    for level in os.listdir(base_folder):
-        print('etl-ing level: {}'.format(level))
-        new_level = str(int(level[1:]))
-        new_level_folder = os.path.join(new_folder, new_level)
-        if not os.path.exists(new_level_folder):
-            os.makedirs(new_level_folder)
-
-        print('globbing')
-        paths = glob.iglob('{}/{}/**/*.*[!.lock]'.format(base_folder, level))
-
-        print('processing folders')
-        for file_path in paths:
-            parts = file_path.split(os.path.sep)[-2:]
-            row = str(int(parts[0][1:], 16))
-            column = str(int(parts[1][1:-4], 16))
-            column_folder = os.path.join(new_level_folder, column)
-            if not os.path.exists(column_folder):
-                os.mkdir(column_folder)
-
-            shutil.copy(os.path.join(base_folder, level, file_path), os.path.join(column_folder, row))
-
-        print('cleaning up AGS tiles')
-
-        shutil.rmtree(os.path.join(base_folder, level))
-
-
-def upload(bucket, image_type, column_folder):
-    '''
-    upload all tile in folder to GCP, then clean up the folder
-    '''
-    print('uploading: ' + column_folder)
-    content_type = 'image/{}'.format(image_type)
-    level = os.path.basename(os.path.dirname(column_folder))
-
+def process_row_folder(name, bucket_name, level, row_folder):
+    bucket = storage_client.bucket(bucket_name)
+    row = str(int(row_folder.name[1:], 16))
     try:
-        subprocess.check_call([
-            'gsutil',
-            '-m',
-            '-h',
-            'Content-Type:' + content_type,
-            'rsync',
-            '-a',
-            'public-read',
-            '-r',  #: recursive
-            '-c',  #: force hashing for change detection
-            column_folder,
-            'gs://{}/{}/{}'.format(bucket, level, os.path.basename(column_folder))
-        ], shell=True)
+        for file_path in row_folder.iterdir():
+            column = str(int(file_path.name[1:-4], 16))
 
-        try:
-            print('removing local folder')
-            shutil.rmtree(column_folder)
-        except Exception:
-            print('error removing folders, they will need to be removed manually')
+            blob = bucket.blob(f'{name}/{level}/{column}/{row}')
+            blob.upload_from_filename(file_path)
+            file_path.unlink()
+        row_folder.rmdir()
     except Exception:
         trace = traceback.format_exc()
         send_email('Uploading error. Level: {}'.format(level), trace)
