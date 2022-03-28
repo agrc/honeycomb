@@ -14,6 +14,7 @@ from shutil import rmtree
 import pygsheets
 from datetime import date
 from pathlib import Path
+from tqdm import tqdm
 
 import arcpy
 
@@ -78,9 +79,6 @@ class WorkerBee(object):
         else:
             self.cache_test_extent()
 
-        if missing_only:
-            print('caching empty tiles only...')
-
         self.missing_only = missing_only
         self.start_bundles = self.get_bundles_count()
 
@@ -92,6 +90,7 @@ class WorkerBee(object):
             print('Caching all tiles')
 
         if not spot_path:
+            self.overall_progress_bar = tqdm(total=self.complete_num_bundles - self.start_bundles, desc='Overall', position=0)
             self.cache(not levels)
         else:
             #: levels 0-17 include the entire state
@@ -112,7 +111,7 @@ class WorkerBee(object):
         if len(cache_scales) == 0:
             return
 
-        print('caching {} at {}'.format(name, cache_scales))
+        tqdm.write('caching {} at {}'.format(name, cache_scales))
 
         if config.is_dev() and name != spot_cache_name:
             aoi = settings.TEST_EXTENT
@@ -132,6 +131,8 @@ class WorkerBee(object):
     def get_progress(self):
         total_bundles = self.get_bundles_count()
 
+        self.overall_progress_bar.update(total_bundles - self.start_bundles)
+
         bundles_per_hour = (total_bundles - self.start_bundles) / ((time.time() - self.start_time) / 60 / 60)
         if bundles_per_hour != 0 and total_bundles > self.start_bundles:
             hours_remaining = (self.complete_num_bundles - total_bundles) / bundles_per_hour
@@ -141,7 +142,6 @@ class WorkerBee(object):
         percent = int(round(float(total_bundles) / self.complete_num_bundles * 100.00))
         msg = '{} of {} ({}%) bundle files created.\nEstimated hours remaining: {}'.format(
             total_bundles, self.complete_num_bundles, percent, hours_remaining)
-        print(msg)
         return msg
 
     def get_bundles_count(self):
@@ -172,6 +172,7 @@ class WorkerBee(object):
 
         for fc_name, scales in settings.CACHE_EXTENTS:
             self.cache_extent(scales, fc_name, fc_name)
+            self.get_progress()
 
         send_email(self.email_subject,
                    'Levels 0-9 completed.\n{}\n{}'.format(self.get_progress(), self.preview_url))
@@ -180,17 +181,11 @@ class WorkerBee(object):
             settings.GRIDS = settings.GRIDS[:-4]
         for grid in settings.GRIDS:
             total_grids = int(arcpy.management.GetCount(grid[0])[0])
-            grid_count = 0
-            progress = ''
             with arcpy.da.SearchCursor(grid[0], ['SHAPE@', 'OID@']) as cur:
-                for row in cur:
-                    grid_count += 1
-                    grid_percent = int(round((float(grid_count) / total_grids) * 100))
+                for row in tqdm(cur, total=total_grids, position=1, desc='Current Job'):
                     self.cache_extent([grid[1]], row[0], '{}: OBJECTID: {}'.format(grid[0], row[1]))
-                    grit_percent_msg = 'Grids for this level completed: {}%'.format(grid_percent)
-                    print(grit_percent_msg)
-                    progress = self.get_progress()
-            send_email(self.email_subject, 'Level {} completed.\n{}\n{}\nNumber of errors: {}'.format(grid[0], progress, self.preview_url, len(self.errors)))
+                    self.get_progress()
+            send_email(self.email_subject, 'Level {} completed.\n{}\n{}\nNumber of errors: {}'.format(grid[0], self.get_progress(), self.preview_url, len(self.errors)))
 
         while (len(self.errors) > 0):
             msg = 'Recaching errors. Errors left: {}'.format(len(self.errors))
