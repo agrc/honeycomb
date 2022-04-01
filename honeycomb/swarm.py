@@ -15,12 +15,16 @@ import requests
 from google.cloud import storage
 from google.oauth2 import service_account
 from p_tqdm import p_map
+from google.api_core.retry import Retry
+from google_crc32c import Checksum
+from base64 import b64encode
 
 from . import config, settings
 from .messaging import send_email
 
 credentials = service_account.Credentials.from_service_account_file(Path(__file__).parent / 'service-account.json')
 storage_client = storage.Client(config.get_config_value('gcpProject'), credentials)
+retry = Retry()
 
 def swarm(name, bucket_name):
     '''
@@ -44,18 +48,30 @@ def swarm(name, bucket_name):
 def process_row_folder(name, bucket_name, level, row_folder):
     bucket = storage_client.bucket(bucket_name)
     row = str(int(row_folder.name[1:], 16))
-    try:
-        for file_path in row_folder.iterdir():
+    upload_errors = []
+    for file_path in row_folder.iterdir():
+        try:
             column = str(int(file_path.name[1:-4], 16))
 
             blob = bucket.blob(f'{name}/{level}/{column}/{row}')
-            blob.upload_from_filename(file_path)
+            blob.reload() #: required to get the checksum
+            local_checksum = b64encode(Checksum(file_path.read_bytes()).digest()).decode('utf-8')
+            if blob.crc32c != local_checksum:
+                blob.upload_from_filename(file_path, retry=retry)
             file_path.unlink()
+        except Exception:
+            trace = traceback.format_exc()
+            upload_errors.append(f'Uploading error. Level: {level}, row: {row}, column: {column}\n\n{trace}')
+            print(trace)
+    try:
         row_folder.rmdir()
     except Exception:
         trace = traceback.format_exc()
-        send_email('Uploading error. Level: {}'.format(level), trace)
+        send_email('Removing folder error. Level: {}'.format(level), trace)
         print(trace)
+
+    if len(upload_errors) > 0:
+        send_email('Uploading errors', '\n\n'.join(upload_errors))
 
 
 def bust_discover_cache():
