@@ -116,11 +116,11 @@ class WorkerBee(object):
             if hasattr(e, 'message') and e.message == error_001470_message:
                 msg = 'ERROR 001470 thrown. Moving on and hoping the job completes successfully.'
                 print(msg)
-                send_email('Cache Warning (ERROR 001470)', 'e.message\n\narcpy.GetMessages:\n{}'.format(arcpy.GetMessages().encode('utf-8')))
+                send_email('Cache Warning (ERROR 001470)', 'e.message\n\narcpy.GetMessages:\n{}'.format(arcpy.GetMessages()))
             else:
                 self.errors.append([cache_scales, aoi, name])
-                print(arcpy.GetMessages().encode('utf-8'))
-                send_email('Cache Update ({}) - arcpy.ExecuteError'.format(self.service_name), arcpy.GetMessages().encode('utf-8'))
+                print(arcpy.GetMessages())
+                send_email('Cache Update ({}) - arcpy.ExecuteError'.format(self.service_name), arcpy.GetMessages())
 
     def get_progress(self):
         total_bundles = self.get_bundles_count()
@@ -157,8 +157,8 @@ class WorkerBee(object):
             # if raw_input('Recache test extent (T) or continue with full cache (F): ') == 'T':
             #     self.cache_test_extent()
         except arcpy.ExecuteError:
-            print(arcpy.GetMessages().encode('utf-8'))
-            send_email('Cache Test Extent Error ({}) - arcpy.ExecuteError'.format(self.service_name), arcpy.GetMessages().encode('utf-8'))
+            print(arcpy.GetMessages())
+            send_email('Cache Test Extent Error ({}) - arcpy.ExecuteError'.format(self.service_name), arcpy.GetMessages())
             raise arcpy.ExecuteError
 
     def cache(self, run_all_levels):
