@@ -1,8 +1,7 @@
 '''
-vector_py3.py
+vector.py
 
-A module for publishing vector tiles to ArcGIS Online. This requires running via the ArcGIS Pro python 3 environment.
-e.g. propy vector_py3 addresspoints
+A module for publishing vector tiles to ArcGIS Online.
 
 Arguments:
 1: name (this corresponds with the project folder name, project name and tile package file name)
@@ -10,9 +9,8 @@ Arguments:
 3: tags (comma-separated; matches tags in AGOL)
 '''
 
-import config
+from . import config
 from datetime import date
-import sys
 from os.path import join, dirname, realpath
 import os
 
@@ -24,7 +22,7 @@ BASE_FOLDER = config.get_config_value('vectorTilesFolder')
 USERNAME = os.getenv('HONEYCOMB_AGOL_USERNAME')
 PASSWORD = os.getenv('HONEYCOMB_AGOL_PASSWORD')
 
-def main(id, base_map_name, summary, tags):
+def main(base_map_name, config):
     print('building tiles for: ' + base_map_name)
 
     project_path = join(BASE_FOLDER, base_map_name)
@@ -39,8 +37,8 @@ def main(id, base_map_name, summary, tags):
                                              tile_structure='INDEXED',
                                              min_cached_scale=295828763.795778,
                                              max_cached_scale=564.248588,
-                                             summary=summary,
-                                             tags=tags)
+                                             summary=config['summary'],
+                                             tags=config['tags'])
 
     print('publishing new tile package item...')
     gis = arcgis.gis.GIS(username=USERNAME, password=PASSWORD)
@@ -50,7 +48,7 @@ def main(id, base_map_name, summary, tags):
     temp_item = item.publish()
 
     print('replacing production service...')
-    prod_item = arcgis.gis.Item(gis, id)
+    prod_item = arcgis.gis.Item(gis, config['id'])
     gis.content.replace_service(prod_item, temp_item)
 
     print('removing temporary items...')
@@ -59,7 +57,7 @@ def main(id, base_map_name, summary, tags):
     print('vector tile package successfully built and published!')
 
     print('updating base maps spreadsheet')
-    client = pygsheets.authorize(service_file=join(dirname(realpath(__file__)), 'ut-dts-agrc-tf-state-prod-a484d5118976.json'))
+    client = pygsheets.authorize(service_file=join(dirname(realpath(__file__)), 'service-account.json'))
     base_maps_sheet = client.open_by_key('1XnncmhWrIjntlaMfQnMrlcCTyl9e2i-ztbvqryQYXDc')
     base_maps_worksheet = base_maps_sheet[0]
 
@@ -68,7 +66,3 @@ def main(id, base_map_name, summary, tags):
     cell = results[0]
 
     base_maps_worksheet.update_value((cell.row + 1, cell.col), today)
-
-
-if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])

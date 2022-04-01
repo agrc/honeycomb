@@ -13,9 +13,10 @@ Usage:
     honeycomb loop
     honeycomb upload <basemap>
     honeycomb stats
+    honeycomb vector <basemap>
+    honeycomb vector-all
     honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test] [--spot <path>] [--levels <levels>]
     honeycomb publish <basemap>
-    honeycomb vector <basemap>
 
 Arguments:
     -h --help               Show this screen.
@@ -47,15 +48,15 @@ Examples:
     honeycomb Terrain --levels 5-7                              Builds a single base map for levels 5, 6 & 7 and pushes to GCP.
     honeycomb publish Lite                                      Publishes a base map's associated MXD to ArcGIS Server (raster base maps only).
     honeycomb vector UtahAddressPoints                          Builds a new vector tile package and uploads to AGOL.
+    honeycomb vector-all                                        Builds all of the vector tile packages in the config and uploads to AGOL.
 '''
 
-import subprocess
 import sys
-from os import path, startfile
+from os import startfile
 
 from docopt import docopt
 
-from . import config, update_data, stats
+from . import config, update_data, stats, vector
 from .publish import publish
 from .swarm import swarm
 from .worker_bee import WorkerBee
@@ -119,25 +120,16 @@ def main():
     elif args['vector']:
         basemap = args['<basemap>']
         vector_basemaps = config.get_config_value('vectorBaseMaps')
-        vector_module = path.join(path.abspath(path.dirname(__file__)), 'vector_py3.py')
-        summary = vector_basemaps[basemap]['summary']
-        tags = vector_basemaps[basemap]['tags']
-        id = vector_basemaps[basemap]['id']
-
-        print('building and publishing: ' + basemap)
-        print('summary: ' + summary)
-        print('tags: ' + tags)
 
         stats.record_start(basemap, 'cache')
-        command = ['propy', '-E', vector_module, id, basemap, summary, tags]
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        output, error = process.communicate()
+        vector.main(basemap, vector_basemaps[basemap])
         stats.record_finish(basemap, 'cache')
-
-        if output:
-            print(output)
-        if error:
-            print(error)
+    elif args['vector-all']:
+        vector_basemaps = config.get_config_value('vectorBaseMaps')
+        for basemap in [key for key in list(vector_basemaps.keys())]:
+            stats.record_start(basemap, 'cache')
+            vector.main(basemap, vector_basemaps[basemap])
+            stats.record_finish(basemap, 'cache')
     elif args['<basemap>']:
         cache(args['<basemap>'])
     elif args['stats']:
