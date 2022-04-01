@@ -113,7 +113,7 @@ class WorkerBee(object):
         try:
             arcpy.server.ManageMapServerCacheTiles(self.service, cache_scales, self.update_mode, settings.NUM_INSTANCES, aoi)
         except arcpy.ExecuteError as e:
-            if hasattr(e) and e.message == error_001470_message:
+            if hasattr(e, 'message') and e.message == error_001470_message:
                 msg = 'ERROR 001470 thrown. Moving on and hoping the job completes successfully.'
                 print(msg)
                 send_email('Cache Warning (ERROR 001470)', 'e.message\n\narcpy.GetMessages:\n{}'.format(arcpy.GetMessages().encode('utf-8')))
@@ -176,7 +176,7 @@ class WorkerBee(object):
         for grid in settings.GRIDS:
             total_grids = int(arcpy.management.GetCount(grid[0])[0])
             with arcpy.da.SearchCursor(grid[0], ['SHAPE@', 'OID@']) as cur:
-                for row in tqdm(cur, total=total_grids, position=1, desc='Current Job'):
+                for row in tqdm(cur, total=total_grids, position=1, desc='Current'):
                     self.cache_extent([grid[1]], row[0], '{}: OBJECTID: {}'.format(grid[0], row[1]))
                     self.get_progress()
             send_email(self.email_subject, 'Level {} completed.\n{}\n{}\nNumber of errors: {}'.format(grid[0], self.get_progress(), self.preview_url, len(self.errors)))
