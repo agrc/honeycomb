@@ -84,6 +84,7 @@ class WorkerBee(object):
             print('Caching all tiles')
 
         if not spot_path:
+            self.overall_progress_bar_current_value = 0
             self.overall_progress_bar = tqdm(total=self.complete_num_bundles - self.start_bundles, desc='Overall', position=0)
             self.cache(not levels)
         else:
@@ -125,7 +126,9 @@ class WorkerBee(object):
     def get_progress(self):
         total_bundles = self.get_bundles_count()
 
-        self.overall_progress_bar.update(total_bundles - self.start_bundles)
+        new_progress_bar_value = total_bundles - self.start_bundles
+        self.overall_progress_bar.update(new_progress_bar_value - self.overall_progress_bar_current_value)
+        self.overall_progress_bar_current_value = new_progress_bar_value
 
         bundles_per_hour = (total_bundles - self.start_bundles) / ((time.time() - self.start_time) / 60 / 60)
         if bundles_per_hour != 0 and total_bundles > self.start_bundles:
