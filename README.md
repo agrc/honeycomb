@@ -14,6 +14,7 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 
 ## Installation
 
+1. Install ArcGIS Pro (Standard license level or higher)
 1. Create new python 3.7 conda environment and activate
 1. `conda create --name honeycomb python=3.7` 
 1. Install [`gcloud`](https://cloud.google.com/sdk/docs/)
