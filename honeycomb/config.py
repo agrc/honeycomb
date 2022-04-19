@@ -117,7 +117,7 @@ def get_ags_connection():
                                                     username=getenv('HONEYCOMB_AGS_USERNAME'),
                                                     password=getenv('HONEYCOMB_AGS_PASSWORD'))
 
-    return ags_connection_file.replace('.ags', '')
+    return ags_connection_file
 
 
 def get_basemap(name):
