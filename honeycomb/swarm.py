@@ -22,8 +22,11 @@ from base64 import b64encode
 from . import config, settings
 from .messaging import send_email
 
-credentials = service_account.Credentials.from_service_account_file(Path(__file__).parent / 'service-account.json')
-storage_client = storage.Client(config.get_config_value('gcpProject'), credentials)
+try:
+    credentials = service_account.Credentials.from_service_account_file(Path(__file__).parent / 'service-account.json')
+    storage_client = storage.Client(config.get_config_value('gcpProject'), credentials)
+except FileNotFoundError:
+    print('WARNING: service-account.json not found. Uploading to GCP will not work')
 retry = Retry()
 
 def swarm(name, bucket_name):
