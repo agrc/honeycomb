@@ -13,12 +13,13 @@ config_folder = abspath(join(abspath(dirname(__file__)), '..', 'honeycomb-hive')
 config_location = join(config_folder, 'config.json')
 ags_connection_file = join(config_folder, 'arcgisserver.ags')
 
+#: do this on load so that stats.py can use it
+try:
+    makedirs(dirname(config_location))
+except Exception:
+    pass
 
 def create_default_config():
-    try:
-        makedirs(dirname(config_location))
-    except Exception:
-        pass
 
     with open(config_location, 'w') as json_config_file:
         data = {
