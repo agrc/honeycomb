@@ -14,13 +14,15 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 
 ## Installation
 
+**not required for data-update command only installation*
+
 1. Install ArcGIS Pro (Standard license level or higher)
 1. Create new python 3.7 conda environment and activate
-1. `conda create --name honeycomb python=3.7` 
-1. Install [`gcloud`](https://cloud.google.com/sdk/docs/)
-    - Do *not* include the bundled python.
+1. `conda create --name honeycomb python=3.7`
+1. Install [`gcloud`](https://cloud.google.com/sdk/docs/)*
+    - Do _not_ include the bundled python.
     - `gcloud auth activate-service-account --key-file C:\dev\honeycomb\honeycomb\service-account.json`
-1. Install compiled crcmod (couldn't get this to work) (crcmod compiled version is [only available for 32bit python on windows](https://cloud.google.com/storage/docs/gsutil_install#:~:text=If%20you%20plan%20to%20use%20composite%20objects%2C%20you%20need%20to%20install%20compiled%20crcmod.%20On%20Windows%2C%20this%20is%20only%20available%20for%2032%2Dbit%20Python.))
+1. Install compiled crcmod (couldn't get this to work) (crcmod compiled version is [only available for 32bit python on windows](https://cloud.google.com/storage/docs/gsutil_install#:~:text=If%20you%20plan%20to%20use%20composite%20objects%2C%20you%20need%20to%20install%20compiled%20crcmod.%20On%20Windows%2C%20this%20is%20only%20available%20for%2032%2Dbit%20Python.))*
 1. `conda install arcpy -c esri`
 1. Clone repository to local folder.
 1. From project folder base:
@@ -30,19 +32,19 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 | Name | Description | Example |
 | --- | --- | --- |
 | `HONEYCOMB_SHARE` | the to the share folder used to share mxd's and data with Zach | \\999.99.99.99\agrc\caching |
-| `HONEYCOMB_SMTP_SERVER` | your smtp server | send.yourdomain.com |
-| `HONEYCOMB_SMTP_PORT` | your smtp port | 25 |
-| `HONEYCOMB_AGS_SERVER` | your ArcGIS server url | http://localhost:6080/arcgis/admin |
-| `HONEYCOMB_AGS_USERNAME` | your ArcGIS Server username | name |
-| `HONEYCOMB_AGS_PASSWORD` | your ArcGIS Server password | password |
-| `HONEYCOMB_GIZA_USERNAME` | your Giza (discover) username | name |
-| `HONEYCOMB_GIZA_PASSWORD` | your Giza (discover) password | password |
-| `HONEYCOMB_AGOL_USERNAME` | your AGOL username | name |
-| `HONEYCOMB_AGOL_PASSWORD` | your AGOL password | password |
+| `HONEYCOMB_SMTP_SERVER`* | your smtp server | send.yourdomain.com |
+| `HONEYCOMB_SMTP_PORT`* | your smtp port | 25 |
+| `HONEYCOMB_AGS_SERVER`* | your ArcGIS server url | <http://localhost:6080/arcgis/admin> |
+| `HONEYCOMB_AGS_USERNAME`* | your ArcGIS Server username | name |
+| `HONEYCOMB_AGS_PASSWORD`* | your ArcGIS Server password | password |
+| `HONEYCOMB_GIZA_USERNAME`* | your Giza (discover) username | name |
+| `HONEYCOMB_GIZA_PASSWORD`* | your Giza (discover) password | password |
+| `HONEYCOMB_AGOL_USERNAME`* | your AGOL username | name |
+| `HONEYCOMB_AGOL_PASSWORD`* | your AGOL password | password |
 
-1. Download GCP service account credentials and place them here: `honeycomb/service-account.json`
-1. Run `honeycomb config open`. This will initialize your config with default values and open it in your text editor.
-1. Set map services to be dedicated instances with a min of 0 to prevent schema locks when updating the data.
+1. Download GCP service account credentials and place them here: `honeycomb/service-account.json`*
+1. Run `honeycomb config open`. This will initialize your config with default values and open it in your text editor.*
+1. Set map services to be dedicated instances with a min of 0 to prevent schema locks when updating the data.*
 
 ## Usage
 
