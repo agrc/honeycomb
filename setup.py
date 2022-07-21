@@ -26,16 +26,16 @@ setup(
     keywords=[
     ],
     install_requires=[
-        'arcgis==2.0.0',
-        'colorama==0.3.7',
-        'docopt==0.6.2',
-        'google-cloud-storage==2.2.1',
-        'humanize==4.0.0',
-        'p_tqdm==1.3.3',
-        'pygsheets==2.0.5',
-        'requests==2.18.4',
-        'tabulate==0.8.9',
-        'tqdm==4.62.3'
+        'arcgis>=2',
+        'colorama>=0',
+        'docopt>=0',
+        'google-cloud-storage>=2',
+        'humanize>=4',
+        'p_tqdm>=1',
+        'pygsheets>=2',
+        'requests>=2',
+        'tabulate>=0',
+        'tqdm>=4'
     ],
     dependency_links=[
     ],
