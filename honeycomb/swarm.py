@@ -55,15 +55,21 @@ def process_row_folder(name, bucket_name, level, row_folder):
     for file_path in row_folder.iterdir():
         try:
             column = str(int(file_path.name[1:-4], 16))
+            #: set the content type explicitly in case it ever changes for a particular tile
+            #: if you pass none then the content type of the existing blob object is used
+            if file_path.suffix == '.png':
+                content_type = 'image/png'
+            else:
+                content_type = 'image/jpeg'
 
             blob = bucket.blob(f'{name}/{level}/{column}/{row}')
             if blob.exists(retry=retry):
                 blob.reload() #: required to get the checksum
                 local_checksum = b64encode(Checksum(file_path.read_bytes()).digest()).decode('utf-8')
                 if blob.crc32c != local_checksum:
-                    blob.upload_from_filename(file_path, retry=retry)
+                    blob.upload_from_filename(file_path, retry=retry, content_type=content_type)
             else:
-                blob.upload_from_filename(file_path, retry=retry)
+                blob.upload_from_filename(file_path, retry=retry, content_type=content_type)
             file_path.unlink()
         except Exception:
             trace = traceback.format_exc()
