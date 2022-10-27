@@ -57,9 +57,12 @@ def process_row_folder(name, bucket_name, level, row_folder):
             column = str(int(file_path.name[1:-4], 16))
 
             blob = bucket.blob(f'{name}/{level}/{column}/{row}')
-            blob.reload() #: required to get the checksum
-            local_checksum = b64encode(Checksum(file_path.read_bytes()).digest()).decode('utf-8')
-            if blob.crc32c != local_checksum:
+            if blob.exists(retry=retry):
+                blob.reload() #: required to get the checksum
+                local_checksum = b64encode(Checksum(file_path.read_bytes()).digest()).decode('utf-8')
+                if blob.crc32c != local_checksum:
+                    blob.upload_from_filename(file_path, retry=retry)
+            else:
                 blob.upload_from_filename(file_path, retry=retry)
             file_path.unlink()
         except Exception:
