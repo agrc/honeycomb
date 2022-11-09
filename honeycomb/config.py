@@ -64,11 +64,10 @@ def set_config_prop(key, value):
     return message
 
 
-def add_basemap(name, bucket=None, image_type=None, loop=False):
+def add_basemap(name, bucket=None, loop=False):
     basemaps = _get_config()['basemaps']
     basemaps[name] = {
         'bucket': bucket,
-        'image_type': image_type,
         'loop': loop
     }
 
