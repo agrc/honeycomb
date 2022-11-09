@@ -57,7 +57,6 @@ def publish(basemap):
             storage_format = '<StorageFormat>esriMapCacheStorageModeCompactV2</StorageFormat>'
             txt = txt.replace(storage_format, storage_format.replace('esriMapCacheStorageModeCompactV2', 'esriMapCacheStorageModeExploded'))
             tile_format = '<CacheTileFormat>PNG</CacheTileFormat>'
-            txt = txt.replace(tile_format, tile_format.replace('PNG', config.get_basemap(basemap)['image_type'].upper()))
 
         with open(sddraft_path, 'w') as sddraft_file:
             sddraft_file.write(txt)

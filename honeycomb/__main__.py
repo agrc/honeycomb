@@ -6,7 +6,7 @@ honeycomb 🐝  # NOQA
 Usage:
     honeycomb config init
     honeycomb config set --key <key> --value <value>
-    honeycomb config basemaps --add <basemap> [<bucket-name>] [<image-type>] [--loop]
+    honeycomb config basemaps --add <basemap> [<bucket-name>] [--loop]
     honeycomb config basemaps --remove <basemap>
     honeycomb config open
     honeycomb update-data [--static-only] [--sgid-only]
@@ -22,7 +22,6 @@ Arguments:
     -h --help               Show this screen.
     basemap                 The name of a registered base map (e.g. Terrain).
     bucket-name             The name of the GCP bucket were you want the tiles to be pushed to.
-    image-type              The output image type of the cache tiles ("jpeg" or "png")
     --loop                  Include the base map in the loop command.
     --missing-only          Only missing tiles are generated.
     --skip-update           Skip update vector data from SGID.

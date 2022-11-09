@@ -49,12 +49,10 @@ def test_add_basemap():
     assert config._get_config()['basemaps'] == {
         'Lite': {
             'bucket': None,
-            'image_type': None,
             'loop': False
         },
         'Terrain': {
             'bucket': 'state-of-utah-test',
-            'image_type': 'jpeg',
             'loop': True
         }
     }
