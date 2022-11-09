@@ -13,7 +13,6 @@ from pathlib import Path
 
 import requests
 from google.cloud import storage
-from google.oauth2 import service_account
 from p_tqdm import p_map
 from google.api_core.retry import Retry
 from google_crc32c import Checksum
@@ -22,11 +21,8 @@ from base64 import b64encode
 from . import config, settings
 from .messaging import send_email
 
-try:
-    credentials = service_account.Credentials.from_service_account_file(Path(__file__).parent / 'service-account.json')
-    storage_client = storage.Client(config.get_config_value('gcpProject'), credentials)
-except FileNotFoundError:
-    print('WARNING: service-account.json not found. Uploading to GCP will not work')
+storage_client = storage.Client(config.get_config_value('gcpProject'))
+
 retry = Retry()
 
 def swarm(name, bucket_name):
