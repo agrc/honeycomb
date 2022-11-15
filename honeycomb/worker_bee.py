@@ -20,6 +20,7 @@ import arcpy
 
 from . import config, settings, update_data
 from .messaging import send_email
+from .swarm import swarm
 
 spot_cache_name = 'spot cache'
 error_001470_message = 'ERROR 001470: Failed to retrieve the job status from server. The Job is running on the server, please use the above URL to check the job status.\nFailed to execute (ManageMapServerCacheTiles).\n'  # noqa
@@ -57,7 +58,7 @@ class WorkerBee(object):
             self.complete_num_bundles = settings.COMPLETE_NUM_BUNDLES_LU[self.service_name]
 
         ip = socket.gethostbyname(socket.gethostname())
-        self.preview_url = settings.PREVIEW_URL.format(ip, self.service_name)
+        self.preview_url = settings.PREVIEW_URL.format(self.service_name.lower())
 
         self.service = os.path.join(config.get_ags_connection(), '{}.MapServer'.format(self.service_name))
         self.email_subject = 'Cache Update ({})'.format(self.service_name)
@@ -72,6 +73,10 @@ class WorkerBee(object):
             print('skipping test cache...')
         else:
             self.cache_test_extent()
+            basemap_info = config.get_basemap(basemap)
+            swarm(basemap, basemap_info['bucket'], is_test=True, preview_url=self.preview_url)
+            if input('Test cache complete. Would you like to continue processing the production cache? (y/n) ') != 'y':
+                raise Exception('caching cancelled')
 
         self.missing_only = missing_only
         self.start_bundles = self.get_bundles_count()
@@ -156,9 +161,6 @@ class WorkerBee(object):
 
         try:
             arcpy.server.ManageMapServerCacheTiles(self.service, cache_scales, 'RECREATE_ALL_TILES', settings.NUM_INSTANCES, settings.TEST_EXTENT)
-            send_email('Cache Test Extent Complete ({})'.format(self.service_name), self.preview_url)
-            # if raw_input('Recache test extent (T) or continue with full cache (F): ') == 'T':
-            #     self.cache_test_extent()
         except arcpy.ExecuteError:
             print(arcpy.GetMessages())
             send_email('Cache Test Extent Error ({}) - arcpy.ExecuteError'.format(self.service_name), arcpy.GetMessages())

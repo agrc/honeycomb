@@ -9,9 +9,10 @@ import os
 
 SHARE_ENV_NAME = 'HONEYCOMB_SHARE'
 SHARE = os.getenv(SHARE_ENV_NAME)
+QUAD_WORD = os.getenv('HONEYCOMB_QUAD_WORD')
 if SHARE is None:
     raise Exception('Please set the "{}" environmental variable!'.format(SHARE_ENV_NAME))
-PREVIEW_URL = r'http://{}:6080/arcgis/rest/services/{}/MapServer?f=jsapi'
+PREVIEW_URL = rf'https://discover.agrc.utah.gov/login/path/{QUAD_WORD}/tiles/preview#basemap_{{}}_test/8/39.527/-111.555'
 EXTENTSFGDB = os.path.join(os.path.dirname(__file__), 'data', 'Extents.geodatabase')
 CACHE_DIR = r'E:\arcgisserver\directories\arcgiscache'
 TEST_EXTENT = os.path.join(EXTENTSFGDB, 'test_extent')
