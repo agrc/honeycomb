@@ -118,6 +118,10 @@ class WorkerBee(object):
 
         try:
             arcpy.server.ManageMapServerCacheTiles(self.service, cache_scales, self.update_mode, settings.NUM_INSTANCES, aoi)
+            #: the gp tool in cache_test_extent messes with the conda/python environment causing the following error message:
+            #: "ModuleNotFoundError: No module named 'multiprocess'"
+            #: resetting the environment seems to solve the issue.
+            arcpy.ResetEnvironments()
         except arcpy.ExecuteError as e:
             if hasattr(e, 'message') and e.message == error_001470_message:
                 msg = 'ERROR 001470 thrown. Moving on and hoping the job completes successfully.'
@@ -161,6 +165,10 @@ class WorkerBee(object):
 
         try:
             arcpy.server.ManageMapServerCacheTiles(self.service, cache_scales, 'RECREATE_ALL_TILES', settings.NUM_INSTANCES, settings.TEST_EXTENT)
+            #: the gp tool in cache_test_extent messes with the conda/python environment causing the following error message:
+            #: "ModuleNotFoundError: No module named 'multiprocess'"
+            #: resetting the environment seems to solve the issue.
+            arcpy.ResetEnvironments()
         except arcpy.ExecuteError:
             print(arcpy.GetMessages())
             send_email('Cache Test Extent Error ({}) - arcpy.ExecuteError'.format(self.service_name), arcpy.GetMessages())
