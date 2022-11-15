@@ -10,7 +10,6 @@ import os
 import socket
 import time
 from os.path import join, dirname, realpath
-from shutil import rmtree
 import pygsheets
 from datetime import date
 from pathlib import Path
@@ -41,11 +40,11 @@ def intersect_scales(scales, restrict_scales):
 
 
 class WorkerBee(object):
-    def __init__(self, s_name, missing_only=False, skip_update=False, skip_test=False, spot_path=False, levels=False):
-        print('caching {}'.format(s_name))
+    def __init__(self, basemap, missing_only=False, skip_update=False, skip_test=False, spot_path=False, levels=False):
+        print('caching {}'.format(basemap))
         self.errors = []
         self.start_time = time.time()
-        self.service_name = s_name
+        self.service_name = basemap
 
         if not levels:
             self.restrict_scales = settings.SCALES

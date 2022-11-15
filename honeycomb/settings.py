@@ -14,7 +14,7 @@ if SHARE is None:
     raise Exception('Please set the "{}" environmental variable!'.format(SHARE_ENV_NAME))
 PREVIEW_URL = rf'https://discover.agrc.utah.gov/login/path/{QUAD_WORD}/tiles/preview#basemap_{{}}_test/8/39.527/-111.555'
 EXTENTSFGDB = os.path.join(os.path.dirname(__file__), 'data', 'Extents.geodatabase')
-CACHE_DIR = r'E:\arcgisserver\directories\arcgiscache'
+CACHE_DIR = r'C:\arcgisserver\directories\arcgiscache'
 TEST_EXTENT = os.path.join(EXTENTSFGDB, 'test_extent')
 
 COMPLETE_NUM_BUNDLES_LU = {
