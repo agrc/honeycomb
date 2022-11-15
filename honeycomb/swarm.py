@@ -25,23 +25,30 @@ storage_client = storage.Client(config.get_config_value('gcpProject'))
 
 retry = Retry()
 
-def swarm(name, bucket_name):
+def swarm(name, bucket_name, is_test=False, preview_url=None):
     '''
     copies all tiles into WMTS format as a sibling folder to the AGS cache folder
     returns a list of all of the column folders
     '''
     base_folder = Path(settings.CACHE_DIR) / name / name / '_alllayers'
 
+    if is_test:
+        bucket_name += '-test'
+
     for level_folder in sorted(base_folder.iterdir()):
         level = str(int(level_folder.name[1:]))
         print('uploading level: {}'.format(level))
 
-        row_folders = [folder for folder in level_folder.iterdir()]
+        row_folders = [folder for folder in sorted(level_folder.iterdir())]
         if len(row_folders) > 0:
             p_map(partial(process_row_folder, name, bucket_name, level), row_folders)
 
     bust_discover_cache()
-    send_email('honeycomb update', '{} has been pushed to production'.format(name))
+
+    if is_test:
+        send_email('honeycomb update', f'{name}-Test is ready for review.\n\n{preview_url}')
+    else:
+        send_email('honeycomb update', f'{name} has been pushed to production')
 
 
 def process_row_folder(name, bucket_name, level, row_folder):
