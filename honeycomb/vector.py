@@ -17,6 +17,7 @@ import os
 import arcpy
 import arcgis
 import pygsheets
+import google.auth
 
 BASE_FOLDER = config.get_config_value('vectorTilesFolder')
 USERNAME = os.getenv('HONEYCOMB_AGOL_USERNAME')
@@ -57,7 +58,8 @@ def main(base_map_name, config):
     print('vector tile package successfully built and published!')
 
     print('updating base maps spreadsheet')
-    client = pygsheets.authorize(service_file=join(dirname(realpath(__file__)), 'service-account.json'))
+    credentials, project = google.auth.default()
+    client = pygsheets.authorize(custom_credentials=credentials)
     base_maps_sheet = client.open_by_key('1XnncmhWrIjntlaMfQnMrlcCTyl9e2i-ztbvqryQYXDc')
     base_maps_worksheet = base_maps_sheet[0]
 

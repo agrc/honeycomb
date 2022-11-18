@@ -21,7 +21,6 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 1. `conda create --name honeycomb python=3.7`
 1. Install [`gcloud`](https://cloud.google.com/sdk/docs/)*
     - Do _not_ include the bundled python.
-    - `gcloud auth activate-service-account --key-file C:\dev\honeycomb\honeycomb\service-account.json`
 1. Install compiled crcmod (couldn't get this to work) (crcmod compiled version is [only available for 32bit python on windows](https://cloud.google.com/storage/docs/gsutil_install#:~:text=If%20you%20plan%20to%20use%20composite%20objects%2C%20you%20need%20to%20install%20compiled%20crcmod.%20On%20Windows%2C%20this%20is%20only%20available%20for%2032%2Dbit%20Python.))*
 1. `conda install arcpy -c esri`
 1. Clone repository to local folder.
