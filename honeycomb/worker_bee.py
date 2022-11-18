@@ -14,6 +14,7 @@ import pygsheets
 from datetime import date
 from pathlib import Path
 from tqdm import tqdm
+import google.auth
 
 import arcpy
 
@@ -206,11 +207,12 @@ class WorkerBee(object):
             send_email(self.email_subject, msg)
             self.cache(True)
 
-        send_email(self.email_subject + ' Finished', 'Caching complete!\n\n{}'.format(self.preview_url))
+        send_email(self.email_subject + ' Finished', 'Caching complete!')
 
         print('updating google spreadsheets')
 
-        client = pygsheets.authorize(service_file=join(dirname(realpath(__file__)), 'service-account.json'))
+        credentials, project = google.auth.default()
+        client = pygsheets.authorize(custom_credentials=credentials)
         sgid_sheet = client.open_by_key('11ASS7LnxgpnD0jN4utzklREgMf1pcvYjcXcIcESHweQ')
         sgid_worksheet = sgid_sheet[0]
         base_maps_sheet = client.open_by_key('1XnncmhWrIjntlaMfQnMrlcCTyl9e2i-ztbvqryQYXDc')
