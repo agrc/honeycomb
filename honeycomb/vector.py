@@ -58,7 +58,7 @@ def main(base_map_name, config):
     print('vector tile package successfully built and published!')
 
     print('updating base maps spreadsheet')
-    credentials, project = google.auth.default()
+    credentials, project = google.auth.default(scopes=['https://www.googleapis.com/auth/spreadsheets'])
     client = pygsheets.authorize(custom_credentials=credentials)
     base_maps_sheet = client.open_by_key('1XnncmhWrIjntlaMfQnMrlcCTyl9e2i-ztbvqryQYXDc')
     base_maps_worksheet = base_maps_sheet[0]

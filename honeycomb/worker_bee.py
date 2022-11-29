@@ -211,7 +211,7 @@ class WorkerBee(object):
 
         print('updating google spreadsheets')
 
-        credentials, project = google.auth.default()
+        credentials, project = google.auth.default(scopes=['https://www.googleapis.com/auth/spreadsheets'])
         client = pygsheets.authorize(custom_credentials=credentials)
         sgid_sheet = client.open_by_key('11ASS7LnxgpnD0jN4utzklREgMf1pcvYjcXcIcESHweQ')
         sgid_worksheet = sgid_sheet[0]
