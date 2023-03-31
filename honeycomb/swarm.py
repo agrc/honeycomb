@@ -41,7 +41,7 @@ def swarm(name, bucket_name, is_test=False, preview_url=None):
 
         row_folders = [folder for folder in sorted(level_folder.iterdir())]
         if len(row_folders) > 0:
-            p_map(partial(process_row_folder, name, bucket_name, level), row_folders)
+            list(p_map(partial(process_row_folder, name, bucket_name, level), row_folders))
 
     bust_discover_cache()
 
