@@ -92,7 +92,7 @@ def main():
             print(config.set_config_prop(args['<key>'], args['<value>']))
         elif args['basemaps'] and args['<basemap>']:
             if args['--add']:
-                print(config.add_basemap(args['<basemap>'], args['<bucket-name>'], args['<image-type>'], args['--loop']))
+                print(config.add_basemap(args['<basemap>'], args['<bucket-name>'], args['--loop']))
             elif args['--remove']:
                 print(config.remove_basemap(args['<basemap>']))
         elif args['open']:
