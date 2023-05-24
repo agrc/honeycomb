@@ -9,17 +9,18 @@ A module that contains logic for building traditional image-based caches.
 import os
 import socket
 import time
-from os.path import join, dirname, realpath
-import pygsheets
 from datetime import date
+from os.path import dirname, join, realpath
 from pathlib import Path
-from tqdm import tqdm
-import google.auth
 
 import arcpy
+import google.auth
+import pygsheets
+from tqdm import tqdm
 
 from . import config, settings, update_data
 from .messaging import send_email
+from .resumable import get_job_status, update_job
 from .swarm import swarm
 
 spot_cache_name = 'spot cache'
@@ -63,13 +64,15 @@ class WorkerBee(object):
         self.service = os.path.join(config.get_ags_connection(), '{}.MapServer'.format(self.service_name))
         self.email_subject = 'Cache Update ({})'.format(self.service_name)
 
-        if skip_update:
+        if skip_update or get_job_status('data_updated'):
             print('skipping data update...')
         else:
             update_data.main()
             send_email(self.email_subject, 'Data update complete. Proceeding with caching...')
 
-        if skip_test:
+        update_job('data_updated', True)
+
+        if skip_test or get_job_status('test_cache_complete'):
             print('skipping test cache...')
         else:
             self.cache_test_extent()
@@ -77,6 +80,8 @@ class WorkerBee(object):
             swarm(basemap, basemap_info['bucket'], is_test=True, preview_url=self.preview_url)
             if input('Test cache complete. Would you like to continue processing the production cache? (y/n) ') != 'y':
                 raise Exception('caching cancelled')
+
+        update_job('test_cache_complete', True)
 
         self.missing_only = missing_only
         self.start_bundles = self.get_bundles_count()
@@ -106,6 +111,11 @@ class WorkerBee(object):
             self.cache_extent(settings.SCALES[18:], intersect, spot_cache_name)
 
     def cache_extent(self, scales, aoi, name):
+        cache_job_key = f'{name}-{scales}'
+        if cache_job_key in get_job_status('cache_extents_completed'):
+            print(f'skipping extent based on current job: {cache_job_key}')
+
+            return;
         cache_scales = intersect_scales(scales, self.restrict_scales)
 
         if len(cache_scales) == 0:
@@ -122,6 +132,8 @@ class WorkerBee(object):
             #: "ModuleNotFoundError: No module named 'multiprocess'"
             #: resetting the environment seems to solve the issue.
             arcpy.ResetEnvironments()
+
+            update_job('cache_extents_completed', cache_job_key)
         except arcpy.ExecuteError as e:
             if hasattr(e, 'message') and e.message == error_001470_message:
                 msg = 'ERROR 001470 thrown. Moving on and hoping the job completes successfully.'
