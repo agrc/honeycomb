@@ -13,6 +13,7 @@ Usage:
     honeycomb loop
     honeycomb upload <basemap>
     honeycomb stats
+    honeycomb resume
     honeycomb vector <basemap>
     honeycomb vector-all
     honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test] [--spot <path>] [--levels <levels>]
@@ -48,15 +49,20 @@ Examples:
     honeycomb publish Lite                                      Publishes a base map's associated MXD to ArcGIS Server (raster base maps only).
     honeycomb vector UtahAddressPoints                          Builds a new vector tile package and uploads to AGOL.
     honeycomb vector-all                                        Builds all of the vector tile packages in the config and uploads to AGOL.
+    honeycomb resume                                            Resume a previously started cache job.
 '''
 
+import json
 import sys
+from datetime import datetime
 from os import startfile
 
 from docopt import docopt
 
-from . import config, update_data, stats, vector
+from . import config, stats, update_data, vector
+from .messaging import send_email
 from .publish import publish
+from .resumable import finish_job, get_current_job, start_new_job, update_job
 from .swarm import swarm
 from .worker_bee import WorkerBee
 
@@ -64,9 +70,12 @@ from .worker_bee import WorkerBee
 def main():
     args = docopt(__doc__, version='1.1.1')
 
-    def cache(basemap):
-        stats.record_start(basemap, 'cache')
-        WorkerBee(basemap, args['--missing-only'], args['--skip-update'], args['--skip-test'], args['--spot'], args['--levels'])
+    def cache(basemap, missing_only=False, skip_update=False, skip_test=False, spot=False, levels=False, is_resumed_job=False):
+        if not is_resumed_job:
+            start_new_job(basemap, missing_only, skip_update, skip_test, spot, levels)
+            stats.record_start(basemap, 'cache')
+
+        WorkerBee(basemap, missing_only, skip_update, skip_test, spot, levels)
         stats.record_finish(basemap, 'cache')
 
         # def prompt_recache():
@@ -76,6 +85,8 @@ def main():
         # while recache:
         #     WorkerBee(basemap, False, True, True)
         #     recache = prompt_recache()
+
+        finish_job()
 
         upload(basemap)
 
@@ -130,9 +141,20 @@ def main():
             vector.main(basemap, vector_basemaps[basemap])
             stats.record_finish(basemap, 'cache')
     elif args['<basemap>']:
-        cache(args['<basemap>'])
+        cache(args['<basemap>'], args['--missing-only'], args['--skip-update'], args['--skip-test'], args['--spot'], args['--levels'])
     elif args['stats']:
         stats.print_stats()
+    elif args['resume']:
+        job = get_current_job()
+
+        if job is None:
+            print('no current job found!')
+        else:
+            cache_name = job["cache_args"][0]
+            print(f'resuming {cache_name}')
+            send_email(f'Cache Job Resumed: {cache_name}', json.dumps(job, indent=2))
+            update_job('restart_times', str(datetime.now()))
+            cache(*job['cache_args'], is_resumed_job=True)
 
 
 if __name__ == '__main__':
