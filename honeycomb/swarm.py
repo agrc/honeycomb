@@ -12,18 +12,15 @@ from functools import partial
 from pathlib import Path
 
 import requests
-from google.cloud import storage
-from p_tqdm import p_map
 from google.api_core.retry import Retry
 from google_crc32c import Checksum
 from base64 import b64encode
+from multiprocessing.pool import ThreadPool
+from tqdm import tqdm
 
 from . import config, settings
 from .messaging import send_email
 
-storage_client = storage.Client(config.get_config_value('gcpProject'))
-
-retry = Retry()
 
 def swarm(name, bucket_name, is_test=False, preview_url=None):
     '''
@@ -41,7 +38,8 @@ def swarm(name, bucket_name, is_test=False, preview_url=None):
 
         row_folders = [folder for folder in sorted(level_folder.iterdir())]
         if len(row_folders) > 0:
-            list(p_map(partial(process_row_folder, name, bucket_name, level), row_folders))
+            with ThreadPool(4*8) as pool, tqdm(total=len(row_folders)) as progress_bar:
+                pool.map(partial(process_row_folder, name, bucket_name, level, progress_bar), row_folders)
 
     bust_discover_cache()
 
@@ -51,8 +49,9 @@ def swarm(name, bucket_name, is_test=False, preview_url=None):
         send_email('honeycomb update', f'{name} has been pushed to production')
 
 
-def process_row_folder(name, bucket_name, level, row_folder):
-    bucket = storage_client.bucket(bucket_name)
+def process_row_folder(name, bucket_name, level, progress_bar, row_folder):
+    retry = Retry()
+    bucket = config.get_storage_client().bucket(bucket_name)
     row = str(int(row_folder.name[1:], 16))
     upload_errors = []
     for file_path in row_folder.iterdir():
@@ -76,7 +75,11 @@ def process_row_folder(name, bucket_name, level, row_folder):
             file_path.unlink()
         except Exception:
             trace = traceback.format_exc()
-            upload_errors.append(f'Uploading error. Level: {level}, row: {row}, column: {column}\n\n{trace}')
+            try:
+                error_column = column
+            except Exception:
+                error_column = 'unknown'
+            upload_errors.append(f'Uploading error. Level: {level}, row: {row}, column: {error_column}\n\n{trace}')
             print(trace)
     try:
         row_folder.rmdir()
@@ -87,6 +90,8 @@ def process_row_folder(name, bucket_name, level, row_folder):
 
     if len(upload_errors) > 0:
         send_email('Uploading errors', '\n\n'.join(upload_errors))
+
+    progress_bar.update()
 
 
 def bust_discover_cache():
