@@ -2,26 +2,38 @@
 vector.py
 
 A module for publishing vector tiles to ArcGIS Online.
-
-Arguments:
-1: name (this corresponds with the project folder name, project name and tile package file name)
-2: summary (matches item summary in AGOL)
-3: tags (comma-separated; matches tags in AGOL)
 '''
 
-from . import config
-from datetime import date
-from os.path import join, dirname, realpath
+import logging
 import os
+import sys
+from datetime import date
+from os.path import join
 
-import arcpy
 import arcgis
-import pygsheets
+import arcpy
 import google.auth
+import pygsheets
+from forklift import engine
+
+from . import config
 
 BASE_FOLDER = config.get_config_value('vectorTilesFolder')
 USERNAME = os.getenv('HONEYCOMB_AGOL_USERNAME')
 PASSWORD = os.getenv('HONEYCOMB_AGOL_PASSWORD')
+
+def update_data():
+    print('running forklift')
+
+    log = logging.getLogger('forklift')
+    console_handler = logging.StreamHandler(stream=sys.stdout)
+    console_handler.setLevel(logging.DEBUG)
+    log.addHandler(console_handler)
+    log.setLevel(logging.DEBUG)
+
+    engine.build_pallets(None)
+    engine.lift_pallets(None)
+    engine.ship_data()
 
 def main(base_map_name, config):
     print('building tiles for: ' + base_map_name)
