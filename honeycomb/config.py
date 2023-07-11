@@ -8,6 +8,7 @@ A module that contains logic for reading and writing the config file
 from json import dumps, loads
 from os import getenv, makedirs
 from os.path import abspath, basename, dirname, exists, join
+from google.cloud import storage
 
 config_folder = abspath(join(abspath(dirname(__file__)), '..', 'honeycomb-hive'))
 config_location = join(config_folder, 'config.json')
@@ -18,6 +19,14 @@ try:
     makedirs(dirname(config_location))
 except Exception:
     pass
+
+storage_client = None
+def get_storage_client():
+    global storage_client
+    if storage_client is None:
+        storage_client = storage.Client(get_config_value('gcpProject'))
+
+    return storage_client
 
 def create_default_config():
 
