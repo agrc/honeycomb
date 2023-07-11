@@ -86,9 +86,9 @@ def main():
         #     WorkerBee(basemap, False, True, True)
         #     recache = prompt_recache()
 
-        finish_job()
-
         upload(basemap)
+
+        finish_job()
 
     def upload(basemap):
         basemap_info = config.get_basemap(basemap)
