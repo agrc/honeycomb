@@ -34,7 +34,6 @@ def update_data():
 
     engine.build_pallets(None)
     engine.lift_pallets(None)
-    engine.ship_data()
 
 
 def main(base_map_name, config):
