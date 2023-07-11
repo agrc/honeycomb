@@ -10,7 +10,7 @@ import os
 import socket
 import time
 from datetime import date
-from os.path import dirname, join, realpath
+from os.path import join
 from pathlib import Path
 
 import arcpy
