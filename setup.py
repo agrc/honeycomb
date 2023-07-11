@@ -9,7 +9,7 @@ setup(
     author="Scott Davis",
     author_email="stdavis@utah.gov",
     url="https://github.com/agrc/honeycomb",
-    packages=['honeycomb'],
+    packages=["honeycomb"],
     include_package_data=True,
     zip_safe=False,
     classifiers=[
@@ -21,41 +21,34 @@ setup(
         "Operating System :: Microsoft :: Windows",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.7",
-        "Topic :: Utilities"
+        "Topic :: Utilities",
     ],
-    keywords=[
-    ],
+    keywords=[],
     install_requires=[
-        'arcgis>=2',
-        'colorama>=0',
-        'docopt>=0',
-        'google-cloud-storage>=2',
-        'humanize>=4',
-        'p_tqdm>=1',
-        'pygsheets>=2',
-        'requests>=2',
-        'tabulate>=0',
-        'tqdm>=4'
+        "arcgis>=2",
+        "colorama>=0",
+        "docopt>=0",
+        "google-cloud-storage>=2",
+        "humanize>=4",
+        "p_tqdm>=1",
+        "pygsheets>=2",
+        "requests>=2",
+        "tabulate>=0",
+        "tqdm>=4",
     ],
-    dependency_links=[
-    ],
+    dependency_links=[],
     extras_require={
-        'test': [
-            'black',
-            'mock',
-            'pytest-benchmark',
-            'pytest-cov',
-            'pytest-env',
-            'pytest-ruff',
-            'pytest-watch',
-            'pytest',
-            'requests_mock'
-            'ruff',
+        "test": [
+            "black",
+            "mock",
+            "pytest-benchmark",
+            "pytest-cov",
+            "pytest-env",
+            "pytest-ruff",
+            "pytest-watch",
+            "pytest",
+            "requests_mock" "ruff",
         ]
     },
-    entry_points={
-        "console_scripts": [
-            "honeycomb = honeycomb.__main__:main"
-        ]
-    }
+    entry_points={"console_scripts": ["honeycomb = honeycomb.__main__:main"]},
 )

@@ -5,14 +5,14 @@ from shutil import rmtree
 import pytest
 
 #: mock arcpy
-sys.path.insert(0, path.join(path.dirname(__file__), 'mocks'))
+sys.path.insert(0, path.join(path.dirname(__file__), "mocks"))
 from honeycomb import config  # NOQA
 
 
-config.config_location = path.join(path.abspath(path.dirname(__file__)), 'config.json')
-config.ags_connection_file = path.join(path.abspath(path.dirname(__file__)), 'arcgisserver.ags')
-test_data_folder = path.join(path.dirname(__file__), 'data')
-temp_folder = path.join(test_data_folder, 'temp')
+config.config_location = path.join(path.abspath(path.dirname(__file__)), "config.json")
+config.ags_connection_file = path.join(path.abspath(path.dirname(__file__)), "arcgisserver.ags")
+test_data_folder = path.join(path.dirname(__file__), "data")
+temp_folder = path.join(test_data_folder, "temp")
 
 
 def cleanup():
@@ -24,7 +24,7 @@ def cleanup():
                 rmtree(clean_path)
 
 
-@pytest.fixture(scope='function', autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 def setup_teardown():
     cleanup()
     yield
