@@ -130,12 +130,14 @@ def main():
     elif args['vector']:
         basemap = args['<basemap>']
         vector_basemaps = config.get_config_value('vectorBaseMaps')
+        vector.update_data()
 
         stats.record_start(basemap, 'cache')
         vector.main(basemap, vector_basemaps[basemap])
         stats.record_finish(basemap, 'cache')
     elif args['vector-all']:
         vector_basemaps = config.get_config_value('vectorBaseMaps')
+        vector.update_data()
         for basemap in [key for key in list(vector_basemaps.keys())]:
             stats.record_start(basemap, 'cache')
             vector.main(basemap, vector_basemaps[basemap])
