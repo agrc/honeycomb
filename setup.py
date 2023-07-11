@@ -41,15 +41,16 @@ setup(
     ],
     extras_require={
         'test': [
-            'flake8',
+            'black',
             'mock',
             'pytest-benchmark',
             'pytest-cov',
             'pytest-env',
-            'pytest-flake8==1.0.0',
+            'pytest-ruff',
             'pytest-watch',
             'pytest',
             'requests_mock'
+            'ruff',
         ]
     },
     entry_points={
