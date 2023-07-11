@@ -14,8 +14,8 @@ Usage:
     honeycomb upload <basemap>
     honeycomb stats
     honeycomb resume
-    honeycomb vector <basemap>
-    honeycomb vector-all
+    honeycomb vector <basemap> [--skip-update]
+    honeycomb vector-all [--skip-update]
     honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test] [--spot <path>] [--levels <levels>]
     honeycomb publish <basemap>
 
@@ -132,14 +132,19 @@ def main():
     elif args["vector"]:
         basemap = args["<basemap>"]
         vector_basemaps = config.get_config_value("vectorBaseMaps")
-        vector.update_data()
+
+        if not args['--skip-update']:
+            vector.update_data()
 
         stats.record_start(basemap, "cache")
         vector.main(basemap, vector_basemaps[basemap])
         stats.record_finish(basemap, "cache")
     elif args["vector-all"]:
         vector_basemaps = config.get_config_value("vectorBaseMaps")
-        vector.update_data()
+
+        if not args['--skip-update']:
+            vector.update_data()
+
         for basemap in [key for key in list(vector_basemaps.keys())]:
             stats.record_start(basemap, "cache")
             vector.main(basemap, vector_basemaps[basemap])
