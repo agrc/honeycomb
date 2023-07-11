@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # * coding: utf8 *
-'''
+"""
 arcpy.py
 
 A module that contains a mock for the arcpy library so that tests can be run without it.
-'''
+"""
 
 from os.path import join
 
@@ -15,8 +15,8 @@ class env(object):
 
 class mapping(object):
     @staticmethod
-    def CreateGISServerConnectionFile(one, folder, filename, four, five, username='', password=''):
-        open(join(folder, filename), 'a').close()
+    def CreateGISServerConnectionFile(one, folder, filename, four, five, username="", password=""):
+        open(join(folder, filename), "a").close()
 
 
 class management(object):
@@ -75,14 +75,14 @@ class analysis(object):
 
 
 def ListFeatureClasses():
-    if env.workspace.endswith('.sde'):
-        return ['SGID10.BOUNDARIES.CountyBoundaries', 'SGID10.LOCATION.Schools']
+    if env.workspace.endswith(".sde"):
+        return ["SGID10.BOUNDARIES.CountyBoundaries", "SGID10.LOCATION.Schools"]
     else:
-        return ['CountyBoundaries', 'Schools']
+        return ["CountyBoundaries", "Schools"]
 
 
 def GetMessages():
-    return 'GetMessages mock response'
+    return "GetMessages mock response"
 
 
 def ExecuteError(Exception):

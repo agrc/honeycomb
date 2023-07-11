@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # * coding: utf8 *
-'''
+"""
 honeycomb 🐝  # NOQA
 
 Usage:
@@ -50,7 +50,7 @@ Examples:
     honeycomb vector UtahAddressPoints                          Builds a new vector tile package and uploads to AGOL.
     honeycomb vector-all                                        Builds all of the vector tile packages in the config and uploads to AGOL.
     honeycomb resume                                            Resume a previously started cache job.
-'''
+"""
 
 import json
 import sys
@@ -68,15 +68,17 @@ from .worker_bee import WorkerBee
 
 
 def main():
-    args = docopt(__doc__, version='1.1.1')
+    args = docopt(__doc__, version="1.1.1")
 
-    def cache(basemap, missing_only=False, skip_update=False, skip_test=False, spot=False, levels=False, is_resumed_job=False):
+    def cache(
+        basemap, missing_only=False, skip_update=False, skip_test=False, spot=False, levels=False, is_resumed_job=False
+    ):
         if not is_resumed_job:
             start_new_job(basemap, missing_only, skip_update, skip_test, spot, levels)
-            stats.record_start(basemap, 'cache')
+            stats.record_start(basemap, "cache")
 
         WorkerBee(basemap, missing_only, skip_update, skip_test, spot, levels)
-        stats.record_finish(basemap, 'cache')
+        stats.record_finish(basemap, "cache")
 
         # def prompt_recache():
         #     return raw_input('Caching complete. Publish to production (P) or recache (R)? ') != 'P'
@@ -92,72 +94,79 @@ def main():
 
     def upload(basemap):
         basemap_info = config.get_basemap(basemap)
-        stats.record_start(basemap, 'upload')
-        swarm(basemap, basemap_info['bucket'])
-        stats.record_finish(basemap, 'upload')
+        stats.record_start(basemap, "upload")
+        swarm(basemap, basemap_info["bucket"])
+        stats.record_finish(basemap, "upload")
 
-    if args['config']:
-        if args['init']:
-            print('config file: {}'.format(config.create_default_config()))
-        elif args['set'] and args['<key>'] and args['<value>']:
-            print(config.set_config_prop(args['<key>'], args['<value>']))
-        elif args['basemaps'] and args['<basemap>']:
-            if args['--add']:
-                print(config.add_basemap(args['<basemap>'], args['<bucket-name>'], args['--loop']))
-            elif args['--remove']:
-                print(config.remove_basemap(args['<basemap>']))
-        elif args['open']:
+    if args["config"]:
+        if args["init"]:
+            print("config file: {}".format(config.create_default_config()))
+        elif args["set"] and args["<key>"] and args["<value>"]:
+            print(config.set_config_prop(args["<key>"], args["<value>"]))
+        elif args["basemaps"] and args["<basemap>"]:
+            if args["--add"]:
+                print(config.add_basemap(args["<basemap>"], args["<bucket-name>"], args["--loop"]))
+            elif args["--remove"]:
+                print(config.remove_basemap(args["<basemap>"]))
+        elif args["open"]:
             startfile(config.config_location)
-    elif args['update-data']:
-        update_data.main(args['--static-only'], args['--sgid-only'])
-    elif args['upload'] and args['<basemap>']:
-        upload(args['<basemap>'])
-    elif args['loop']:
+    elif args["update-data"]:
+        update_data.main(args["--static-only"], args["--sgid-only"])
+    elif args["upload"] and args["<basemap>"]:
+        upload(args["<basemap>"])
+    elif args["loop"]:
         stop = False
-        basemaps = config.get_config_value('basemaps')
+        basemaps = config.get_config_value("basemaps")
         while not stop:
-            for basemap in [key for key in list(basemaps.keys()) if basemaps[key]['loop']]:
-                action = input('cache {} (C), skip to the next base map (S) or exit (E)? '.format(basemap))
-                if action == 'C':
+            for basemap in [key for key in list(basemaps.keys()) if basemaps[key]["loop"]]:
+                action = input("cache {} (C), skip to the next base map (S) or exit (E)? ".format(basemap))
+                if action == "C":
                     cache(basemap)
-                elif action == 'S':
+                elif action == "S":
                     continue
                 else:
                     stop = True
                     break
-    elif args['publish']:
-        publish(args['<basemap>'])
-    elif args['vector']:
-        basemap = args['<basemap>']
-        vector_basemaps = config.get_config_value('vectorBaseMaps')
+    elif args["publish"]:
+        publish(args["<basemap>"])
+    elif args["vector"]:
+        basemap = args["<basemap>"]
+        vector_basemaps = config.get_config_value("vectorBaseMaps")
         vector.update_data()
 
-        stats.record_start(basemap, 'cache')
+        stats.record_start(basemap, "cache")
         vector.main(basemap, vector_basemaps[basemap])
-        stats.record_finish(basemap, 'cache')
-    elif args['vector-all']:
-        vector_basemaps = config.get_config_value('vectorBaseMaps')
+        stats.record_finish(basemap, "cache")
+    elif args["vector-all"]:
+        vector_basemaps = config.get_config_value("vectorBaseMaps")
         vector.update_data()
         for basemap in [key for key in list(vector_basemaps.keys())]:
-            stats.record_start(basemap, 'cache')
+            stats.record_start(basemap, "cache")
             vector.main(basemap, vector_basemaps[basemap])
-            stats.record_finish(basemap, 'cache')
-    elif args['<basemap>']:
-        cache(args['<basemap>'], args['--missing-only'], args['--skip-update'], args['--skip-test'], args['--spot'], args['--levels'])
-    elif args['stats']:
+            stats.record_finish(basemap, "cache")
+    elif args["<basemap>"]:
+        cache(
+            args["<basemap>"],
+            args["--missing-only"],
+            args["--skip-update"],
+            args["--skip-test"],
+            args["--spot"],
+            args["--levels"],
+        )
+    elif args["stats"]:
         stats.print_stats()
-    elif args['resume']:
+    elif args["resume"]:
         job = get_current_job()
 
         if job is None:
-            print('no current job found!')
+            print("no current job found!")
         else:
             cache_name = job["cache_args"][0]
-            print(f'resuming {cache_name}')
-            send_email(f'Cache Job Resumed: {cache_name}', json.dumps(job, indent=2))
-            update_job('restart_times', str(datetime.now()))
-            cache(*job['cache_args'], is_resumed_job=True)
+            print(f"resuming {cache_name}")
+            send_email(f"Cache Job Resumed: {cache_name}", json.dumps(job, indent=2))
+            update_job("restart_times", str(datetime.now()))
+            cache(*job["cache_args"], is_resumed_job=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

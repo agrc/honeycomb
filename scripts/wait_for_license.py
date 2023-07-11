@@ -4,8 +4,8 @@ while True:
     try:
         import arcpy
 
-        print('license found')
+        print("license found")
         break
     except:
-        print('no license available, waiting...')
+        print("no license available, waiting...")
         sleep(10)
