@@ -62,7 +62,7 @@ from docopt import docopt
 from . import config, stats, update_data, vector
 from .messaging import send_email
 from .publish import publish
-from .resumable import finish_job, get_current_job, start_new_job, update_job
+from .resumable import finish_job, get_current_job, start_new_job, update_job, get_job_status
 from .swarm import swarm
 from .worker_bee import WorkerBee
 
@@ -77,8 +77,10 @@ def main():
             start_new_job(basemap, missing_only, skip_update, skip_test, spot, levels)
             stats.record_start(basemap, "cache")
 
-        WorkerBee(basemap, missing_only, skip_update, skip_test, spot, levels)
-        stats.record_finish(basemap, "cache")
+        if not is_resumed_job or get_job_status("caching_complete") is False:
+            WorkerBee(basemap, missing_only, skip_update, skip_test, spot, levels)
+            stats.record_finish(basemap, "cache")
+            update_job("caching_complete", True)
 
         # def prompt_recache():
         #     return raw_input('Caching complete. Publish to production (P) or recache (R)? ') != 'P'
