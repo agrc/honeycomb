@@ -25,6 +25,7 @@ def start_new_job(basemap, missing_only, skip_update, skip_test, spot, levels):
         "data_updated": False,
         "test_cache_complete": False,
         "cache_extents_completed": [],
+        "caching_complete": False,
         "restart_times": [],
     }
 
