@@ -1,10 +1,13 @@
-from pathlib import Path
-from .config import config_folder
+import datetime
 import json
 import time
-import datetime
+from pathlib import Path
+
 import humanize
 from tabulate import tabulate
+
+from .config import config_folder
+from .log import logger
 
 stats_file = Path(config_folder) / "stats.json"
 
@@ -44,7 +47,7 @@ def record_finish(basemap, task):
 
     basemap_stats = get_basemap(basemap)
     if basemap_stats[task]["start"] == 0:
-        print(f"WARNING: no start time has been recorded for task: {task}")
+        logger.warning(f"no start time has been recorded for task: {task}")
         return
 
     duration = int(time.time()) - basemap_stats[task]["start"]

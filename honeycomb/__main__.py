@@ -60,14 +60,22 @@ from os import startfile
 from docopt import docopt
 
 from . import config, stats, update_data, vector
+from .log import init, logger
 from .messaging import send_email
 from .publish import publish
-from .resumable import finish_job, get_current_job, start_new_job, update_job, get_job_status
+from .resumable import (
+    finish_job,
+    get_current_job,
+    get_job_status,
+    start_new_job,
+    update_job,
+)
 from .swarm import swarm
 from .worker_bee import WorkerBee
 
 
 def main():
+    init()
     args = docopt(__doc__, version="1.1.1")
 
     def cache(
@@ -102,14 +110,14 @@ def main():
 
     if args["config"]:
         if args["init"]:
-            print("config file: {}".format(config.create_default_config()))
+            logger.info("config file: {}".format(config.create_default_config()))
         elif args["set"] and args["<key>"] and args["<value>"]:
-            print(config.set_config_prop(args["<key>"], args["<value>"]))
+            logger.info(config.set_config_prop(args["<key>"], args["<value>"]))
         elif args["basemaps"] and args["<basemap>"]:
             if args["--add"]:
-                print(config.add_basemap(args["<basemap>"], args["<bucket-name>"], args["--loop"]))
+                logger.info(config.add_basemap(args["<basemap>"], args["<bucket-name>"], args["--loop"]))
             elif args["--remove"]:
-                print(config.remove_basemap(args["<basemap>"]))
+                logger.info(config.remove_basemap(args["<basemap>"]))
         elif args["open"]:
             startfile(config.config_location)
     elif args["update-data"]:
@@ -135,7 +143,7 @@ def main():
         basemap = args["<basemap>"]
         vector_basemaps = config.get_config_value("vectorBaseMaps")
 
-        if not args['--skip-update']:
+        if not args["--skip-update"]:
             vector.update_data()
 
         stats.record_start(basemap, "cache")
@@ -144,7 +152,7 @@ def main():
     elif args["vector-all"]:
         vector_basemaps = config.get_config_value("vectorBaseMaps")
 
-        if not args['--skip-update']:
+        if not args["--skip-update"]:
             vector.update_data()
 
         for basemap in [key for key in list(vector_basemaps.keys())]:
@@ -166,10 +174,10 @@ def main():
         job = get_current_job()
 
         if job is None:
-            print("no current job found!")
+            logger.warning("no current job found!")
         else:
             cache_name = job["cache_args"][0]
-            print(f"resuming {cache_name}")
+            logger.info(f"resuming {cache_name}")
             send_email(f"Cache Job Resumed: {cache_name}", json.dumps(job, indent=2))
             update_job("restart_times", str(datetime.now()))
             cache(*job["cache_args"], is_resumed_job=True)

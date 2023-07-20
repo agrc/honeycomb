@@ -7,7 +7,6 @@ A module that contains logic for building traditional image-based caches.
 """
 
 import os
-import socket
 import time
 from datetime import date
 from os.path import join
@@ -19,6 +18,7 @@ import pygsheets
 from tqdm import tqdm
 
 from . import config, settings, update_data
+from .log import logger
 from .messaging import send_email
 from .resumable import get_job_status, update_job
 from .swarm import swarm
@@ -43,7 +43,7 @@ def intersect_scales(scales, restrict_scales):
 
 class WorkerBee(object):
     def __init__(self, basemap, missing_only=False, skip_update=False, skip_test=False, spot_path=False, levels=False):
-        print("caching {}".format(basemap))
+        logger.info("caching {}".format(basemap))
         self.errors = []
         self.start_time = time.time()
         self.service_name = basemap
@@ -58,14 +58,13 @@ class WorkerBee(object):
         else:
             self.complete_num_bundles = settings.COMPLETE_NUM_BUNDLES_LU[self.service_name]
 
-        ip = socket.gethostbyname(socket.gethostname())
         self.preview_url = settings.PREVIEW_URL.format(self.service_name.lower())
 
         self.service = os.path.join(config.get_ags_connection(), "{}.MapServer".format(self.service_name))
         self.email_subject = "Cache Update ({})".format(self.service_name)
 
         if skip_update or get_job_status("data_updated"):
-            print("skipping data update...")
+            logger.info("skipping data update...")
         else:
             update_data.main()
             send_email(self.email_subject, "Data update complete. Proceeding with caching...")
@@ -73,7 +72,7 @@ class WorkerBee(object):
         update_job("data_updated", True)
 
         if skip_test or get_job_status("test_cache_complete"):
-            print("skipping test cache...")
+            logger.info("skipping test cache...")
         else:
             self.cache_test_extent()
             basemap_info = config.get_basemap(basemap)
@@ -88,10 +87,10 @@ class WorkerBee(object):
 
         if self.missing_only:
             self.update_mode = "RECREATE_EMPTY_TILES"
-            print("Caching empty tiles only")
+            logger.info("Caching empty tiles only")
         else:
             self.update_mode = "RECREATE_ALL_TILES"
-            print("Caching all tiles")
+            logger.info("Caching all tiles")
 
         if not spot_path:
             self.overall_progress_bar_current_value = 0
@@ -101,23 +100,23 @@ class WorkerBee(object):
             self.cache(not levels)
         else:
             #: levels 0-17 include the entire state
-            print("spot caching levels 0-17...")
+            logger.info("spot caching levels 0-17...")
             self.cache_extent(settings.SCALES[:18], spot_path, spot_cache_name)
 
             #: levels 18-19 intersect with cache extent
-            print("intersecting spot cache polygon with level 18-19 cache extent...")
+            logger.info("intersecting spot cache polygon with level 18-19 cache extent...")
             intersect = arcpy.analysis.Intersect(
                 [spot_path, join(settings.EXTENTSFGDB, settings.EXTENT_18_19)],
                 "in_memory/spot_cache_intersect",
                 join_attributes="ONLY_FID",
             )
-            print("spot caching levels 18-19...")
+            logger.info("spot caching levels 18-19...")
             self.cache_extent(settings.SCALES[18:], intersect, spot_cache_name)
 
     def cache_extent(self, scales, aoi, name):
         cache_job_key = f"{name}-{scales}"
         if cache_job_key in get_job_status("cache_extents_completed"):
-            print(f"skipping extent based on current job: {cache_job_key}")
+            logger.info(f"skipping extent based on current job: {cache_job_key}")
 
             return
         cache_scales = intersect_scales(scales, self.restrict_scales)
@@ -143,13 +142,13 @@ class WorkerBee(object):
         except arcpy.ExecuteError as e:
             if hasattr(e, "message") and e.message == error_001470_message:
                 msg = "ERROR 001470 thrown. Moving on and hoping the job completes successfully."
-                print(msg)
+                logger.warning(msg)
                 send_email(
                     "Cache Warning (ERROR 001470)", "e.message\n\narcpy.GetMessages:\n{}".format(arcpy.GetMessages())
                 )
             else:
                 self.errors.append([cache_scales, aoi, name])
-                print(arcpy.GetMessages())
+                logger.error(arcpy.GetMessages())
                 send_email("Cache Update ({}) - arcpy.ExecuteError".format(self.service_name), arcpy.GetMessages())
 
     def get_progress(self):
@@ -181,7 +180,7 @@ class WorkerBee(object):
         return totalfiles
 
     def cache_test_extent(self):
-        print("caching test extent")
+        logger.info("caching test extent")
         cache_scales = intersect_scales(settings.SCALES, self.restrict_scales)
 
         try:
@@ -193,7 +192,7 @@ class WorkerBee(object):
             #: resetting the environment seems to solve the issue.
             arcpy.ResetEnvironments()
         except arcpy.ExecuteError:
-            print(arcpy.GetMessages())
+            logger.error(arcpy.GetMessages())
             send_email(
                 "Cache Test Extent Error ({}) - arcpy.ExecuteError".format(self.service_name), arcpy.GetMessages()
             )
@@ -225,20 +224,20 @@ class WorkerBee(object):
 
         while len(self.errors) > 0:
             msg = "Recaching errors. Errors left: {}".format(len(self.errors))
-            print(msg)
+            logger.warning(msg)
             send_email(self.email_subject, msg)
             self.cache_extent(*self.errors.pop())
 
         bundles = self.get_bundles_count()
         if bundles < self.complete_num_bundles and run_all_levels:
             msg = "Only {} out of {} bundles completed. Recaching...".format(bundles, self.complete_num_bundles)
-            print(msg)
+            logger.warning(msg)
             send_email(self.email_subject, msg)
             self.cache(True)
 
         send_email(self.email_subject + " Finished", "Caching complete!")
 
-        print("updating google spreadsheets")
+        logger.info("updating google spreadsheets")
 
         credentials, project = google.auth.default(scopes=["https://www.googleapis.com/auth/spreadsheets"])
         client = pygsheets.authorize(custom_credentials=credentials)
