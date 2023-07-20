@@ -8,17 +8,18 @@ A module that contains code for etl-ing tiles into WMTS format and uploading to 
 
 import os
 import traceback
+from base64 import b64encode
 from functools import partial
+from multiprocessing.pool import ThreadPool
 from pathlib import Path
 
 import requests
 from google.api_core.retry import Retry
 from google_crc32c import Checksum
-from base64 import b64encode
-from multiprocessing.pool import ThreadPool
 from tqdm import tqdm
 
 from . import config, settings
+from .log import logger
 from .messaging import send_email
 
 
@@ -34,7 +35,7 @@ def swarm(name, bucket_name, is_test=False, preview_url=None):
 
     for level_folder in sorted(base_folder.iterdir()):
         level = str(int(level_folder.name[1:]))
-        print("uploading level: {}".format(level))
+        logger.info("uploading level: {}".format(level))
 
         row_folders = [folder for folder in sorted(level_folder.iterdir())]
         if len(row_folders) > 0:
@@ -80,13 +81,13 @@ def process_row_folder(name, bucket_name, level, progress_bar, row_folder):
             except Exception:
                 error_column = "unknown"
             upload_errors.append(f"Uploading error. Level: {level}, row: {row}, column: {error_column}\n\n{trace}")
-            print(trace)
+            logger.error(trace)
     try:
         row_folder.rmdir()
     except Exception:
         trace = traceback.format_exc()
         send_email("Removing folder error. Level: {}".format(level), trace)
-        print(trace)
+        logger.error(trace)
 
     if len(upload_errors) > 0:
         send_email("Uploading errors", "\n\n".join(upload_errors))

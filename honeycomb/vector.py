@@ -17,6 +17,7 @@ import pygsheets
 from forklift import engine
 
 from . import config
+from .log import logger
 
 BASE_FOLDER = config.get_config_value("vectorTilesFolder")
 USERNAME = os.getenv("HONEYCOMB_AGOL_USERNAME")
@@ -24,7 +25,7 @@ PASSWORD = os.getenv("HONEYCOMB_AGOL_PASSWORD")
 
 
 def update_data():
-    print("running forklift")
+    logger.info("running forklift")
 
     log = logging.getLogger("forklift")
     console_handler = logging.StreamHandler(stream=sys.stdout)
@@ -37,13 +38,13 @@ def update_data():
 
 
 def main(base_map_name, config):
-    print("building tiles for: " + base_map_name)
+    logger.info("building tiles for: " + base_map_name)
 
     project_path = join(BASE_FOLDER, base_map_name)
     promap = arcpy.mp.ArcGISProject(join(project_path, base_map_name + ".aprx")).listMaps()[0]
     tile_package = join(project_path, base_map_name + "_temp" + ".vtpk")
 
-    print("building package...")
+    logger.info("building package...")
     if arcpy.Exists(tile_package):
         arcpy.management.Delete(tile_package)
 
@@ -58,23 +59,23 @@ def main(base_map_name, config):
         tags=config["tags"],
     )
 
-    print("publishing new tile package item...")
+    logger.info("publishing new tile package item...")
     gis = arcgis.gis.GIS(username=USERNAME, password=PASSWORD)
     item = gis.content.add({}, data=tile_package)
 
-    print("publishing new vector tiles service...")
+    logger.info("publishing new vector tiles service...")
     temp_item = item.publish()
 
-    print("replacing production service...")
+    logger.info("replacing production service...")
     prod_item = arcgis.gis.Item(gis, config["id"])
     gis.content.replace_service(prod_item, temp_item)
 
-    print("removing temporary items...")
+    logger.info("removing temporary items...")
     gis.content.delete_items([item, temp_item])
 
-    print("vector tile package successfully built and published!")
+    logger.info("vector tile package successfully built and published!")
 
-    print("updating base maps spreadsheet")
+    logger.info("updating base maps spreadsheet")
     credentials, project = google.auth.default(scopes=["https://www.googleapis.com/auth/spreadsheets"])
     client = pygsheets.authorize(custom_credentials=credentials)
     base_maps_sheet = client.open_by_key("1XnncmhWrIjntlaMfQnMrlcCTyl9e2i-ztbvqryQYXDc")

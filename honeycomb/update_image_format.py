@@ -1,6 +1,9 @@
 from pathlib import Path
-from PIL import Image
+
 from p_tqdm import p_map
+from PIL import Image
+
+from .log import logger
 
 base_directory = Path(r"D:\Cache\CIR\_alllayers")
 
@@ -8,7 +11,7 @@ base_directory = Path(r"D:\Cache\CIR\_alllayers")
 def process_image(file):
     image = Image.open(file)
     if "A" not in image.getbands() and image.mode != "P":
-        # print(f'converting {file} to jpg')
+        # logger.info(f'converting {file} to jpg')
         image.convert("RGB")
         image.save(file.parent / f"{file.stem}.jpg")
         file.unlink()
@@ -18,10 +21,10 @@ def process_image(file):
 
 
 if __name__ == "__main__":
-    print("globing files...")
+    logger.info("globing files...")
     files = list(base_directory.glob(r"**\*.png"))
 
     results = p_map(process_image, files)
     files_modified = results.count(1)
 
-    print(f"files modified: {files_modified}")
+    logger.info(f"files modified: {files_modified}")

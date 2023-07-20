@@ -29,6 +29,7 @@ setup(
         "colorama>=0",
         "docopt>=0",
         "google-cloud-storage>=2",
+        "google-cloud-logging>=3",
         "humanize>=4",
         "p_tqdm>=1",
         "pygsheets>=2",

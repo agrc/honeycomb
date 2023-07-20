@@ -1,11 +1,18 @@
+import logging
 from time import sleep
+
+import google.cloud.logging
+
+logging.basicConfig()
+google.cloud.logging.Client().setup_logging()
 
 while True:
     try:
-        import arcpy
+        import arcpy  # noqa: F401
 
-        print("license found")
+        logging.info("license found")
+
         break
-    except:
-        print("no license available, waiting...")
+    except:  # noqa: E722
+        logging.info("no license available, waiting...")
         sleep(10)

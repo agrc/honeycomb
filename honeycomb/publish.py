@@ -12,6 +12,7 @@ from os.path import exists, join
 import arcpy
 
 from . import config
+from .log import logger
 
 
 def publish(basemap):
@@ -22,26 +23,26 @@ def publish(basemap):
     if not exists(drafts_folder):
         mkdir(drafts_folder)
 
-    print("creating .sddraft")
+    logger.info("creating .sddraft")
     arcpy.mapping.CreateMapSDDraft(mxd_path, sddraft_path, basemap, connection_file_path=config.ags_connection_file)
 
-    print("analyzing")
+    logger.info("analyzing")
     analysis = arcpy.mapping.AnalyzeForSD(sddraft_path)
-    print("The following information was returned during analysis of the MXD:")
+    logger.info("The following information was returned during analysis of the MXD:")
     for key in ("messages", "warnings", "errors"):
         items = analysis[key]
         if len(items) > 0:
-            print(key.upper())
-            for ((message, code), layerlist) in items.items():
-                print("{} (CODE {})".format(message, code))
+            logger.info(key.upper())
+            for (message, code), layerlist in items.items():
+                logger.info("{} (CODE {})".format(message, code))
 
                 if len(layerlist) > 0:
-                    print("applies to:")
+                    logger.info("applies to:")
                     for layer in layerlist:
-                        print(layer.name + "\n")
+                        logger.info(layer.name + "\n")
 
     if analysis["errors"] == {}:
-        print("updating sddraft values")
+        logger.info("updating sddraft values")
 
         with open(sddraft_path, "r") as sddraft_file:
             txt = sddraft_file.read()
@@ -61,20 +62,21 @@ def publish(basemap):
                 storage_format,
                 storage_format.replace("esriMapCacheStorageModeCompactV2", "esriMapCacheStorageModeExploded"),
             )
-            tile_format = "<CacheTileFormat>PNG</CacheTileFormat>"
 
         with open(sddraft_path, "w") as sddraft_file:
             sddraft_file.write(txt)
 
-        print("staging")
+        logger.info("staging")
         sd_path = sddraft_path.replace(".sddraft", ".sd")
         if exists(sd_path):
             remove(sd_path)
         arcpy.server.StageService(sddraft_path, sd_path)
 
-        print("uploading")
+        logger.info("uploading")
         arcpy.server.UploadServiceDefinition(sd_path, config.ags_connection_file)
 
-        print("service published successfully!")
+        logger.info("service published successfully!")
     else:
-        print("Service could not be published because of errors found during analysis. Please fix them and republish.")
+        logger.error(
+            "Service could not be published because of errors found during analysis. Please fix them and republish."
+        )
