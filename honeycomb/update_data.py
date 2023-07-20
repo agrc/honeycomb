@@ -9,10 +9,9 @@ A module that contains code for updating the data for base maps.
 from pathlib import Path
 
 import arcpy
-from tqdm import tqdm
 
 from . import settings
-from .log import logger
+from .log import logger, logging_tqdm
 
 LOCAL = Path(r"C:\Cache\MapData")
 SHARE = Path(settings.SHARE) / "Data"
@@ -46,7 +45,7 @@ def get_layers():
     project = arcpy.mp.ArcGISProject(str(PRO_PROJECT))
     for map in project.listMaps():
         logger.info(f"map: {map.name}")
-        for layer in tqdm(map.listLayers()):
+        for layer in logging_tqdm(map.listLayers()):
             if layer.isFeatureLayer and SGID_GDB_NAME in layer.dataSource:
                 layers.add(Path(layer.dataSource).name)
 
@@ -65,7 +64,7 @@ def sgid():
     sgid_layers = get_layers()
     logger.info(f"updating: {local_db}...")
     with arcpy.EnvManager(workspace=local_db):
-        progress_bar = tqdm(sgid_layers)
+        progress_bar = logging_tqdm(sgid_layers)
         for fc in progress_bar:
             progress_bar.set_postfix_str(fc)
             if arcpy.Exists(fc):

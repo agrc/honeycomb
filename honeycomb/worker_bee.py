@@ -15,10 +15,9 @@ from pathlib import Path
 import arcpy
 import google.auth
 import pygsheets
-from tqdm import tqdm
 
 from . import config, settings, update_data
-from .log import logger
+from .log import logger, logging_tqdm
 from .messaging import send_email
 from .resumable import get_job_status, update_job
 from .swarm import swarm
@@ -94,7 +93,7 @@ class WorkerBee(object):
 
         if not spot_path:
             self.overall_progress_bar_current_value = 0
-            self.overall_progress_bar = tqdm(
+            self.overall_progress_bar = logging_tqdm(
                 total=self.complete_num_bundles - self.start_bundles, desc="Overall", position=0
             )
             self.cache(not levels)
@@ -124,7 +123,7 @@ class WorkerBee(object):
         if len(cache_scales) == 0:
             return
 
-        tqdm.write("caching {} at {}".format(name, cache_scales))
+        logging_tqdm.write("caching {} at {}".format(name, cache_scales))
 
         if config.is_dev() and name != spot_cache_name:
             aoi = settings.TEST_EXTENT
@@ -212,7 +211,7 @@ class WorkerBee(object):
         for grid in settings.GRIDS:
             total_grids = int(arcpy.management.GetCount(grid[0])[0])
             with arcpy.da.SearchCursor(grid[0], ["SHAPE@", "OID@"]) as cur:
-                for row in tqdm(cur, total=total_grids, position=1, desc="Current"):
+                for row in logging_tqdm(cur, total=total_grids, position=1, desc="Current"):
                     self.cache_extent([grid[1]], row[0], "{}: OBJECTID: {}".format(grid[0], row[1]))
                     self.get_progress()
             send_email(
