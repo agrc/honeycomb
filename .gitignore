@@ -93,5 +93,4 @@ honeycomb/data/**/*.lock
 .benchmarks/
 .pytest_cache/
 
-.vscode/
 honeycomb/service-account.json
