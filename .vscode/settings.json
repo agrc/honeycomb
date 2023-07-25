@@ -1,0 +1,24 @@
+{
+  "cSpell.words": [
+    "arcgiscache",
+    "dask",
+    "EXTENTSFGDB",
+    "gethostbyname",
+    "globbing",
+    "iglob",
+    "NAIP",
+    "propy",
+    "pygsheets",
+    "pytz",
+    "vtpk"
+  ],
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": true,
+      "source.organizeImports": true
+    },
+    "editor.defaultFormatter": "ms-python.black-formatter",
+  },
+  "python.formatting.provider": "none",
+}
