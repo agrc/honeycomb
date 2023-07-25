@@ -6,9 +6,12 @@ update_data.py
 A module that contains code for updating the data for base maps.
 """
 
+import datetime
+import time
 from pathlib import Path
 
 import arcpy
+import pytz
 
 from . import settings
 from .log import logger, logging_tqdm
@@ -90,6 +93,16 @@ def main(static_only=False, sgid_only=False):
         LOCAL.mkdir(parents=True)
 
     neither = not static_only and not sgid_only
+
+    #: wait until 10 PM to run
+    mountain = pytz.timezone("US/Mountain")
+    now = datetime.datetime.now(mountain)
+    start = now.replace(hour=22, minute=0, second=0, microsecond=0)
+
+    if now < start:
+        diff = start - now
+        logger.info(f"waiting {diff} until 10 PM to update data")
+        time.sleep(diff.seconds)
 
     if sgid_only or neither:
         sgid()
