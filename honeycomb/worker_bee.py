@@ -41,7 +41,16 @@ def intersect_scales(scales, restrict_scales):
 
 
 class WorkerBee(object):
-    def __init__(self, basemap, missing_only=False, skip_update=False, skip_test=False, spot_path=False, levels=False):
+    def __init__(
+        self,
+        basemap,
+        missing_only=False,
+        skip_update=False,
+        skip_test=False,
+        spot_path=False,
+        levels=False,
+        dont_wait=False,
+    ):
         logger.info("caching {}".format(basemap))
         self.errors = []
         self.start_time = time.time()
@@ -65,7 +74,7 @@ class WorkerBee(object):
         if skip_update or get_job_status("data_updated"):
             logger.info("skipping data update...")
         else:
-            update_data.main()
+            update_data.main(dont_wait=dont_wait)
             send_email(self.email_subject, "Data update complete. Proceeding with caching...")
 
         update_job("data_updated", True)
