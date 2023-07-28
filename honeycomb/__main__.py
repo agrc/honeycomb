@@ -9,14 +9,14 @@ Usage:
     honeycomb config basemaps --add <basemap> [<bucket-name>] [--loop]
     honeycomb config basemaps --remove <basemap>
     honeycomb config open
-    honeycomb update-data [--static-only] [--sgid-only]
+    honeycomb update-data [--static-only] [--sgid-only] [--dont-wait]
     honeycomb loop
     honeycomb upload <basemap>
     honeycomb stats
     honeycomb resume
     honeycomb vector <basemap> [--skip-update]
     honeycomb vector-all [--skip-update]
-    honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test] [--spot <path>] [--levels <levels>]
+    honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test] [--spot <path>] [--levels <levels>] [--dont-wait]
     honeycomb publish <basemap>
 
 Arguments:
@@ -31,6 +31,7 @@ Arguments:
     --levels <levels>       Cache only specific levels
     --static-only           Copy static data from the SHARE to your local machine.
     --sgid-only             Copy vector data from the SGID to your local machine.
+    --dont-wait             Don't wait until evening to get updated data from internal.
 
 Examples:
     honeycomb config init                                       Create a default config file.
@@ -102,14 +103,21 @@ def main():
     args = docopt(__doc__, version="1.1.1")
 
     def cache(
-        basemap, missing_only=False, skip_update=False, skip_test=False, spot=False, levels=False, is_resumed_job=False
+        basemap,
+        missing_only=False,
+        skip_update=False,
+        skip_test=False,
+        spot=False,
+        levels=False,
+        is_resumed_job=False,
+        dont_wait=False,
     ):
         if not is_resumed_job:
             start_new_job(basemap, missing_only, skip_update, skip_test, spot, levels)
             stats.record_start(basemap, "cache")
 
         if not is_resumed_job or get_job_status("caching_complete") is False:
-            WorkerBee(basemap, missing_only, skip_update, skip_test, spot, levels)
+            WorkerBee(basemap, missing_only, skip_update, skip_test, spot, levels, dont_wait)
             stats.record_finish(basemap, "cache")
             update_job("caching_complete", True)
 
@@ -144,7 +152,7 @@ def main():
         elif args["open"]:
             startfile(config.config_location)
     elif args["update-data"]:
-        update_data.main(args["--static-only"], args["--sgid-only"])
+        update_data.main(args["--static-only"], args["--sgid-only"], args["--dont-wait"])
     elif args["upload"] and args["<basemap>"]:
         upload(args["<basemap>"])
     elif args["loop"]:
@@ -190,6 +198,7 @@ def main():
             args["--skip-test"],
             args["--spot"],
             args["--levels"],
+            dont_wait=args["--dont-wait"],
         )
     elif args["stats"]:
         stats.print_stats()

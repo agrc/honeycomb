@@ -87,7 +87,7 @@ def static():
     arcpy.management.Copy(str(SHARE / STATIC_GDB_NAME), local_static)
 
 
-def main(static_only=False, sgid_only=False):
+def main(static_only=False, sgid_only=False, dont_wait=False):
     if not LOCAL.exists():
         logger.info(f"creating local folder: {LOCAL}")
         LOCAL.mkdir(parents=True)
@@ -99,7 +99,7 @@ def main(static_only=False, sgid_only=False):
     now = datetime.datetime.now(mountain)
     start = now.replace(hour=22, minute=0, second=0, microsecond=0)
 
-    if now < start:
+    if not dont_wait and now < start:
         diff = start - now
         logger.info(f"waiting {diff} until 10 PM to update data")
         time.sleep(diff.seconds)
