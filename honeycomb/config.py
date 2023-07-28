@@ -8,6 +8,8 @@ A module that contains logic for reading and writing the config file
 from json import dumps, loads
 from os import getenv, makedirs
 from os.path import abspath, basename, dirname, exists, join
+
+import requests
 from google.cloud import storage
 
 config_folder = abspath(join(abspath(dirname(__file__)), "..", "honeycomb-hive"))
@@ -27,12 +29,14 @@ def get_storage_client():
     global storage_client
     if storage_client is None:
         storage_client = storage.Client(get_config_value("gcpProject"))
+        adapter = requests.adapters.HTTPAdapter(pool_connections=128, pool_maxsize=128, max_retries=3, pool_block=True)
+        storage_client._http.mount("https://", adapter)
+        storage_client._http._auth_request.session.mount("https://", adapter)
 
     return storage_client
 
 
 def create_default_config():
-
     with open(config_location, "w") as json_config_file:
         data = {
             "basemaps": {},
@@ -110,7 +114,7 @@ def get_ags_connection():
     """
     creates a server connection file if needed and returns the path to it
     """
-    import arcpy  #: this is not imported at the top of the file to save it being imported in child processes in swarm.py
+    import arcpy  # : this is not imported at the top of the file to save it being imported in child processes in swarm.py
 
     if not exists(ags_connection_file):
         for variable in ["HONEYCOMB_AGS_SERVER", "HONEYCOMB_AGS_USERNAME", "HONEYCOMB_AGS_PASSWORD"]:
@@ -136,4 +140,5 @@ def get_basemap(name):
     try:
         return basemaps[name]
     except KeyError:
+        raise KeyError("Invalid basemap! Current basemaps: {}".format(", ".join(basemaps)))
         raise KeyError("Invalid basemap! Current basemaps: {}".format(", ".join(basemaps)))
