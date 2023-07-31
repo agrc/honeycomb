@@ -220,7 +220,7 @@ class WorkerBee(object):
         for grid in settings.GRIDS:
             total_grids = int(arcpy.management.GetCount(grid[0])[0])
             with arcpy.da.SearchCursor(grid[0], ["SHAPE@", "OID@"]) as cur:
-                for row in logging_tqdm(cur, total=total_grids, position=1, desc="Current"):
+                for row in logging_tqdm(cur, total=total_grids, position=1, desc=f"Level {grid[0]}"):
                     self.cache_extent([grid[1]], row[0], "{}: OBJECTID: {}".format(grid[0], row[1]))
                     self.get_progress()
             send_email(
