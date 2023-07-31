@@ -85,8 +85,8 @@ class WorkerBee(object):
             self.cache_test_extent()
             basemap_info = config.get_basemap(basemap)
             swarm(basemap, basemap_info["bucket"], is_test=True, preview_url=self.preview_url)
-            if input("Test cache complete. Would you like to continue processing the production cache? (y/n) ") != "y":
-                raise Exception("caching cancelled")
+            # if input("Test cache complete. Would you like to continue processing the production cache? (y/n) ") != "y":
+            #     raise Exception("caching cancelled")
 
         update_job("test_cache_complete", True)
 
