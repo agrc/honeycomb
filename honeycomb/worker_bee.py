@@ -166,7 +166,10 @@ class WorkerBee(object):
         self.overall_progress_bar.update(new_progress_bar_value - self.overall_progress_bar_current_value)
         self.overall_progress_bar_current_value = new_progress_bar_value
 
-        bundles_per_hour = (total_bundles - self.start_bundles) / ((time.time() - self.start_time) / 60 / 60)
+        try:
+            bundles_per_hour = (total_bundles - self.start_bundles) / ((time.time() - self.start_time) / 60 / 60)
+        except ZeroDivisionError:
+            bundles_per_hour = 0
         if bundles_per_hour != 0 and total_bundles > self.start_bundles:
             hours_remaining = (self.complete_num_bundles - total_bundles) / bundles_per_hour
         else:
