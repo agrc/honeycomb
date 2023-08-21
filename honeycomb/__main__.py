@@ -85,12 +85,7 @@ def global_exception_handler(ex_cls, ex, tb):
     """
     import traceback
 
-    last_traceback = (traceback.extract_tb(tb))[-1]
-    line_number = last_traceback[1]
-    file_name = last_traceback[0].split(".")[0]
     error = linesep.join(traceback.format_exception(ex_cls, ex, tb))
-
-    logger.error(("global error handler line: %s (%s)" % (line_number, file_name)))
     logger.error(error)
 
     send_email("Honeycomb Error", error)
