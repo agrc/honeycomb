@@ -38,7 +38,7 @@ def swarm(name, bucket_name, is_test=False, preview_url=None):
 
         row_folders = [folder for folder in sorted(level_folder.iterdir())]
         if len(row_folders) > 0:
-            with ThreadPool(4 * 8) as pool, logging_tqdm(total=len(row_folders)) as progress_bar:
+            with ThreadPool(config.pool_threads) as pool, logging_tqdm(total=len(row_folders)) as progress_bar:
                 pool.map(partial(process_row_folder, name, bucket_name, level, progress_bar), row_folders)
 
     bust_discover_cache()
