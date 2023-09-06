@@ -25,11 +25,16 @@ except Exception:
 storage_client = None
 
 
+pool_threads = 128  #: try 175 next
+
+
 def get_storage_client():
     global storage_client
     if storage_client is None:
         storage_client = storage.Client(get_config_value("gcpProject"))
-        adapter = requests.adapters.HTTPAdapter(pool_connections=128, pool_maxsize=128, max_retries=3, pool_block=True)
+        adapter = requests.adapters.HTTPAdapter(
+            pool_connections=pool_threads, pool_maxsize=pool_threads, max_retries=3, pool_block=True
+        )
         storage_client._http.mount("https://", adapter)
         storage_client._http._auth_request.session.mount("https://", adapter)
 
