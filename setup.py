@@ -34,6 +34,7 @@ setup(
         "p_tqdm>=1",
         "pygsheets>=2",
         "requests>=2",
+        "sendgrid>=6",
         "tabulate>=0",
         "tqdm>=4",
     ],
