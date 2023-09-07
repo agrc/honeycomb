@@ -31,8 +31,7 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 | Name | Description | Example |
 | --- | --- | --- |
 | `HONEYCOMB_SHARE` | the to the share folder used to share mxd's and data with Zach | \\999.99.99.99\agrc\caching |
-| `HONEYCOMB_SMTP_SERVER`* | your smtp server | send.yourdomain.com |
-| `HONEYCOMB_SMTP_PORT`* | your smtp port | 25 |
+| `HONEYCOMB_SENDGRID_API_KEY` | your sendgrid api key | SG.1234567890 |
 | `HONEYCOMB_AGS_SERVER`* | your ArcGIS server url | <http://localhost:6080/arcgis/admin> |
 | `HONEYCOMB_AGS_USERNAME`* | your ArcGIS Server username | name |
 | `HONEYCOMB_AGS_PASSWORD`* | your ArcGIS Server password | password |
