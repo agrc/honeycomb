@@ -112,6 +112,8 @@ def main():
             stats.record_start(basemap, "cache")
 
         if not is_resumed_job or get_job_status("caching_complete") is False:
+            if is_resumed_job:
+                missing_only = True
             WorkerBee(basemap, missing_only, skip_update, skip_test, spot, levels, dont_wait)
             stats.record_finish(basemap, "cache")
             update_job("caching_complete", True)
