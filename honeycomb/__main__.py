@@ -9,6 +9,7 @@ Usage:
     honeycomb config basemaps --add <basemap> [<bucket-name>] [--loop]
     honeycomb config basemaps --remove <basemap>
     honeycomb config open
+    honeycomb cleanup
     honeycomb update-data [--static-only] [--sgid-only] [--dont-wait]
     honeycomb loop
     honeycomb upload <basemap>
@@ -51,6 +52,7 @@ Examples:
     honeycomb vector UtahAddressPoints                          Builds a new vector tile package and uploads to AGOL.
     honeycomb vector-all                                        Builds all of the vector tile packages in the config and uploads to AGOL.
     honeycomb resume                                            Resume a previously started cache job.
+    honeycomb cleanup                                           Deletes all of the local tiles for all of the basemaps.
 """
 
 import json
@@ -60,7 +62,7 @@ from os import linesep, startfile
 
 from docopt import docopt
 
-from . import config, stats, update_data, vector
+from . import cleanup, config, stats, update_data, vector
 from .log import init, logger
 from .messaging import send_email
 from .publish import publish
@@ -187,6 +189,8 @@ def main():
             stats.record_start(basemap, "cache")
             vector.main(basemap, vector_basemaps[basemap])
             stats.record_finish(basemap, "cache")
+    elif args["cleanup"]:
+        cleanup.main()
     elif args["<basemap>"]:
         cache(
             args["<basemap>"],
