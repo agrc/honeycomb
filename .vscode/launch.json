@@ -28,6 +28,14 @@
             "module": "honeycomb",
             "justMyCode": false,
             "args": ["Terrain", "--skip-update", "--skip-test"]
+        },
+        {
+            "name": "upload Overlay",
+            "type": "python",
+            "request": "launch",
+            "module": "honeycomb",
+            "justMyCode": false,
+            "args": ["upload", "Overlay"]
         }
     ]
 }
