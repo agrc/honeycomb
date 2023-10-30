@@ -85,11 +85,7 @@ def process_row_folder(name, bucket_name, level, progress_bar, row_folder):
         row_folder.rmdir()
     except Exception:
         trace = traceback.format_exc()
-        send_email("Removing folder error. Level: {}".format(level), trace)
         logger.error(trace)
-
-    if len(upload_errors) > 0:
-        send_email("Uploading errors", "\n\n".join(upload_errors))
 
     progress_bar.update()
 

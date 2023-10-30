@@ -90,9 +90,6 @@ def global_exception_handler(ex_cls, ex, tb):
     error = linesep.join(traceback.format_exception(ex_cls, ex, tb))
     logger.error(error)
 
-    send_email("Honeycomb Error", error)
-
-
 def main():
     init()
     sys.excepthook = global_exception_handler
