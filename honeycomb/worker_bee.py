@@ -121,9 +121,9 @@ class WorkerBee(object):
             logger.info("spot caching levels 18-19...")
             self.cache_extent(settings.SCALES[18:], intersect, spot_cache_name)
 
-    def cache_extent(self, scales, aoi, name):
+    def cache_extent(self, scales, aoi, name, dont_skip=False):
         cache_job_key = f"{name}-{scales}"
-        if cache_job_key in get_job_status("cache_extents_completed"):
+        if dont_skip is False and cache_job_key in get_job_status("cache_extents_completed"):
             logger.info(f"skipping extent based on current job: {cache_job_key}")
 
             return
@@ -205,11 +205,11 @@ class WorkerBee(object):
             )
             raise arcpy.ExecuteError
 
-    def cache(self, run_all_levels):
+    def cache(self, run_all_levels, dont_skip=False):
         arcpy.env.workspace = settings.EXTENTSFGDB
 
         for fc_name, scales in settings.CACHE_EXTENTS:
-            self.cache_extent(scales, fc_name, fc_name)
+            self.cache_extent(scales, fc_name, fc_name, dont_skip)
             self.get_progress()
 
         send_email(self.email_subject, "Levels 0-9 completed.\n{}\n{}".format(self.get_progress(), self.preview_url))
@@ -220,7 +220,7 @@ class WorkerBee(object):
             total_grids = int(arcpy.management.GetCount(grid[0])[0])
             with arcpy.da.SearchCursor(grid[0], ["SHAPE@", "OID@"]) as cur:
                 for row in logging_tqdm(cur, total=total_grids, position=1, desc=f"Level {grid[0]}"):
-                    self.cache_extent([grid[1]], row[0], "{}: OBJECTID: {}".format(grid[0], row[1]))
+                    self.cache_extent([grid[1]], row[0], "{}: OBJECTID: {}".format(grid[0], row[1]), dont_skip)
                     self.get_progress()
             send_email(
                 self.email_subject,
@@ -238,7 +238,7 @@ class WorkerBee(object):
         if bundles < self.complete_num_bundles and run_all_levels:
             msg = "Only {} out of {} bundles completed. Recaching...".format(bundles, self.complete_num_bundles)
             logger.warning(msg)
-            self.cache(True)
+            self.cache(True, dont_skip=True)
 
         send_email(self.email_subject + " Finished", "Caching complete!")
 
