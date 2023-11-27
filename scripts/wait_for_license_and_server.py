@@ -10,6 +10,7 @@ logger.setLevel(logging.INFO)
 client = google.cloud.logging.Client()
 client.setup_logging()
 
+tries = 0
 while True:
     try:
         import arcpy  # noqa: F401
@@ -19,8 +20,13 @@ while True:
         break
     except:  # noqa: E722
         logger.info("no license available, waiting...")
+
+        if tries > 50:
+            logger.error(Exception("no arcpy license available!"))
+        tries += 1
         sleep(10)
 
+tries = 0
 while True:
     try:
         requests.get("https://localhost:6443/arcgis/rest/", verify=False)
@@ -30,6 +36,11 @@ while True:
         break
     except:  # noqa: E722
         logger.info("waiting for arcgis server to start")
+
+        if tries > 100:
+            logger.error(Exception("arcgis server did not start!"))
+
+        tries += 1
         sleep(10)
 
 logger.info("waiting for 5 minutes for anything else that needs to spin up")
