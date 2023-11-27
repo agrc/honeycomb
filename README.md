@@ -26,6 +26,8 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 1. Clone repository to local folder.
 1. From project folder base:
 `pip install -e . --upgrade`
+1. From forklift folder (`C:\dev\forklift`):
+`pip install . --upgrade`
 1. Add the following environmental variables:
 
 | Name | Description | Example |
