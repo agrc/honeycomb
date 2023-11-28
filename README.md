@@ -17,14 +17,16 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 **not required for data-update command only installation*
 
 1. Install ArcGIS Pro (Standard license level or higher)
-1. Create new python 3.7 conda environment and activate
-1. `conda create --name honeycomb python=3.7`
+1. Create new python 3.9 conda environment and activate
+1. `conda create --name honeycomb python=3.9`
 1. Install [`gcloud`](https://cloud.google.com/sdk/docs/)*
     - Do _not_ include the bundled python.
 1. Install compiled crcmod (couldn't get this to work) (crcmod compiled version is [only available for 32bit python on windows](https://cloud.google.com/storage/docs/gsutil_install#:~:text=If%20you%20plan%20to%20use%20composite%20objects%2C%20you%20need%20to%20install%20compiled%20crcmod.%20On%20Windows%2C%20this%20is%20only%20available%20for%2032%2Dbit%20Python.))*
 1. `conda install arcpy -c esri`
 1. Clone repository to local folder.
 1. From project folder base:
+`pip install -e . --upgrade`
+1. From forklift folder (`C:\dev\forklift`):
 `pip install . --upgrade`
 1. Add the following environmental variables:
 
