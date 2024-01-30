@@ -64,6 +64,12 @@ Run `honeycomb config open` to open the config file.
 | `sendEmails` | A boolean that determines whether emails are actually sent or not. Useful during development.
 | `num_processes` | A number that indicates the maximum number of parallel processes to use when uploading files to GCP.
 
+## Adding a New Layer
+
+1. Add the new layer to your local file geodatabase (`C:\Cache\MapData\SGID10_WGS.gdb`).
+1. Add the new layer to the appropriate map in the pro project on the share.
+1. The next time that honeycomb runs, it will pull the new layer to the caching machine.
+
 ## Development
 
 ### Unit Tests & Linting
