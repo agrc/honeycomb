@@ -7,11 +7,14 @@ A module that contains code for updating the data for base maps.
 """
 
 import datetime
+import logging
+import sys
 import time
 from pathlib import Path
 
 import arcpy
 import pytz
+from forklift import engine
 
 from . import settings
 from .log import logger, logging_tqdm
@@ -22,6 +25,19 @@ SGID = SHARE / "SGID.sde"
 SGID_GDB_NAME = "SGID10_WGS.gdb"
 PRO_PROJECT = Path(settings.SHARE) / "Maps" / "Maps.aprx"
 STATIC_GDB_NAME = "UtahBaseMap-Data_WGS.gdb"
+
+
+def run_forklift(pallet_path=None):
+    logger.info("running forklift")
+
+    log = logging.getLogger("forklift")
+    console_handler = logging.StreamHandler(stream=sys.stdout)
+    console_handler.setLevel(logging.DEBUG)
+    log.addHandler(console_handler)
+    log.setLevel(logging.DEBUG)
+
+    engine.build_pallets(pallet_path)
+    engine.lift_pallets(pallet_path)
 
 
 def get_SGID_lookup():
@@ -87,12 +103,12 @@ def static():
     arcpy.management.Copy(str(SHARE / STATIC_GDB_NAME), local_static)
 
 
-def main(static_only=False, sgid_only=False, dont_wait=False):
+def main(static_only=False, sgid_only=False, external_only=False, dont_wait=False):
     if not LOCAL.exists():
         logger.info(f"creating local folder: {LOCAL}")
         LOCAL.mkdir(parents=True)
 
-    neither = not static_only and not sgid_only
+    all = not static_only and not sgid_only and not external_only
 
     #: wait until 10 PM to run
     mountain = pytz.timezone("US/Mountain")
@@ -104,8 +120,12 @@ def main(static_only=False, sgid_only=False, dont_wait=False):
         logger.info(f"waiting {diff} until 10 PM to update data")
         time.sleep(diff.seconds)
 
-    if sgid_only or neither:
+    if sgid_only or all:
         sgid()
 
-    if static_only or neither:
+    if static_only or all:
         static()
+
+    if external_only or all:
+        pallet_path = Path(__file__).parent / "pallets" / "BasemapsPallet.py"
+        run_forklift(str(pallet_path))

@@ -4,17 +4,15 @@ vector.py
 A module for publishing vector tiles to ArcGIS Online.
 """
 
-import logging
 import os
-import sys
 from datetime import date
 from os.path import join
+from pathlib import Path
 
 import arcgis
 import arcpy
 import google.auth
 import pygsheets
-from forklift import engine
 
 from . import config
 from .log import logger
@@ -27,14 +25,8 @@ PASSWORD = os.getenv("HONEYCOMB_AGOL_PASSWORD")
 def update_data():
     logger.info("running forklift")
 
-    log = logging.getLogger("forklift")
-    console_handler = logging.StreamHandler(stream=sys.stdout)
-    console_handler.setLevel(logging.DEBUG)
-    log.addHandler(console_handler)
-    log.setLevel(logging.DEBUG)
-
-    engine.build_pallets(None)
-    engine.lift_pallets(None)
+    pallet_path = Path(__file__).parent / "pallets" / "VectorBasemapsPallet.py"
+    update_data.run_forklift(str(pallet_path))
 
 
 def main(base_map_name, config):

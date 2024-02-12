@@ -10,7 +10,7 @@ Usage:
     honeycomb config basemaps --remove <basemap>
     honeycomb config open
     honeycomb cleanup
-    honeycomb update-data [--static-only] [--sgid-only] [--dont-wait]
+    honeycomb update-data [--static-only] [--sgid-only] [--external-only] [--dont-wait]
     honeycomb loop
     honeycomb upload <basemap>
     honeycomb stats
@@ -90,6 +90,7 @@ def global_exception_handler(ex_cls, ex, tb):
     error = linesep.join(traceback.format_exception(ex_cls, ex, tb))
     logger.error(error)
 
+
 def main():
     init()
     sys.excepthook = global_exception_handler
@@ -148,7 +149,7 @@ def main():
         elif args["open"]:
             startfile(config.config_location)
     elif args["update-data"]:
-        update_data.main(args["--static-only"], args["--sgid-only"], args["--dont-wait"])
+        update_data.main(args["--static-only"], args["--sgid-only"], args["--external-only"], args["--dont-wait"])
     elif args["upload"] and args["<basemap>"]:
         upload(args["<basemap>"])
     elif args["loop"]:
