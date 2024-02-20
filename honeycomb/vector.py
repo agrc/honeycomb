@@ -16,6 +16,7 @@ import pygsheets
 
 from . import config
 from .log import logger
+from .update_data import run_forklift
 
 BASE_FOLDER = config.get_config_value("vectorTilesFolder")
 USERNAME = os.getenv("HONEYCOMB_AGOL_USERNAME")
@@ -26,7 +27,7 @@ def update_data():
     logger.info("running forklift")
 
     pallet_path = Path(__file__).parent / "pallets" / "VectorBasemapsPallet.py"
-    update_data.run_forklift(str(pallet_path))
+    run_forklift(str(pallet_path))
 
 
 def main(base_map_name, config):
