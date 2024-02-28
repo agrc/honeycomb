@@ -146,4 +146,3 @@ def get_basemap(name):
         return basemaps[name]
     except KeyError:
         raise KeyError("Invalid basemap! Current basemaps: {}".format(", ".join(basemaps)))
-        raise KeyError("Invalid basemap! Current basemaps: {}".format(", ".join(basemaps)))
