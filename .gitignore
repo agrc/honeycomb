@@ -92,5 +92,3 @@ honeycomb-hive/
 honeycomb/data/**/*.lock
 .benchmarks/
 .pytest_cache/
-
-honeycomb/service-account.json
