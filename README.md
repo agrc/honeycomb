@@ -19,6 +19,7 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 1. Install ArcGIS Pro (Standard license level or higher)
 1. Create new python conda environment and activate
 1. `conda create --name honeycomb python=3.11`
+1. `conda activate honeycomb`
 1. `conda install arcpy -c esri`
 1. Clone repository to local folder.
 1. From project folder base:
