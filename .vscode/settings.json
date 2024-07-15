@@ -3,6 +3,7 @@
     "alllayers",
     "arcgiscache",
     "dask",
+    "docopt",
     "excepthook",
     "EXTENTSFGDB",
     "gethostbyname",

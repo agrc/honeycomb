@@ -4,38 +4,52 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-
         {
             "name": "upload PerfTest",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "honeycomb",
             "justMyCode": true,
-            "args": ["upload", "PerfTest"],
+            "args": [
+                "upload",
+                "PerfTest"
+            ],
         },
         {
             "name": "build AddressPoints",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "honeycomb",
             "justMyCode": true,
-            "args": ["AddressPoints", "--missing-only", "--skip-update", "--skip-test"],
+            "args": [
+                "AddressPoints",
+                "--missing-only",
+                "--skip-update",
+                "--skip-test"
+            ],
         },
         {
             "name": "Terrain skip upload",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "honeycomb",
             "justMyCode": false,
-            "args": ["Terrain", "--skip-update", "--skip-test"]
+            "args": [
+                "Terrain",
+                "--skip-update",
+                "--skip-test"
+            ]
         },
         {
-            "name": "upload Overlay",
-            "type": "python",
+            "name": "upload AddressPoints",
+            "type": "debugpy",
             "request": "launch",
             "module": "honeycomb",
             "justMyCode": false,
-            "args": ["upload", "Overlay"]
+            "args": [
+                "upload",
+                "AddressPoints"
+            ]
         }
     ]
 }
