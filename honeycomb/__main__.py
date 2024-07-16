@@ -58,12 +58,11 @@ Examples:
 import json
 import sys
 from datetime import datetime
-from os import linesep, startfile
 
 from docopt import docopt
 
 from . import cleanup, config, stats, update_data, vector
-from .log import init, logger
+from .log import logger
 from .messaging import send_email
 from .publish import publish
 from .resumable import (
@@ -77,24 +76,7 @@ from .swarm import swarm
 from .worker_bee import WorkerBee
 
 
-def global_exception_handler(ex_cls, ex, tb):
-    """
-    ex_cls: Class - the type of the exception
-    ex: object - the exception object
-    tb: Traceback
-
-    Used to handle any uncaught exceptions. Formats an error message, logs it, and sends an email.
-    """
-    import traceback
-
-    error = linesep.join(traceback.format_exception(ex_cls, ex, tb))
-    logger.error(error)
-
-
 def main():
-    init()
-    sys.excepthook = global_exception_handler
-
     args = docopt(__doc__, version="1.1.1")
 
     def cache(
