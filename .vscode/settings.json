@@ -17,6 +17,7 @@
     "pygsheets",
     "pytz",
     "sendgrid",
+    "TRAX",
     "vtpk"
   ],
   "[python]": {

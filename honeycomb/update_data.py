@@ -38,6 +38,7 @@ def run_forklift(pallet_path=None):
 
     engine.build_pallets(pallet_path)
     engine.lift_pallets(pallet_path)
+    engine.ship_data()
 
 
 def get_SGID_lookup():
