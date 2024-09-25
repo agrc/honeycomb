@@ -29,7 +29,7 @@ class BasemapsPallet(Pallet):
                     "UTA_TRAX_Light_Rail_Routes",
                 ),
                 (
-                    "Hosted/UTA_TRAX_Light_Rail_Stations/FeatureServer/0",
+                    "Hosted/TRAX_Light_Rail_Stations/FeatureServer/0",
                     "https://maps.rideuta.com/server/rest/services/",
                     self.external,
                     "TRAX_Stations",
