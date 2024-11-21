@@ -8,8 +8,11 @@ from tqdm import tqdm
 logging.basicConfig(format="%(levelname)-7s %(asctime)s %(module)10s:%(lineno)5s %(message)s", datefmt="%m-%d %H:%M:%S")
 logger = logging.getLogger("honeycomb")
 logger.setLevel(logging.INFO)
-client = google.cloud.logging.Client()
-client.setup_logging()
+try:
+    client = google.cloud.logging.Client()
+    client.setup_logging()
+except Exception:
+    print("Could not setup google cloud logging. Logging to console only.")
 
 
 def global_exception_handler(ex_cls, ex, tb):
