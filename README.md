@@ -80,3 +80,7 @@ Running tests/linting: `pytest` or `ptw` to automatically run tests on file chan
 ### Running Source Version
 
 From `root` directory: `python -m honeycomb <...>`
+
+## Compute Instance Group
+
+This project is run via a spot VM within a compute engine instance group. Any time there are updates made to the OS or applications, use [this script](scripts/update_compute_group_template.sh) to update the instance template.
