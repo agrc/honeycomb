@@ -58,6 +58,7 @@ Examples:
 import json
 import sys
 from datetime import datetime
+from os import startfile
 
 from docopt import docopt
 
