@@ -34,7 +34,9 @@ def main(base_map_name, config):
     logger.info("building tiles for: " + base_map_name)
 
     project_path = join(BASE_FOLDER, base_map_name)
-    promap = arcpy.mp.ArcGISProject(join(project_path, base_map_name + ".aprx")).listMaps()[0]
+    promap = arcpy.mp.ArcGISProject(
+        join(project_path, base_map_name + ".aprx")
+    ).listMaps()[0]
     tile_package = join(project_path, base_map_name + "_temp" + ".vtpk")
 
     logger.info("building package...")
@@ -69,7 +71,9 @@ def main(base_map_name, config):
     logger.info("vector tile package successfully built and published!")
 
     logger.info("updating base maps spreadsheet")
-    credentials, project = google.auth.default(scopes=["https://www.googleapis.com/auth/spreadsheets"])
+    credentials, project = google.auth.default(
+        scopes=["https://www.googleapis.com/auth/spreadsheets"]
+    )
     client = pygsheets.authorize(custom_credentials=credentials)
     base_maps_sheet = client.open_by_key("1XnncmhWrIjntlaMfQnMrlcCTyl9e2i-ztbvqryQYXDc")
     base_maps_worksheet = base_maps_sheet[0]

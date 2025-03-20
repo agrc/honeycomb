@@ -24,7 +24,9 @@ def publish(basemap):
         mkdir(drafts_folder)
 
     logger.info("creating .sddraft")
-    arcpy.mapping.CreateMapSDDraft(mxd_path, sddraft_path, basemap, connection_file_path=config.ags_connection_file)
+    arcpy.mapping.CreateMapSDDraft(
+        mxd_path, sddraft_path, basemap, connection_file_path=config.ags_connection_file
+    )
 
     logger.info("analyzing")
     analysis = arcpy.mapping.AnalyzeForSD(sddraft_path)
@@ -53,14 +55,23 @@ def publish(basemap):
             )
             is_cached = "<Key>isCached</Key><Value xsi:type='xs:string'>false</Value>"
             txt = txt.replace(is_cached, is_cached.replace("false", "true"))
-            min_instances = "<Key>MinInstances</Key><Value xsi:type='xs:string'>1</Value>"
+            min_instances = (
+                "<Key>MinInstances</Key><Value xsi:type='xs:string'>1</Value>"
+            )
             txt = txt.replace(min_instances, min_instances.replace("1", "0"))
-            anti_aliasing = "<Key>antialiasingMode</Key><Value xsi:type='xs:string'>None</Value>"
+            anti_aliasing = (
+                "<Key>antialiasingMode</Key><Value xsi:type='xs:string'>None</Value>"
+            )
             txt = txt.replace(anti_aliasing, anti_aliasing.replace("None", "Fast"))
-            storage_format = "<StorageFormat>esriMapCacheStorageModeCompactV2</StorageFormat>"
+            storage_format = (
+                "<StorageFormat>esriMapCacheStorageModeCompactV2</StorageFormat>"
+            )
             txt = txt.replace(
                 storage_format,
-                storage_format.replace("esriMapCacheStorageModeCompactV2", "esriMapCacheStorageModeExploded"),
+                storage_format.replace(
+                    "esriMapCacheStorageModeCompactV2",
+                    "esriMapCacheStorageModeExploded",
+                ),
             )
 
         with open(sddraft_path, "w") as sddraft_file:

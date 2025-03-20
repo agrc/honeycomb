@@ -10,7 +10,10 @@ current_directory = Path(__file__).parent.absolute()
 pro_project_path = r"D:\NAIP2021.aprx"
 cache_directory = Path(r"D:\Cache")
 
-if cache_directory.exists() and input(f"do you want to delete the {cache_directory} folder? (y/n): ") == "y":
+if (
+    cache_directory.exists()
+    and input(f"do you want to delete the {cache_directory} folder? (y/n): ") == "y"
+):
     logger.info(f"clearing out: {str(cache_directory)}")
     rmtree(cache_directory)
 
@@ -25,7 +28,11 @@ arcpy.env.parallelProcessingFactor = "85%"
 min_cached_scale = SCALES[0]
 max_cached_scale = SCALES[18]
 logger.info(f"building cache for scales from {min_cached_scale} to {max_cached_scale}")
-test_extent = Path(r"C:\dev\honeycomb\honeycomb\data") / "Extents.geodatabase" / "main.test_extent"
+test_extent = (
+    Path(r"C:\dev\honeycomb\honeycomb\data")
+    / "Extents.geodatabase"
+    / "main.test_extent"
+)
 project_extent = Path(r"D:\NAIP2021.gdb\NAIP2021_RGB_Boundary")
 arcpy.management.ManageTileCache(
     str(cache_directory),

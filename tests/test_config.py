@@ -4,6 +4,7 @@
 test_config.py
 A module that contains tests for config.py
 """
+
 import pytest
 from mock import patch
 
@@ -63,7 +64,10 @@ def test_remove_basemap():
 
 
 def test_remove_invalid_basemap():
-    assert config.remove_basemap("bad name") == '"bad name" is not a valid basemap name! Current basemaps: '
+    assert (
+        config.remove_basemap("bad name")
+        == '"bad name" is not a valid basemap name! Current basemaps: '
+    )
 
 
 def test_get_config_value():
@@ -76,7 +80,10 @@ def test_is_dev():
     assert config.is_dev()
 
 
-@patch("arcpy.mapping.CreateGISServerConnectionFile", wraps=arcpy.mapping.CreateGISServerConnectionFile)
+@patch(
+    "arcpy.mapping.CreateGISServerConnectionFile",
+    wraps=arcpy.mapping.CreateGISServerConnectionFile,
+)
 def test_get_ags_connection(mock):
     config.get_ags_connection()
     config.get_ags_connection()

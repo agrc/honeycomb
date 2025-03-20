@@ -97,7 +97,9 @@ def main():
         if not is_resumed_job or get_job_status("caching_complete") is False:
             if is_resumed_job:
                 missing_only = True
-            WorkerBee(basemap, missing_only, skip_update, skip_test, spot, levels, dont_wait)
+            WorkerBee(
+                basemap, missing_only, skip_update, skip_test, spot, levels, dont_wait
+            )
             stats.record_finish(basemap, "cache")
             update_job("caching_complete", True)
 
@@ -126,21 +128,36 @@ def main():
             logger.info(config.set_config_prop(args["<key>"], args["<value>"]))
         elif args["basemaps"] and args["<basemap>"]:
             if args["--add"]:
-                logger.info(config.add_basemap(args["<basemap>"], args["<bucket-name>"], args["--loop"]))
+                logger.info(
+                    config.add_basemap(
+                        args["<basemap>"], args["<bucket-name>"], args["--loop"]
+                    )
+                )
             elif args["--remove"]:
                 logger.info(config.remove_basemap(args["<basemap>"]))
         elif args["open"]:
             startfile(config.config_location)
     elif args["update-data"]:
-        update_data.main(args["--static-only"], args["--sgid-only"], args["--external-only"], args["--dont-wait"])
+        update_data.main(
+            args["--static-only"],
+            args["--sgid-only"],
+            args["--external-only"],
+            args["--dont-wait"],
+        )
     elif args["upload"] and args["<basemap>"]:
         upload(args["<basemap>"])
     elif args["loop"]:
         stop = False
         basemaps = config.get_config_value("basemaps")
         while not stop:
-            for basemap in [key for key in list(basemaps.keys()) if basemaps[key]["loop"]]:
-                action = input("cache {} (C), skip to the next base map (S) or exit (E)? ".format(basemap))
+            for basemap in [
+                key for key in list(basemaps.keys()) if basemaps[key]["loop"]
+            ]:
+                action = input(
+                    "cache {} (C), skip to the next base map (S) or exit (E)? ".format(
+                        basemap
+                    )
+                )
                 if action == "C":
                     cache(basemap)
                 elif action == "S":

@@ -4,7 +4,10 @@ from time import sleep
 import google.cloud.logging
 import requests
 
-logging.basicConfig(format="%(levelname)-7s %(asctime)s %(module)10s:%(lineno)5s %(message)s", datefmt="%m-%d %H:%M:%S")
+logging.basicConfig(
+    format="%(levelname)-7s %(asctime)s %(module)10s:%(lineno)5s %(message)s",
+    datefmt="%m-%d %H:%M:%S",
+)
 logger = logging.getLogger("honeycomb")
 logger.setLevel(logging.INFO)
 client = google.cloud.logging.Client()

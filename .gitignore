@@ -92,3 +92,7 @@ honeycomb-hive/
 honeycomb/data/**/*.lock
 .benchmarks/
 .pytest_cache/
+honeycomb/data/.Extents.geodatabase-conch
+honeycomb/data/Extents.geodatabase-shm
+honeycomb/data/Extents.geodatabase-wal
+cov.xml

@@ -5,7 +5,10 @@ from os import linesep
 import google.cloud.logging
 from tqdm import tqdm
 
-logging.basicConfig(format="%(levelname)-7s %(asctime)s %(module)10s:%(lineno)5s %(message)s", datefmt="%m-%d %H:%M:%S")
+logging.basicConfig(
+    format="%(levelname)-7s %(asctime)s %(module)10s:%(lineno)5s %(message)s",
+    datefmt="%m-%d %H:%M:%S",
+)
 logger = logging.getLogger("honeycomb")
 logger.setLevel(logging.INFO)
 try:

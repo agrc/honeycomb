@@ -38,7 +38,12 @@ def send_email(subject, body):
         return False
 
     if get_config_value("sendEmails"):
-        message = Mail(from_email=from_address, to_emails=to_addresses, subject=subject, plain_text_content=body)
+        message = Mail(
+            from_email=from_address,
+            to_emails=to_addresses,
+            subject=subject,
+            plain_text_content=body,
+        )
 
         try:
             client = SendGridAPIClient(api_key)
