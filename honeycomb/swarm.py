@@ -27,7 +27,7 @@ def swarm(name, bucket_name, is_test=False, preview_url=None):
     copies all tiles into WMTS format as a sibling folder to the AGS cache folder
     returns a list of all of the column folders
     """
-    base_folder = Path(settings.CACHE_DIR) / name / name / "_alllayers"
+    base_folder = Path(settings.CACHES_DIR) / f"{name}_Exploded" / "_alllayers"
 
     if is_test:
         bucket_name += "-test"
@@ -38,15 +38,23 @@ def swarm(name, bucket_name, is_test=False, preview_url=None):
 
         row_folders = [folder for folder in sorted(level_folder.iterdir())]
         if len(row_folders) > 0:
-            with ThreadPool(config.pool_threads) as pool, logging_tqdm(total=len(row_folders)) as progress_bar:
-                pool.map(partial(process_row_folder, name, bucket_name, level, progress_bar), row_folders)
+            with (
+                ThreadPool(config.pool_threads) as pool,
+                logging_tqdm(total=len(row_folders)) as progress_bar,
+            ):
+                pool.map(
+                    partial(process_row_folder, name, bucket_name, level, progress_bar),
+                    row_folders,
+                )
             # with logging_tqdm(total=len(row_folders)) as progress_bar:
             #     map(partial(process_row_folder, name, bucket_name, level, progress_bar), row_folders)
 
     bust_discover_cache()
 
     if is_test:
-        send_email("honeycomb update", f"{name}-Test is ready for review.\n\n{preview_url}")
+        send_email(
+            "honeycomb update", f"{name}-Test is ready for review.\n\n{preview_url}"
+        )
     else:
         send_email("honeycomb update", f"{name} has been pushed to production")
 
@@ -69,11 +77,17 @@ def process_row_folder(name, bucket_name, level, progress_bar, row_folder):
             blob = bucket.blob(f"{name}/{level}/{column}/{row}")
             if blob.exists(retry=retry):
                 blob.reload()  #: required to get the checksum
-                local_checksum = b64encode(Checksum(file_path.read_bytes()).digest()).decode("utf-8")
+                local_checksum = b64encode(
+                    Checksum(file_path.read_bytes()).digest()
+                ).decode("utf-8")
                 if blob.crc32c != local_checksum:
-                    blob.upload_from_filename(file_path, retry=retry, content_type=content_type)
+                    blob.upload_from_filename(
+                        file_path, retry=retry, content_type=content_type
+                    )
             else:
-                blob.upload_from_filename(file_path, retry=retry, content_type=content_type)
+                blob.upload_from_filename(
+                    file_path, retry=retry, content_type=content_type
+                )
             file_path.unlink()
         except Exception:
             trace = traceback.format_exc()
@@ -81,7 +95,9 @@ def process_row_folder(name, bucket_name, level, progress_bar, row_folder):
                 error_column = column
             except Exception:
                 error_column = "unknown"
-            upload_errors.append(f"Uploading error. Level: {level}, row: {row}, column: {error_column}\n\n{trace}")
+            upload_errors.append(
+                f"Uploading error. Level: {level}, row: {row}, column: {error_column}\n\n{trace}"
+            )
             logger.error(trace)
     try:
         row_folder.rmdir()
@@ -98,7 +114,10 @@ def bust_discover_cache():
     with requests.Session() as session:
         response = session.post(
             "{}/login".format(giza_instance),
-            data={"user": os.getenv("HONEYCOMB_GIZA_USERNAME"), "password": os.getenv("HONEYCOMB_GIZA_PASSWORD")},
+            data={
+                "user": os.getenv("HONEYCOMB_GIZA_USERNAME"),
+                "password": os.getenv("HONEYCOMB_GIZA_PASSWORD"),
+            },
         )
 
         if response.status_code != 200:

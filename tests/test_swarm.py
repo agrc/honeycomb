@@ -11,9 +11,10 @@ from os import walk
 from os.path import exists, join
 
 import requests_mock
-from honeycomb import config, settings, swarm
 from mock import patch
 from pytest import raises
+
+from honeycomb import config, settings, swarm
 
 from . import conftest
 
@@ -38,9 +39,11 @@ def test_swarm(upload_mock, etl_mock, requests_mock):
 
 def test_etl(benchmark):
     service = "JPG_Service"
-    shutil.copytree(join(conftest.test_data_folder, service), join(conftest.temp_folder, service))
+    shutil.copytree(
+        join(conftest.test_data_folder, service), join(conftest.temp_folder, service)
+    )
 
-    settings.CACHE_DIR = conftest.temp_folder
+    settings.CACHES_DIR = conftest.temp_folder
 
     benchmark(swarm.etl, service)
 
@@ -60,7 +63,9 @@ def test_etl(benchmark):
 @patch("honeycomb.swarm.subprocess.check_call")
 def test_upload(check_call_mock):
     column_folder = join(conftest.temp_folder, "JPG_Service", "5", "4")
-    shutil.copytree(join(conftest.test_data_folder, "JPG_Service_GCS", "5", "4"), column_folder)
+    shutil.copytree(
+        join(conftest.test_data_folder, "JPG_Service_GCS", "5", "4"), column_folder
+    )
 
     swarm.upload("bucket", "png", column_folder)
 

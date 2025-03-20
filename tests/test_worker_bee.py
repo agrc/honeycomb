@@ -35,7 +35,10 @@ def test_cache_extent(update_mock, host_mock, count_mock, input_mock):
 def test_get_progress(get_bundles_count, cache, host_mock):
     bee = WorkerBee("Terrain", skip_update=True, skip_test=True)
 
-    assert bee.get_progress() == "0 of 19 (0%) bundle files created.\nEstimated hours remaining: ??"
+    assert (
+        bee.get_progress()
+        == "0 of 19 (0%) bundle files created.\nEstimated hours remaining: ??"
+    )
 
 
 def test_parse_levels():

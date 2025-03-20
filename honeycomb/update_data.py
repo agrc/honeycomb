@@ -90,11 +90,18 @@ def sgid():
             try:
                 sgid_name = sgid_fcs[fc]
             except KeyError:
-                logger.warning(f"Table not found in internal: {fc}. No update will be performed.")
+                logger.warning(
+                    f"Table not found in internal: {fc}. No update will be performed."
+                )
                 continue
             if arcpy.Exists(fc):
                 arcpy.management.Delete(fc)
-            arcpy.management.Project(str(SGID / sgid_name), fc, arcpy.SpatialReference(3857), "NAD_1983_To_WGS_1984_5")
+            arcpy.management.Project(
+                str(SGID / sgid_name),
+                fc,
+                arcpy.SpatialReference(3857),
+                "NAD_1983_To_WGS_1984_5",
+            )
 
 
 def static():

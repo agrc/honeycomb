@@ -6,8 +6,8 @@ A module that contains logic for reading and writing the config file
 """
 
 from json import dumps, loads
-from os import getenv, makedirs
-from os.path import abspath, basename, dirname, exists, join
+from os import makedirs
+from os.path import abspath, dirname, exists, join
 
 import requests
 from google.cloud import storage
@@ -33,7 +33,10 @@ def get_storage_client():
     if storage_client is None:
         storage_client = storage.Client(get_config_value("gcpProject"))
         adapter = requests.adapters.HTTPAdapter(
-            pool_connections=pool_threads, pool_maxsize=pool_threads, max_retries=3, pool_block=True
+            pool_connections=pool_threads,
+            pool_maxsize=pool_threads,
+            max_retries=3,
+            pool_block=True,
         )
         storage_client._http.mount("https://", adapter)
         storage_client._http._auth_request.session.mount("https://", adapter)
@@ -50,13 +53,14 @@ def create_default_config():
             "gizaInstance": "https://discover.agrc.utah.gov",
             "mxdFolder": "C:\\temp",
             "notify": ["stdavis@utah.gov"],
-            "num_processes": 4,
             "sendEmails": False,
             "vectorBaseMaps": {},
             "vectorTilesFolder": "C:\\temp",
         }
 
-        json_config_file.write(dumps(data, sort_keys=True, indent=2, separators=(",", ": ")))
+        json_config_file.write(
+            dumps(data, sort_keys=True, indent=2, separators=(",", ": "))
+        )
 
         return abspath(json_config_file.name)
 
@@ -80,7 +84,9 @@ def set_config_prop(key, value):
     message = "Set {} to {}".format(key, value)
 
     with open(config_location, "w") as json_config_file:
-        json_config_file.write(dumps(config, sort_keys=True, indent=2, separators=(",", ": ")))
+        json_config_file.write(
+            dumps(config, sort_keys=True, indent=2, separators=(",", ": "))
+        )
 
     return message
 
@@ -100,11 +106,15 @@ def remove_basemap(name):
     try:
         basemaps.pop(name)
     except KeyError:
-        return '"{}" is not a valid basemap name! Current basemaps: {}'.format(name, ", ".join(basemaps))
+        return '"{}" is not a valid basemap name! Current basemaps: {}'.format(
+            name, ", ".join(basemaps)
+        )
 
     set_config_prop("basemaps", basemaps)
 
-    return 'Removed "{}" basemap. Current basemaps: {}'.format(name, ", ".join(basemaps))
+    return 'Removed "{}" basemap. Current basemaps: {}'.format(
+        name, ", ".join(basemaps)
+    )
 
 
 def get_config_value(key):
@@ -145,4 +155,6 @@ def get_basemap(name):
     try:
         return basemaps[name]
     except KeyError:
-        raise KeyError("Invalid basemap! Current basemaps: {}".format(", ".join(basemaps)))
+        raise KeyError(
+            "Invalid basemap! Current basemaps: {}".format(", ".join(basemaps))
+        )

@@ -1,5 +1,6 @@
 {
   "cSpell.words": [
+    "addopts",
     "alllayers",
     "arcgiscache",
     "dask",
@@ -9,25 +10,37 @@
     "gethostbyname",
     "globbing",
     "iglob",
+    "Ijntla",
+    "instafail",
     "levelname",
     "mininterval",
+    "minversion",
+    "Mrlc",
     "NAIP",
     "ncols",
+    "norecursedirs",
     "propy",
     "pygsheets",
     "pytz",
+    "Recaching",
     "sendgrid",
     "startfile",
+    "testpaths",
     "TRAX",
-    "vtpk"
+    "vtpk",
+    "Xnncmh",
+    "ztbvqry"
   ],
+  "editor.formatOnSave": true,
+  "python.languageServer": "Pylance",
+  "python.testing.pytestEnabled": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
   "[python]": {
-    "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-      "source.fixAll": "explicit",
       "source.organizeImports": "explicit"
     },
-    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.defaultFormatter": "charliermarsh.ruff",
   },
-  "python.formatting.provider": "none",
 }

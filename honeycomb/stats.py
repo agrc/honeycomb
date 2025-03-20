@@ -54,7 +54,10 @@ def record_finish(basemap, task):
 
     if duration > 60:
         basemap_stats[task]["runs"].append(
-            {"duration": duration, "completionDate": datetime.datetime.now().isoformat()}
+            {
+                "duration": duration,
+                "completionDate": datetime.datetime.now().isoformat(),
+            }
         )
     basemap_stats[task]["start"] = 0
 
