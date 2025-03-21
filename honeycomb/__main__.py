@@ -18,7 +18,6 @@ Usage:
     honeycomb vector <basemap> [--skip-update]
     honeycomb vector-all [--skip-update]
     honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test] [--spot <path>] [--levels <levels>] [--dont-wait]
-    honeycomb publish <basemap>
 
 Arguments:
     -h --help               Show this screen.
@@ -48,7 +47,6 @@ Examples:
     honeycomb Terrain --skip-update                             Builds a single base map (skipping data update) and pushes to GCP.
     honeycomb Terrain --skip-test --spot C:\\\\test.gdb\\extent Builds a single base map (skipping test and for a specific extent) and pushes to GCP.
     honeycomb Terrain --levels 5-7                              Builds a single base map for levels 5, 6 & 7 and pushes to GCP.
-    honeycomb publish Lite                                      Publishes a base map's associated MXD to ArcGIS Server (raster base maps only).
     honeycomb vector UtahAddressPoints                          Builds a new vector tile package and uploads to AGOL.
     honeycomb vector-all                                        Builds all of the vector tile packages in the config and uploads to AGOL.
     honeycomb resume                                            Resume a previously started cache job.
@@ -65,7 +63,6 @@ from docopt import docopt
 from . import cleanup, config, stats, update_data, vector
 from .log import logger
 from .messaging import send_email
-from .publish import publish
 from .resumable import (
     finish_job,
     get_current_job,
@@ -103,13 +100,13 @@ def main():
             stats.record_finish(basemap, "cache")
             update_job("caching_complete", True)
 
-        # def prompt_recache():
-        #     return raw_input('Caching complete. Publish to production (P) or recache (R)? ') != 'P'
-        #
-        # recache = prompt_recache()
-        # while recache:
-        #     WorkerBee(basemap, False, True, True)
-        #     recache = prompt_recache()
+        send_email(
+            f"Cache Job Complete {basemap}",
+            "Time to manually convert cache to exploded format.",
+        )
+        input(
+            "Caching complete. Manually convert cache to exploded format and then press any key to continue..."
+        )
 
         upload(basemap)
 
@@ -165,8 +162,6 @@ def main():
                 else:
                     stop = True
                     break
-    elif args["publish"]:
-        publish(args["<basemap>"])
     elif args["vector"]:
         basemap = args["<basemap>"]
         vector_basemaps = config.get_config_value("vectorBaseMaps")

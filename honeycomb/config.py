@@ -14,7 +14,6 @@ from google.cloud import storage
 
 config_folder = abspath(join(abspath(dirname(__file__)), "..", "honeycomb-hive"))
 config_location = join(config_folder, "config.json")
-ags_connection_file = join(config_folder, "arcgisserver.ags")
 
 #: do this on load so that stats.py can use it
 try:
@@ -123,31 +122,6 @@ def get_config_value(key):
 
 def is_dev():
     return _get_config()["configuration"] == "dev"
-
-
-def get_ags_connection():
-    """
-    creates a server connection file if needed and returns the path to it
-    """
-    import arcpy  # : this is not imported at the top of the file to save it being imported in child processes in swarm.py
-
-    if not exists(ags_connection_file):
-        for variable in ["HONEYCOMB_AGS_SERVER", "HONEYCOMB_AGS_USERNAME", "HONEYCOMB_AGS_PASSWORD"]:
-            if getenv(variable) is None:
-                raise Exception("{} environment variable is not set!".format(variable))
-
-        #: TODO: this tool is not available in Pro. I couldn't quickly find an alternative.
-        arcpy.mapping.CreateGISServerConnectionFile(
-            "PUBLISH_GIS_SERVICES",
-            dirname(ags_connection_file),
-            basename(ags_connection_file),
-            getenv("HONEYCOMB_AGS_SERVER"),
-            "ARCGIS_SERVER",
-            username=getenv("HONEYCOMB_AGS_USERNAME"),
-            password=getenv("HONEYCOMB_AGS_PASSWORD"),
-        )
-
-    return ags_connection_file
 
 
 def get_basemap(name):

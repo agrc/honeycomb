@@ -23,7 +23,6 @@ LOCAL = Path(r"C:\Cache\MapData")
 SHARE = Path(settings.SHARE) / "Data"
 SGID = SHARE / "SGID.sde"
 SGID_GDB_NAME = "SGID10_WGS.gdb"
-PRO_PROJECT = Path(settings.SHARE) / "Maps" / "Maps.aprx"
 STATIC_GDB_NAME = "UtahBaseMap-Data_WGS.gdb"
 
 
@@ -62,7 +61,7 @@ def get_layers():
     layers = set()
 
     logger.info("getting unique data sources from layers")
-    project = arcpy.mp.ArcGISProject(str(PRO_PROJECT))
+    project = arcpy.mp.ArcGISProject(str(settings.PRO_PROJECT))
     for map in project.listMaps():
         logger.info(f"map: {map.name}")
         for layer in logging_tqdm(map.listLayers()):
