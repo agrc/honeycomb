@@ -11,6 +11,7 @@ import time
 from datetime import date
 from os.path import join
 from pathlib import Path
+from shutil import rmtree
 
 import arcpy
 import google.auth
@@ -22,8 +23,8 @@ from .messaging import send_email
 from .resumable import get_job_status, update_job
 from .swarm import swarm
 
-spot_cache_name = "spot cache"
-error_001470_message = "ERROR 001470: Failed to retrieve the job status from server. The Job is running on the server, please use the above URL to check the job status.\nFailed to execute (ManageMapServerCacheTiles).\n"  # noqa
+AGOL_SCHEME_NAME = "ARCGISONLINE_SCHEME"
+SPOT_CACHE_NAME = "spot cache"
 
 
 def parse_levels(levels_txt):
@@ -33,7 +34,7 @@ def parse_levels(levels_txt):
     return settings.SCALES[min : max + 1]
 
 
-def intersect_scales(scales, restrict_scales):
+def intersect_scales(scales: list[float], restrict_scales: list[float]) -> list[float]:
     #: return the intersection of between scales and restrict_scales
     intersection = set(scales) & set(restrict_scales)
 
@@ -43,18 +44,28 @@ def intersect_scales(scales, restrict_scales):
 class WorkerBee(object):
     def __init__(
         self,
-        basemap,
-        missing_only=False,
-        skip_update=False,
-        skip_test=False,
-        spot_path=False,
-        levels=False,
-        dont_wait=False,
+        basemap: str,
+        missing_only: bool = False,
+        skip_update: bool = False,
+        skip_test: bool = False,
+        spot_path: bool = False,
+        levels: bool = False,
+        dont_wait: bool = False,
     ):
         logger.info("caching {}".format(basemap))
         self.errors = []
         self.start_time = time.time()
-        self.service_name = basemap
+        self.basemap = basemap
+        self.preview_url = settings.PREVIEW_URL.format(self.basemap.lower())
+        self.email_subject = "Cache Update ({})".format(self.basemap)
+
+        project = arcpy.mp.ArcGISProject(str(settings.PRO_PROJECT))
+        self.pro_map = project.listMaps(basemap)[0]
+
+        if not self.pro_map:
+            raise Exception(f"Map '{basemap}' not found in project.")
+
+        self.validate_map_layers()
 
         if not levels:
             self.restrict_scales = settings.SCALES
@@ -64,18 +75,15 @@ class WorkerBee(object):
         if config.is_dev():
             self.complete_num_bundles = 19
         else:
-            self.complete_num_bundles = settings.COMPLETE_NUM_BUNDLES_LU[self.service_name]
-
-        self.preview_url = settings.PREVIEW_URL.format(self.service_name.lower())
-
-        self.service = os.path.join(config.get_ags_connection(), "{}.MapServer".format(self.service_name))
-        self.email_subject = "Cache Update ({})".format(self.service_name)
+            self.complete_num_bundles = settings.COMPLETE_NUM_BUNDLES_LU[self.basemap]
 
         if skip_update or get_job_status("data_updated"):
             logger.info("skipping data update...")
         else:
             update_data.main(dont_wait=dont_wait)
-            send_email(self.email_subject, "Data update complete. Proceeding with caching...")
+            send_email(
+                self.email_subject, "Data update complete. Proceeding with caching..."
+            )
 
         update_job("data_updated", True)
 
@@ -83,47 +91,82 @@ class WorkerBee(object):
             logger.info("skipping test cache...")
         else:
             self.cache_test_extent()
+
+            # self.explode_cache() - todo after Pro v3.5: enable this line and remove the next two commands
+            send_email(
+                f"Test Cache Job Complete {basemap}",
+                "Time to manually convert cache to exploded format.",
+            )
+            input(
+                "Test caching complete. Manually convert cache to exploded format and then press any key to continue..."
+            )
+
             basemap_info = config.get_basemap(basemap)
-            swarm(basemap, basemap_info["bucket"], is_test=True, preview_url=self.preview_url)
-            # if input("Test cache complete. Would you like to continue processing the production cache? (y/n) ") != "y":
-            #     raise Exception("caching cancelled")
+            swarm(
+                basemap,
+                basemap_info["bucket"],
+                is_test=True,
+                preview_url=self.preview_url,
+            )
 
         update_job("test_cache_complete", True)
 
         self.missing_only = missing_only
-        self.start_bundles = self.get_bundles_count()
-
         if self.missing_only:
-            self.update_mode = "RECREATE_EMPTY_TILES"
-            logger.info("Caching empty tiles only")
+            logger.info("caching empty tiles only")
         else:
-            self.update_mode = "RECREATE_ALL_TILES"
-            logger.info("Caching all tiles")
+            logger.info("removing previous cache and starting fresh")
+            self.delete_cache()
+
+        self.start_bundles = self.get_bundles_count()
 
         if not spot_path:
             self.overall_progress_bar_current_value = 0
             self.overall_progress_bar = logging_tqdm(
-                total=self.complete_num_bundles - self.start_bundles, desc="Overall", position=0
+                total=self.complete_num_bundles - self.start_bundles,
+                desc="Overall",
+                position=0,
             )
             self.cache(not levels)
         else:
             #: levels 0-17 include the entire state
             logger.info("spot caching levels 0-17...")
-            self.cache_extent(settings.SCALES[:18], spot_path, spot_cache_name)
+            self.cache_extent(settings.SCALES[:18], spot_path, SPOT_CACHE_NAME)
 
             #: levels 18-19 intersect with cache extent
-            logger.info("intersecting spot cache polygon with level 18-19 cache extent...")
+            logger.info(
+                "intersecting spot cache polygon with level 18-19 cache extent..."
+            )
             intersect = arcpy.analysis.Intersect(
                 [spot_path, join(settings.EXTENTSFGDB, settings.EXTENT_18_19)],
                 "in_memory/spot_cache_intersect",
                 join_attributes="ONLY_FID",
             )
             logger.info("spot caching levels 18-19...")
-            self.cache_extent(settings.SCALES[18:], intersect, spot_cache_name)
+            self.cache_extent(settings.SCALES[18:], intersect, SPOT_CACHE_NAME)
 
-    def cache_extent(self, scales, aoi, name, dont_skip=False):
+    def validate_map_layers(self) -> None:
+        broken_layers = [
+            layer.longName for layer in self.pro_map.listLayers() if layer.isBroken
+        ]
+        if len(broken_layers) > 0:
+            raise Exception(
+                f"The following layers are broken in the '{self.pro_map.name}' map:\n"
+                + "\n".join(broken_layers)
+            )
+        logger.info(f'All layers in the "{self.pro_map.name}" map are valid.')
+
+    def cache_extent(
+        self,
+        scales: list[float],
+        aoi: str,
+        name: str,
+        dont_skip: bool = False,
+    ) -> None:
         cache_job_key = f"{name}-{scales}"
-        if dont_skip is False and cache_job_key in get_job_status("cache_extents_completed"):
+        if dont_skip is False and cache_job_key in get_job_status(
+            "cache_extents_completed"
+        ):
             logger.info(f"skipping extent based on current job: {cache_job_key}")
 
             return
@@ -134,40 +177,44 @@ class WorkerBee(object):
 
         logging_tqdm.write("caching {} at {}".format(name, cache_scales))
 
-        if config.is_dev() and name != spot_cache_name:
+        if config.is_dev() and name != SPOT_CACHE_NAME:
             aoi = settings.TEST_EXTENT
 
         try:
-            arcpy.server.ManageMapServerCacheTiles(
-                self.service, cache_scales, self.update_mode, settings.NUM_INSTANCES, aoi
+            arcpy.management.ManageTileCache(
+                str(settings.CACHES_DIR),
+                "RECREATE_EMPTY_TILES",
+                in_cache_name=self.basemap,
+                in_datasource=self.pro_map,
+                tiling_scheme=AGOL_SCHEME_NAME,
+                scales=cache_scales,
+                area_of_interest=aoi,
             )
-            #: the gp tool in cache_test_extent messes with the conda/python environment causing the following error message:
-            #: "ModuleNotFoundError: No module named 'multiprocess'"
-            #: resetting the environment seems to solve the issue.
-            arcpy.ResetEnvironments()
 
             update_job("cache_extents_completed", cache_job_key)
-        except arcpy.ExecuteError as e:
-            if hasattr(e, "message") and e.message == error_001470_message:
-                msg = "ERROR 001470 thrown. Moving on and hoping the job completes successfully."
-                logger.warning(msg)
-            else:
-                self.errors.append([cache_scales, aoi, name])
-                logger.error(arcpy.GetMessages())
+        except arcpy.ExecuteError:
+            self.errors.append([cache_scales, aoi, name])
+            logger.error(arcpy.GetMessages())
 
-    def get_progress(self):
+    def get_progress(self) -> str:
         total_bundles = self.get_bundles_count()
 
         new_progress_bar_value = total_bundles - self.start_bundles
-        self.overall_progress_bar.update(new_progress_bar_value - self.overall_progress_bar_current_value)
+        self.overall_progress_bar.update(
+            new_progress_bar_value - self.overall_progress_bar_current_value
+        )
         self.overall_progress_bar_current_value = new_progress_bar_value
 
         try:
-            bundles_per_hour = (total_bundles - self.start_bundles) / ((time.time() - self.start_time) / 60 / 60)
+            bundles_per_hour = (total_bundles - self.start_bundles) / (
+                (time.time() - self.start_time) / 60 / 60
+            )
         except ZeroDivisionError:
             bundles_per_hour = 0
         if bundles_per_hour != 0 and total_bundles > self.start_bundles:
-            hours_remaining = (self.complete_num_bundles - total_bundles) / bundles_per_hour
+            hours_remaining = (
+                self.complete_num_bundles - total_bundles
+            ) / bundles_per_hour
         else:
             self.start_time = time.time()
             hours_remaining = "??"
@@ -175,53 +222,97 @@ class WorkerBee(object):
         msg = "{} of {} ({}%) bundle files created.\nEstimated hours remaining: {}".format(
             total_bundles, self.complete_num_bundles, percent, hours_remaining
         )
+
         return msg
 
-    def get_bundles_count(self):
-        totalfiles = 0
-        name = self.service_name.replace("/", "_")
-        basefolder = Path(settings.CACHE_DIR) / name / name / "_alllayers"
-        for d in os.listdir(basefolder):
-            if d != "missing.jpg":
-                totalfiles += len(os.listdir(os.path.join(basefolder, d)))
-        return totalfiles
+    def get_bundles_count(self) -> int:
+        total_files = 0
+        name = self.basemap.replace("/", "_")
+        base_folder = Path(settings.CACHES_DIR) / name / name / "_alllayers"
+        if base_folder.exists():
+            for d in os.listdir(base_folder):
+                if d != "missing.jpg":
+                    total_files += len(os.listdir(os.path.join(base_folder, d)))
 
-    def cache_test_extent(self):
+        return total_files
+
+    def cache_test_extent(self) -> None:
         logger.info("caching test extent")
         cache_scales = intersect_scales(settings.SCALES, self.restrict_scales)
 
+        self.delete_cache()
+
         try:
-            arcpy.server.ManageMapServerCacheTiles(
-                self.service, cache_scales, "RECREATE_ALL_TILES", settings.NUM_INSTANCES, settings.TEST_EXTENT
+            arcpy.management.ManageTileCache(
+                str(settings.CACHES_DIR),
+                "RECREATE_ALL_TILES",
+                in_cache_name=self.basemap,
+                in_datasource=self.pro_map,
+                tiling_scheme=AGOL_SCHEME_NAME,
+                scales=cache_scales,
+                area_of_interest=settings.TEST_EXTENT,
             )
-            #: the gp tool in cache_test_extent messes with the conda/python environment causing the following error message:
-            #: "ModuleNotFoundError: No module named 'multiprocess'"
-            #: resetting the environment seems to solve the issue.
-            arcpy.ResetEnvironments()
         except arcpy.ExecuteError:
             logger.error(arcpy.GetMessages())
             send_email(
-                "Cache Test Extent Error ({}) - arcpy.ExecuteError".format(self.service_name), arcpy.GetMessages()
+                "Cache Test Extent Error ({}) - arcpy.ExecuteError".format(
+                    self.basemap
+                ),
+                arcpy.GetMessages(),
             )
             raise arcpy.ExecuteError
 
-    def cache(self, run_all_levels, dont_skip=False):
+    def explode_cache(self) -> None:
+        logger.info("exploding cache")
+        try:
+            arcpy.management.ExportTileCache(
+                str(settings.CACHES_DIR / self.basemap),
+                str(settings.CACHES_DIR),
+                f"{self.basemap}_Exploded",
+                export_cache_type="TILE_CACHE",
+                storage_format_type="EXPLODED",
+            )
+        except arcpy.ExecuteError:
+            logger.error(arcpy.GetMessages())
+            send_email(
+                "Explode Cache Error ({}) - arcpy.ExecuteError".format(self.basemap),
+                arcpy.GetMessages(),
+            )
+            raise arcpy.ExecuteError
+
+    def delete_cache(self) -> None:
+        if Path(settings.CACHES_DIR / self.basemap).exists():
+            logger.info("deleting existing cache")
+
+            rmtree(Path(settings.CACHES_DIR / self.basemap))
+
+    def cache(self, run_all_levels: bool, dont_skip: bool = False) -> None:
         arcpy.env.workspace = settings.EXTENTSFGDB
 
         for fc_name, scales in settings.CACHE_EXTENTS:
             self.cache_extent(scales, fc_name, fc_name, dont_skip)
-            self.get_progress()
+            logger.info(self.get_progress())
 
-        send_email(self.email_subject, "Levels 0-9 completed.\n{}\n{}".format(self.get_progress(), self.preview_url))
+        send_email(
+            self.email_subject,
+            "Levels 0-17 completed.\n{}\n{}".format(
+                self.get_progress(), self.preview_url
+            ),
+        )
 
-        if config.is_dev():
-            settings.GRIDS = settings.GRIDS[:-4]
         for grid in settings.GRIDS:
             total_grids = int(arcpy.management.GetCount(grid[0])[0])
             with arcpy.da.SearchCursor(grid[0], ["SHAPE@", "OID@"]) as cur:
-                for row in logging_tqdm(cur, total=total_grids, position=1, desc=f"Level {grid[0]}"):
-                    self.cache_extent([grid[1]], row[0], "{}: OBJECTID: {}".format(grid[0], row[1]), dont_skip)
-                    self.get_progress()
+                for row in logging_tqdm(
+                    cur, total=total_grids, position=1, desc=f"Level {grid[0]}"
+                ):
+                    self.cache_extent(
+                        [grid[1]],
+                        row[0],
+                        "{}: OBJECTID: {}".format(grid[0], row[1]),
+                        dont_skip,
+                    )
+                    logger.info(self.get_progress())
             send_email(
                 self.email_subject,
                 "Level {} completed.\n{}\n{}\nNumber of errors: {}".format(
@@ -236,7 +327,9 @@ class WorkerBee(object):
 
         bundles = self.get_bundles_count()
         if bundles < self.complete_num_bundles and run_all_levels:
-            msg = "Only {} out of {} bundles completed. Recaching...".format(bundles, self.complete_num_bundles)
+            msg = "Only {} out of {} bundles completed. Recaching...".format(
+                bundles, self.complete_num_bundles
+            )
             logger.warning(msg)
             self.cache(True, dont_skip=True)
 
@@ -244,20 +337,26 @@ class WorkerBee(object):
 
         logger.info("updating google spreadsheets")
 
-        credentials, project = google.auth.default(scopes=["https://www.googleapis.com/auth/spreadsheets"])
+        credentials, project = google.auth.default(
+            scopes=["https://www.googleapis.com/auth/spreadsheets"]
+        )
         client = pygsheets.authorize(custom_credentials=credentials)
         sgid_sheet = client.open_by_key("11ASS7LnxgpnD0jN4utzklREgMf1pcvYjcXcIcESHweQ")
         sgid_worksheet = sgid_sheet[0]
-        base_maps_sheet = client.open_by_key("1XnncmhWrIjntlaMfQnMrlcCTyl9e2i-ztbvqryQYXDc")
+        base_maps_sheet = client.open_by_key(
+            "1XnncmhWrIjntlaMfQnMrlcCTyl9e2i-ztbvqryQYXDc"
+        )
         base_maps_worksheet = base_maps_sheet[0]
 
         #: update sgid changelog
         today = date.today().strftime(r"%m/%d/%Y")
-        matrix = sgid_worksheet.get_all_values(include_tailing_empty_rows=False, include_tailing_empty=False)
+        matrix = sgid_worksheet.get_all_values(
+            include_tailing_empty_rows=False, include_tailing_empty=False
+        )
         row = [
             today,
             "Complete",
-            self.service_name,
+            self.basemap,
             "Recache",
             "Statewide cache rebuild and upload to GCP",
             "stdavis",
@@ -273,7 +372,16 @@ class WorkerBee(object):
 
         #: update base maps spreadsheet embedded in gis.utah.gov page
         this_month = date.today().strftime(r"%b %Y")
-        results = base_maps_worksheet.find(self.service_name, matchEntireCell=True)
+        results = base_maps_worksheet.find(self.basemap, matchEntireCell=True)
         cell = results[0]
 
         base_maps_worksheet.update_value((cell.row + 1, cell.col), this_month)
+
+        # self.explode_cache() - todo after Pro v3.5, enable this line and remove the next two commands
+        send_email(
+            f"Cache Job Complete {self.basemap}",
+            "Time to manually convert cache to exploded format.",
+        )
+        input(
+            "Caching complete. Manually convert cache to exploded format and then press any key to continue..."
+        )

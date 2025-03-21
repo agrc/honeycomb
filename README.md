@@ -32,9 +32,6 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 | ---------------------------- | -------------------------------------------------------------- | ------------------------------------ |
 | `HONEYCOMB_SHARE`            | the to the share folder used to share mxd's and data with Zach | \\999.99.99.99\agrc\caching          |
 | `HONEYCOMB_SENDGRID_API_KEY` | your sendgrid api key                                          | SG.1234567890                        |
-| `HONEYCOMB_AGS_SERVER`\*     | your ArcGIS server url                                         | <http://localhost:6080/arcgis/admin> |
-| `HONEYCOMB_AGS_USERNAME`\*   | your ArcGIS Server username                                    | name                                 |
-| `HONEYCOMB_AGS_PASSWORD`\*   | your ArcGIS Server password                                    | password                             |
 | `HONEYCOMB_GIZA_USERNAME`\*  | your Giza (discover) username                                  | name                                 |
 | `HONEYCOMB_GIZA_PASSWORD`\*  | your Giza (discover) password                                  | password                             |
 | `HONEYCOMB_AGOL_USERNAME`\*  | your AGOL username                                             | name                                 |
@@ -59,7 +56,6 @@ Run `honeycomb config open` to open the config file.
 | `configuration` | Affects a few code paths for differences between production and development. Possible values: `prod` and `dev` (default). |
 | `notify`        | A list of email addresses to whom honeycomb sends status updates.                                                         |
 | `sendEmails`    | A boolean that determines whether emails are actually sent or not. Useful during development.                             |
-| `num_processes` | A number that indicates the maximum number of parallel processes to use when uploading files to GCP.                      |
 
 ## Adding a New Layer
 

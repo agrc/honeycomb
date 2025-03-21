@@ -1,0 +1,13 @@
+{
+  "basemaps": {},
+  "configuration": "dev",
+  "gcpProject": "",
+  "gizaInstance": "https://discover.agrc.utah.gov",
+  "mxdFolder": "C:\\temp",
+  "notify": [
+    "stdavis@utah.gov"
+  ],
+  "sendEmails": false,
+  "vectorBaseMaps": {},
+  "vectorTilesFolder": "C:\\temp"
+}
