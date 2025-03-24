@@ -13,8 +13,7 @@ import arcpy
 
 SHARE_ENV_NAME = "HONEYCOMB_SHARE"
 SHARE = os.getenv(SHARE_ENV_NAME)
-# PRO_PROJECT = Path(SHARE) / "Maps" / "Maps.aprx"
-PRO_PROJECT = Path("C:/temp/Maps.aprx")
+PRO_PROJECT = Path(SHARE) / "Maps" / "Maps.aprx"
 QUAD_WORD = os.getenv("HONEYCOMB_QUAD_WORD")
 if SHARE is None:
     raise Exception(
