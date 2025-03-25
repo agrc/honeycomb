@@ -5,10 +5,10 @@ test_config.py
 A module that contains tests for config.py
 """
 
+import arcpy
 import pytest
 from mock import patch
 
-import arcpy
 from honeycomb import config
 
 
@@ -78,17 +78,6 @@ def test_is_dev():
     config.set_config_prop("configuration", "dev")
 
     assert config.is_dev()
-
-
-@patch(
-    "arcpy.mapping.CreateGISServerConnectionFile",
-    wraps=arcpy.mapping.CreateGISServerConnectionFile,
-)
-def test_get_ags_connection(mock):
-    config.get_ags_connection()
-    config.get_ags_connection()
-
-    mock.assert_called_once()
 
 
 def test_get_basemap():

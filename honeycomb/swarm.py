@@ -24,7 +24,7 @@ from .messaging import send_email
 
 def swarm(name, bucket_name, is_test=False, preview_url=None):
     """
-    copies all tiles into WMTS format as a sibling folder to the AGS cache folder
+    copies all tiles into WMTS format as a sibling folder to the cache folder
     returns a list of all of the column folders
     """
     base_folder = Path(settings.CACHES_DIR) / f"{name}_Exploded" / "_alllayers"

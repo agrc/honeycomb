@@ -75,4 +75,5 @@ GRIDS = [
 ]
 
 arcpy.env.parallelProcessingFactor = "100%"
+#: required for using the RECREATE_EMPTY_TILES option in the Manage Tile Cache tool
 arcpy.env.overwriteOutput = True

@@ -28,14 +28,14 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
    `pip install . --upgrade`
 1. Add the following environmental variables:
 
-| Name                         | Description                                                    | Example                              |
-| ---------------------------- | -------------------------------------------------------------- | ------------------------------------ |
-| `HONEYCOMB_SHARE`            | the to the share folder used to share mxd's and data with Zach | \\999.99.99.99\agrc\caching          |
-| `HONEYCOMB_SENDGRID_API_KEY` | your sendgrid api key                                          | SG.1234567890                        |
-| `HONEYCOMB_GIZA_USERNAME`\*  | your Giza (discover) username                                  | name                                 |
-| `HONEYCOMB_GIZA_PASSWORD`\*  | your Giza (discover) password                                  | password                             |
-| `HONEYCOMB_AGOL_USERNAME`\*  | your AGOL username                                             | name                                 |
-| `HONEYCOMB_AGOL_PASSWORD`\*  | your AGOL password                                             | password                             |
+| Name                         | Description                                                    | Example                     |
+| ---------------------------- | -------------------------------------------------------------- | --------------------------- |
+| `HONEYCOMB_SHARE`            | the to the share folder used to share mxd's and data with Zach | \\999.99.99.99\agrc\caching |
+| `HONEYCOMB_SENDGRID_API_KEY` | your sendgrid api key                                          | SG.1234567890               |
+| `HONEYCOMB_GIZA_USERNAME`\*  | your Giza (discover) username                                  | name                        |
+| `HONEYCOMB_GIZA_PASSWORD`\*  | your Giza (discover) password                                  | password                    |
+| `HONEYCOMB_AGOL_USERNAME`\*  | your AGOL username                                             | name                        |
+| `HONEYCOMB_AGOL_PASSWORD`\*  | your AGOL password                                             | password                    |
 
 1. Run `honeycomb config open`. This will initialize your config with default values and open it in your text editor.
 1. Set map services to be dedicated instances with a min of 0 to prevent schema locks when updating the data.
@@ -43,8 +43,6 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 ## Usage
 
 Run `honeycomb -help` to see documentation for the various commands.
-
-Note: in order for honeycomb to modify files in the arcgis server cache directories, your terminal must be run as an administrator.
 
 ## Config file
 
