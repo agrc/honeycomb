@@ -97,14 +97,7 @@ class WorkerBee(object):
         else:
             self.cache_test_extent()
 
-            # self.explode_cache() - todo after Pro v3.5: enable this line and remove the next two commands
-            send_email(
-                f"Test Cache Job Complete {basemap}",
-                "Time to manually convert cache to exploded format.",
-            )
-            input(
-                "Test caching complete. Manually convert cache to exploded format and then press any key to continue..."
-            )
+            self.explode_cache()
 
             basemap_info = config.get_basemap(basemap)
             swarm(
@@ -186,6 +179,7 @@ class WorkerBee(object):
             aoi = settings.TEST_EXTENT
 
         try:
+            #: this takes 8-10 minutes to start for some reason
             arcpy.management.ManageTileCache(
                 str(settings.CACHES_DIR),
                 "RECREATE_EMPTY_TILES",
@@ -248,6 +242,7 @@ class WorkerBee(object):
         self.delete_cache()
 
         try:
+            #: this takes 8-10 minutes to start for some reason
             arcpy.management.ManageTileCache(
                 str(settings.CACHES_DIR),
                 "RECREATE_ALL_TILES",
@@ -269,21 +264,35 @@ class WorkerBee(object):
 
     def explode_cache(self) -> None:
         logger.info("exploding cache")
-        try:
-            arcpy.management.ExportTileCache(
-                str(settings.CACHES_DIR / self.basemap),
-                str(settings.CACHES_DIR),
-                f"{self.basemap}_Exploded",
-                export_cache_type="TILE_CACHE",
-                storage_format_type="EXPLODED",
-            )
-        except arcpy.ExecuteError:
-            logger.error(arcpy.GetMessages())
-            send_email(
-                "Explode Cache Error ({}) - arcpy.ExecuteError".format(self.basemap),
-                arcpy.GetMessages(),
-            )
-            raise arcpy.ExecuteError
+        exploded_directory = Path(settings.CACHES_DIR / f"{self.basemap}_Exploded")
+        if exploded_directory.exists():
+            logger.info("deleting existing exploded cache")
+            rmtree(exploded_directory)
+
+        # todo after Pro v3.5, remove the next two lines, and uncomment the ExportTileCache line
+        send_email(
+            f"Cache Job Complete {self.basemap}",
+            "Time to manually convert cache to exploded format.",
+        )
+        input(
+            "Caching complete. Manually convert cache to exploded format and then press enter to continue..."
+        )
+
+        # try:
+        #     arcpy.management.ExportTileCache(
+        #         str(settings.CACHES_DIR / self.basemap / self.basemap),
+        #         str(settings.CACHES_DIR),
+        #         f"{self.basemap}_Exploded",
+        #         export_cache_type="TILE_CACHE",
+        #         storage_format_type="EXPLODED",
+        #     )
+        # except arcpy.ExecuteError:
+        #     logger.error(arcpy.GetMessages())
+        #     send_email(
+        #         "Explode Cache Error ({}) - arcpy.ExecuteError".format(self.basemap),
+        #         arcpy.GetMessages(),
+        #     )
+        #     raise arcpy.ExecuteError
 
     def delete_cache(self) -> None:
         if Path(settings.CACHES_DIR / self.basemap).exists():
@@ -382,11 +391,4 @@ class WorkerBee(object):
 
         base_maps_worksheet.update_value((cell.row + 1, cell.col), this_month)
 
-        # self.explode_cache() - todo after Pro v3.5, enable this line and remove the next two commands
-        send_email(
-            f"Cache Job Complete {self.basemap}",
-            "Time to manually convert cache to exploded format.",
-        )
-        input(
-            "Caching complete. Manually convert cache to exploded format and then press any key to continue..."
-        )
+        self.explode_cache()
