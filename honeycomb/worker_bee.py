@@ -11,7 +11,7 @@ import time
 from datetime import date
 from os.path import join
 from pathlib import Path
-from shutil import rmtree
+from shutil import copy, rmtree
 
 import arcpy
 import google.auth
@@ -59,7 +59,12 @@ class WorkerBee(object):
         self.preview_url = settings.PREVIEW_URL.format(self.basemap.lower())
         self.email_subject = "Cache Update ({})".format(self.basemap)
 
-        project = arcpy.mp.ArcGISProject(str(settings.PRO_PROJECT))
+        #: make a copy of the pro project so that we don't keep a lock on it
+        temp_project_path = settings.CACHES_DIR / "Maps.aprx"
+        temp_project_path.unlink(missing_ok=True)
+        copy(settings.PRO_PROJECT, settings.CACHES_DIR)
+
+        project = arcpy.mp.ArcGISProject(str(temp_project_path))
         self.pro_map = project.listMaps(basemap)[0]
 
         if not self.pro_map:
