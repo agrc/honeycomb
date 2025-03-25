@@ -12,6 +12,15 @@ for /d %%x in (%folder%\*) do (
   rmdir /q/s %%x
 )
 
+set folder="C:\Cache\Caches\%1_Exploded\_alllayers"
+echo Deleting all files and subdirectories in %folder%
+
+for /d %%x in (%folder%\*) do (
+  echo Deleting: %%x
+  del /f/q/s %%x > nul
+  rmdir /q/s %%x
+)
+
 goto end
 
 :usage
