@@ -58,6 +58,8 @@ class WorkerBee(object):
         self.basemap = basemap
         self.preview_url = settings.PREVIEW_URL.format(self.basemap.lower())
         self.email_subject = "Cache Update ({})".format(self.basemap)
+        basemap_config = config.get_basemap(basemap)
+        self.image_type = basemap_config["imageType"]
 
         #: make a copy of the pro project so that we don't keep a lock on it
         temp_project_path = settings.CACHES_DIR / "Maps.aprx"
@@ -99,10 +101,10 @@ class WorkerBee(object):
 
             self.explode_cache()
 
-            basemap_info = config.get_basemap(basemap)
             swarm(
                 basemap,
-                basemap_info["bucket"],
+                basemap_config["bucket"],
+                self.image_type,
                 is_test=True,
                 preview_url=self.preview_url,
             )

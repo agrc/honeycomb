@@ -115,7 +115,7 @@ def main():
     def upload(basemap):
         basemap_info = config.get_basemap(basemap)
         stats.record_start(basemap, "upload")
-        swarm(basemap, basemap_info["bucket"])
+        swarm(basemap, basemap_info["bucket"], basemap_info["imageType"])
         stats.record_finish(basemap, "upload")
 
     if args["config"]:
