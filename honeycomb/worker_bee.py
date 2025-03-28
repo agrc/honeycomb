@@ -68,6 +68,7 @@ class WorkerBee(object):
 
         project = arcpy.mp.ArcGISProject(str(temp_project_path))
         self.pro_map = project.listMaps(basemap)[0]
+        self.pro_map.clearSelection()
 
         if not self.pro_map:
             raise Exception(f"Map '{basemap}' not found in project.")
