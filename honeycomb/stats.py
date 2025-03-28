@@ -71,7 +71,9 @@ def get_average_duration(runs):
     total_duration = 0
     for run in runs:
         total_duration += run["duration"]
-    return humanize.naturaldelta(total_duration / len(runs))
+    return humanize.precisedelta(
+        total_duration / len(runs), suppress=["minutes", "seconds"]
+    )
 
 
 def print_stats():
