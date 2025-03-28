@@ -16,13 +16,14 @@ from pathlib import Path
 import requests
 from google.api_core.retry import Retry
 from google_crc32c import Checksum
+from PIL import Image
 
 from . import config, settings
 from .log import logger, logging_tqdm
 from .messaging import send_email
 
 
-def swarm(name, bucket_name, is_test=False, preview_url=None):
+def swarm(name, bucket_name, image_type, is_test=False, preview_url=None):
     """
     copies all tiles into WMTS format as a sibling folder to the cache folder
     returns a list of all of the column folders
@@ -43,7 +44,14 @@ def swarm(name, bucket_name, is_test=False, preview_url=None):
                 logging_tqdm(total=len(row_folders)) as progress_bar,
             ):
                 pool.map(
-                    partial(process_row_folder, name, bucket_name, level, progress_bar),
+                    partial(
+                        process_row_folder,
+                        name,
+                        bucket_name,
+                        level,
+                        progress_bar,
+                        image_type,
+                    ),
                     row_folders,
                 )
             # with logging_tqdm(total=len(row_folders)) as progress_bar:
@@ -59,7 +67,23 @@ def swarm(name, bucket_name, is_test=False, preview_url=None):
         send_email("honeycomb update", f"{name} has been pushed to production")
 
 
-def process_row_folder(name, bucket_name, level, progress_bar, row_folder):
+def convert_png_to_jpg(file_path) -> str:
+    image = Image.open(file_path)
+    bands = image.split()
+    if len(bands) == 4:
+        new_image = Image.new("RGB", image.size, (255, 255, 255))
+        new_image.paste(image, mask=bands[3])  # 3 is the alpha channel
+    else:
+        #: handle PNGs with no alpha channel (blank white tiles)
+        new_image = image.convert("RGB")
+    new_file_path = file_path.with_suffix(".jpg")
+    new_image.save(new_file_path, "JPEG", quality=75)
+    file_path.unlink()
+
+    return new_file_path
+
+
+def process_row_folder(name, bucket_name, level, progress_bar, image_type, row_folder):
     retry = Retry()
     bucket = config.get_storage_client().bucket(bucket_name)
     row = str(int(row_folder.name[1:], 16))
@@ -70,7 +94,11 @@ def process_row_folder(name, bucket_name, level, progress_bar, row_folder):
             #: set the content type explicitly in case it ever changes for a particular tile
             #: if you pass none then the content type of the existing blob object is used
             if file_path.suffix == ".png":
-                content_type = "image/png"
+                if image_type == "JPEG":
+                    file_path = convert_png_to_jpg(file_path)
+                    content_type = "image/jpeg"
+                else:
+                    content_type = "image/png"
             else:
                 content_type = "image/jpeg"
 
@@ -109,6 +137,7 @@ def process_row_folder(name, bucket_name, level, progress_bar, row_folder):
 
 
 def bust_discover_cache():
+    logger.info("busting discover cache")
     giza_instance = config.get_config_value("gizaInstance")
 
     with requests.Session() as session:
