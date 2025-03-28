@@ -20,7 +20,8 @@ if SHARE is None:
         'Please set the "{}" environmental variable!'.format(SHARE_ENV_NAME)
     )
 PREVIEW_URL = rf"https://discover.agrc.utah.gov/login/path/{QUAD_WORD}/tiles/preview#basemap_{{}}_test/8/39.527/-111.555"
-EXTENTSFGDB = os.path.join(os.path.dirname(__file__), "data", "Extents.geodatabase")
+DATA_FOLDER = Path(__file__).parent / "data"
+EXTENTSFGDB = str(DATA_FOLDER / "Extents.geodatabase")
 CACHES_DIR = Path(r"C:\Cache\Caches")
 CACHES_DIR.mkdir(exist_ok=True)
 TEST_EXTENT = os.path.join(EXTENTSFGDB, "test_extent")
@@ -40,7 +41,7 @@ SCALES = [
     147914381.897889,  #: 2
     73957190.948944,  #: 3
     36978595.474472,  #: 4
-    1.8489297737236e7,  #: 5
+    18489297.737236,  #: 5
     9244648.868618,  #: 6
     4622324.434309,  #: 7
     2311162.217155,  #: 8

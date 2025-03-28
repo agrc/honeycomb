@@ -239,12 +239,12 @@ class WorkerBee(object):
         return total_files
 
     def cache_test_extent(self) -> None:
-        logger.info("caching test extent")
         cache_scales = intersect_scales(settings.SCALES, self.restrict_scales)
 
         self.delete_cache()
 
         try:
+            logger.info("caching test extent")
             #: this takes 8-10 minutes to start for some reason
             arcpy.management.ManageTileCache(
                 str(settings.CACHES_DIR),
@@ -298,10 +298,11 @@ class WorkerBee(object):
         #     raise arcpy.ExecuteError
 
     def delete_cache(self) -> None:
-        if Path(settings.CACHES_DIR / self.basemap).exists():
+        dir = settings.CACHES_DIR / self.basemap
+        if dir.exists():
             logger.info("deleting existing cache")
 
-            rmtree(Path(settings.CACHES_DIR / self.basemap))
+            rmtree(dir)
 
     def cache(self, run_all_levels: bool, dont_skip: bool = False) -> None:
         arcpy.env.workspace = settings.EXTENTSFGDB
