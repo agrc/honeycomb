@@ -68,6 +68,11 @@ def swarm(name, bucket_name, image_type, is_test=False, preview_url=None):
 
 
 def convert_png_to_jpg(file_path) -> str:
+    """
+    This function exists because I was unable to get the ManageTileCache tool in worker_bee.py
+    to generate JPGs. No matter what tile cache scheme file I pointed it at, it stubbornly
+    generated PNGs.
+    """
     image = Image.open(file_path)
     bands = image.split()
     if len(bands) == 4:
