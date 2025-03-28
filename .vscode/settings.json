@@ -19,6 +19,7 @@
     "NAIP",
     "ncols",
     "norecursedirs",
+    "precisedelta",
     "propy",
     "pygsheets",
     "pytz",
@@ -41,6 +42,6 @@
     "editor.codeActionsOnSave": {
       "source.organizeImports": "explicit"
     },
-    "editor.defaultFormatter": "charliermarsh.ruff",
-  },
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  }
 }
