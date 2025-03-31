@@ -61,18 +61,6 @@ class WorkerBee(object):
         basemap_config = config.get_basemap(basemap)
         self.image_type = basemap_config["imageType"]
 
-        #: make a copy of the pro project so that we don't keep a lock on it
-        temp_project_path = settings.CACHES_DIR / "Maps.aprx"
-        temp_project_path.unlink(missing_ok=True)
-        copy(settings.PRO_PROJECT, settings.CACHES_DIR)
-
-        project = arcpy.mp.ArcGISProject(str(temp_project_path))
-        self.pro_map = project.listMaps(basemap)[0]
-        self.pro_map.clearSelection()
-
-        if not self.pro_map:
-            raise Exception(f"Map '{basemap}' not found in project.")
-
         self.validate_map_layers()
 
         if not levels:
@@ -146,16 +134,35 @@ class WorkerBee(object):
             logger.info("spot caching levels 18-19...")
             self.cache_extent(settings.SCALES[18:], intersect, SPOT_CACHE_NAME)
 
+    def get_pro_map(self):
+        #: make a copy of the pro project so that we don't keep a lock on it
+        temp_project_path = settings.CACHES_DIR / "Maps.aprx"
+        temp_project_path.unlink(missing_ok=True)
+        copy(settings.PRO_PROJECT, settings.CACHES_DIR)
+
+        project = arcpy.mp.ArcGISProject(str(temp_project_path))
+        pro_map = project.listMaps(self.basemap)[0]
+        pro_map.clearSelection()
+
+        if not pro_map:
+            raise Exception(f"Map '{self.basemap}' not found in project.")
+
+        return pro_map
+
     def validate_map_layers(self) -> None:
+        pro_map = self.get_pro_map()
         broken_layers = [
-            layer.longName for layer in self.pro_map.listLayers() if layer.isBroken
+            layer.longName for layer in pro_map.listLayers() if layer.isBroken
         ]
         if len(broken_layers) > 0:
             raise Exception(
-                f"The following layers are broken in the '{self.pro_map.name}' map:\n"
+                f"The following layers are broken in the '{pro_map.name}' map:\n"
                 + "\n".join(broken_layers)
             )
-        logger.info(f'All layers in the "{self.pro_map.name}" map are valid.')
+        logger.info(f'All layers in the "{pro_map.name}" map are valid.')
+
+        #: release schema lock so that we can update data in a future step
+        del pro_map
 
     def cache_extent(
         self,
@@ -187,7 +194,7 @@ class WorkerBee(object):
                 str(settings.CACHES_DIR),
                 "RECREATE_EMPTY_TILES",
                 in_cache_name=self.basemap,
-                in_datasource=self.pro_map,
+                in_datasource=self.get_pro_map(),
                 tiling_scheme=AGOL_SCHEME_NAME,
                 scales=cache_scales,
                 area_of_interest=aoi,
@@ -250,7 +257,7 @@ class WorkerBee(object):
                 str(settings.CACHES_DIR),
                 "RECREATE_ALL_TILES",
                 in_cache_name=self.basemap,
-                in_datasource=self.pro_map,
+                in_datasource=self.get_pro_map(),
                 tiling_scheme=AGOL_SCHEME_NAME,
                 scales=cache_scales,
                 area_of_interest=settings.TEST_EXTENT,
