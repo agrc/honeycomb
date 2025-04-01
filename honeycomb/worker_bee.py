@@ -190,6 +190,7 @@ class WorkerBee(object):
 
         try:
             #: this takes 8-10 minutes to start for some reason
+            print(arcpy.env.parallelProcessingFactor)
             arcpy.management.ManageTileCache(
                 str(settings.CACHES_DIR),
                 "RECREATE_EMPTY_TILES",
@@ -274,10 +275,6 @@ class WorkerBee(object):
 
     def explode_cache(self) -> None:
         logger.info("exploding cache")
-        exploded_directory = Path(settings.CACHES_DIR / f"{self.basemap}_Exploded")
-        if exploded_directory.exists():
-            logger.info("deleting existing exploded cache")
-            rmtree(exploded_directory)
 
         # todo after Pro v3.5, remove the next two lines, and uncomment the ExportTileCache line
         send_email(
@@ -310,6 +307,11 @@ class WorkerBee(object):
             logger.info("deleting existing cache")
 
             rmtree(dir)
+
+        exploded_directory = settings.CACHES_DIR / f"{self.basemap}_Exploded"
+        if exploded_directory.exists():
+            logger.info("deleting existing exploded cache")
+            rmtree(exploded_directory)
 
     def cache(self, run_all_levels: bool, dont_skip: bool = False) -> None:
         arcpy.env.workspace = settings.EXTENTSFGDB
