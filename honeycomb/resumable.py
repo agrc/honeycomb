@@ -1,7 +1,8 @@
-from .config import config_folder
-from pathlib import Path
 import json
 import os
+from pathlib import Path
+
+from .config import config_folder
 
 file_path = Path(config_folder) / "current_job.json"
 
@@ -26,6 +27,7 @@ def start_new_job(basemap, missing_only, skip_update, skip_test, spot, levels):
         "test_cache_complete": False,
         "cache_extents_completed": [],
         "caching_complete": False,
+        "exploding_complete": False,
         "restart_times": [],
     }
 

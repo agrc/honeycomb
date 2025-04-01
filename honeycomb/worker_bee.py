@@ -402,4 +402,9 @@ class WorkerBee(object):
 
         base_maps_worksheet.update_value((cell.row + 1, cell.col), this_month)
 
-        self.explode_cache()
+        if not get_job_status("exploding_complete"):
+            self.explode_cache()
+            update_job("exploding_complete", True)
+            send_email(self.email_subject, "Exploding complete.")
+        else:
+            logger.info("skipping exploding cache based on job status")
