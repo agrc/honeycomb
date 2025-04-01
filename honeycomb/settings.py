@@ -29,10 +29,8 @@ TEST_EXTENT = os.path.join(EXTENTSFGDB, "test_extent")
 COMPLETE_NUM_BUNDLES_LU = {
     "Lite": 20509,
     "Terrain": 20511,
-    "Overlay": 20511,
+    "Overlay": 2934,
     "AddressPoints": 18924,
-    "NAIP2016_Color1Meter_4Band": 9670,
-    "NAIP2016_Color1Meter_4Band_NRG": 9670,
 }
 
 SCALES = [
@@ -75,6 +73,6 @@ GRIDS = [
     [GRIDS18_19, SCALES[19]],
 ]
 
-arcpy.env.parallelProcessingFactor = "100%"
+arcpy.env.parallelProcessingFactor = "95%"
 #: required for using the RECREATE_EMPTY_TILES option in the Manage Tile Cache tool
 arcpy.env.overwriteOutput = True
