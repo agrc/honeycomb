@@ -100,14 +100,6 @@ def main():
             stats.record_finish(basemap, "cache")
             update_job("caching_complete", True)
 
-        send_email(
-            f"Cache Job Complete {basemap}",
-            "Time to manually convert cache to exploded format.",
-        )
-        input(
-            "Caching complete. Manually convert cache to exploded format and then press any key to continue..."
-        )
-
         upload(basemap)
 
         finish_job()
