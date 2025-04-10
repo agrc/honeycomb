@@ -30,7 +30,7 @@ COMPLETE_NUM_BUNDLES_LU = {
     "Lite": 20509,
     "Terrain": 20511,
     "Overlay": 2934,
-    "AddressPoints": 18924,
+    "AddressPoints": 2635,
 }
 
 SCALES = [
