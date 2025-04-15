@@ -54,7 +54,7 @@ def get_SGID_lookup():
     return sgid_fcs
 
 
-def get_layers():
+def get_layers(basemap=None):
     """
     Get a list of SGID layers that are sources in any of the cache map documents
     """
@@ -63,6 +63,8 @@ def get_layers():
     logger.info("getting unique data sources from layers")
     project = arcpy.mp.ArcGISProject(str(settings.PRO_PROJECT))
     for map in project.listMaps():
+        if basemap and map.name != basemap:
+            continue
         logger.info(f"map: {map.name}")
         for layer in logging_tqdm(map.listLayers()):
             if layer.isFeatureLayer and SGID_GDB_NAME in layer.dataSource:
@@ -71,7 +73,7 @@ def get_layers():
     return list(layers)
 
 
-def sgid():
+def sgid(basemap=None):
     sgid_fcs = get_SGID_lookup()
 
     local_db = str(LOCAL / SGID_GDB_NAME)
@@ -80,7 +82,7 @@ def sgid():
         logger.info(f"creating: {local_db}")
         arcpy.CreateFileGDB_management(str(LOCAL), SGID_GDB_NAME)
 
-    sgid_layers = get_layers()
+    sgid_layers = get_layers(basemap)
     logger.info(f"updating: {local_db}...")
     with arcpy.EnvManager(workspace=local_db):
         progress_bar = logging_tqdm(sgid_layers)
@@ -113,7 +115,13 @@ def static():
     arcpy.management.Copy(str(SHARE / STATIC_GDB_NAME), local_static)
 
 
-def main(static_only=False, sgid_only=False, external_only=False, dont_wait=False):
+def main(
+    static_only=False,
+    sgid_only=False,
+    external_only=False,
+    dont_wait=False,
+    basemap=None,
+):
     if not LOCAL.exists():
         logger.info(f"creating local folder: {LOCAL}")
         LOCAL.mkdir(parents=True)
@@ -131,7 +139,7 @@ def main(static_only=False, sgid_only=False, external_only=False, dont_wait=Fals
         time.sleep(diff.seconds)
 
     if sgid_only or all:
-        sgid()
+        sgid(basemap)
 
     if static_only or all:
         static()

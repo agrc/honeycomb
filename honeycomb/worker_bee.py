@@ -76,7 +76,7 @@ class WorkerBee(object):
         if skip_update or get_job_status("data_updated"):
             logger.info("skipping data update...")
         else:
-            update_data.main(dont_wait=dont_wait)
+            update_data.main(dont_wait=dont_wait, basemap=basemap)
             send_email(
                 self.email_subject, "Data update complete. Proceeding with caching..."
             )
