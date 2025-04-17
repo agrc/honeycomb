@@ -54,7 +54,7 @@ def get_SGID_lookup():
     return sgid_fcs
 
 
-def get_layers(basemap=None):
+def get_layers(basemaps: list[str] = None):
     """
     Get a list of SGID layers that are sources in any of the cache map documents
     """
@@ -63,7 +63,7 @@ def get_layers(basemap=None):
     logger.info("getting unique data sources from layers")
     project = arcpy.mp.ArcGISProject(str(settings.PRO_PROJECT))
     for map in project.listMaps():
-        if basemap and map.name != basemap:
+        if basemaps and map.name not in basemaps:
             continue
         logger.info(f"map: {map.name}")
         for layer in logging_tqdm(map.listLayers()):
@@ -73,7 +73,7 @@ def get_layers(basemap=None):
     return list(layers)
 
 
-def sgid(basemap=None):
+def sgid(basemaps: list[str] = None):
     sgid_fcs = get_SGID_lookup()
 
     local_db = str(LOCAL / SGID_GDB_NAME)
@@ -82,8 +82,8 @@ def sgid(basemap=None):
         logger.info(f"creating: {local_db}")
         arcpy.CreateFileGDB_management(str(LOCAL), SGID_GDB_NAME)
 
-    sgid_layers = get_layers(basemap)
-    logger.info(f"updating: {local_db}...")
+    sgid_layers = get_layers(basemaps)
+    logger.info(f"updating {str(len(sgid_layers))} layers in {local_db}...")
     with arcpy.EnvManager(workspace=local_db):
         progress_bar = logging_tqdm(sgid_layers)
         for fc in progress_bar:
@@ -115,13 +115,36 @@ def static():
     arcpy.management.Copy(str(SHARE / STATIC_GDB_NAME), local_static)
 
 
+def update_statewide_parcels():
+    local = LOCAL / "StatewideParcels.gdb" / "StateWideParcels"
+
+    if not local.exists():
+        logger.info(f"creating: {local}")
+        arcpy.CreateFileGDB_management(str(local.parent), local.name)
+
+    logger.info(f"updating statewide parcels in {local}...")
+    arcpy.management.Delete(local)
+
+    arcpy.management.Copy(
+        "https://services1.arcgis.com/99lidPhWCzftIe9K/arcgis/rest/services/UtahStatewideParcels/FeatureServer/0",
+        str(local),
+    )
+
+
 def main(
-    static_only=False,
-    sgid_only=False,
-    external_only=False,
-    dont_wait=False,
-    basemap=None,
+    static_only: bool = False,
+    sgid_only: bool = False,
+    external_only: bool = False,
+    dont_wait: bool = False,
+    basemaps: list[str] = None,
 ):
+    if len(basemaps) == 1 and basemaps[0] == "StatewideParcels":
+        #: statewide parcels is a special case. It only has a single layer and the
+        #: source is in AGOL.
+        update_statewide_parcels()
+
+        return
+
     if not LOCAL.exists():
         logger.info(f"creating local folder: {LOCAL}")
         LOCAL.mkdir(parents=True)
@@ -139,7 +162,7 @@ def main(
         time.sleep(diff.seconds)
 
     if sgid_only or all:
-        sgid(basemap)
+        sgid(basemaps)
 
     if static_only or all:
         static()
