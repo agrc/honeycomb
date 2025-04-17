@@ -20,6 +20,7 @@
     "ncols",
     "norecursedirs",
     "precisedelta",
+    "promap",
     "propy",
     "pygsheets",
     "pytz",

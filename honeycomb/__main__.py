@@ -15,8 +15,8 @@ Usage:
     honeycomb upload <basemap>
     honeycomb stats
     honeycomb resume
-    honeycomb vector <basemap> [--skip-update]
-    honeycomb vector-all [--skip-update]
+    honeycomb vector <basemap> [--skip-update] [--dont-wait]
+    honeycomb vector-all [--skip-update] [--dont-wait]
     honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test] [--spot <path>] [--levels <levels>] [--dont-wait]
 
 Arguments:
@@ -158,22 +158,22 @@ def main():
         basemap = args["<basemap>"]
         vector_basemaps = config.get_config_value("vectorBaseMaps")
 
-        if not args["--skip-update"]:
-            vector.update_data()
-
-        stats.record_start(basemap, "cache")
-        vector.main(basemap, vector_basemaps[basemap])
-        stats.record_finish(basemap, "cache")
+        vector.main(
+            basemap,
+            vector_basemaps[basemap],
+            skip_update=args["--skip-update"],
+            dont_wait=args["--dont-wait"],
+        )
     elif args["vector-all"]:
         vector_basemaps = config.get_config_value("vectorBaseMaps")
 
         if not args["--skip-update"]:
-            vector.update_data()
+            update_data.main(
+                dont_wait=args["--dont-wait"], basemaps=list(vector_basemaps.keys())
+            )
 
         for basemap in [key for key in list(vector_basemaps.keys())]:
-            stats.record_start(basemap, "cache")
-            vector.main(basemap, vector_basemaps[basemap])
-            stats.record_finish(basemap, "cache")
+            vector.main(basemap, vector_basemaps[basemap], skip_update=True)
     elif args["cleanup"]:
         cleanup.main()
     elif args["<basemap>"]:
