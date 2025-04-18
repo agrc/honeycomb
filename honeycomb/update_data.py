@@ -121,9 +121,10 @@ def sgid(basemaps: list[str] = None):
     logger.info(f"updating {str(len(sgid_layers))} layers in {local_db}...")
 
     with arcpy.EnvManager(workspace=local_db):
-        progress_bar = logging_tqdm(sgid_layers)
+        #: set the postfix to the first layer name so we can see it in the progress bar on the first iteration
+        progress_bar = logging_tqdm(sgid_layers, postfix=sgid_layers[0])
+        index = 0
         for fc in progress_bar:
-            progress_bar.set_postfix_str(fc)
             try:
                 sgid_name = sgid_fcs[fc.upper()]
             except KeyError:
@@ -131,6 +132,11 @@ def sgid(basemaps: list[str] = None):
                     f"Table not found in internal: {fc}. No update will be performed."
                 )
                 continue
+            finally:
+                #: this won't show up until the next loop iteration so we need to update it with the
+                #: next layer name
+                index += 1
+                progress_bar.set_postfix_str(sgid_layers[index])
             if arcpy.Exists(fc):
                 arcpy.management.Delete(fc)
             arcpy.management.Project(
