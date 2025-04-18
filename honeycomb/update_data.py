@@ -46,12 +46,33 @@ def get_SGID_lookup():
     them with the local FGDB feature classes.
     """
     logger.info("getting SGID fc lookup")
-    sgid_fcs = {}
-    arcpy.env.workspace = str(SGID)
-    for fc in arcpy.ListFeatureClasses():
-        sgid_fcs[fc.split(".")[-1]] = fc
+    import pyodbc
 
-    return sgid_fcs
+    host = ***REMOVED***
+    port = 1433
+    database = ***REMOVED***
+    username = ***REMOVED***
+    password = ***REMOVED***
+
+    connection_string = f"DRIVER={{ODBC Driver 18 for SQL Server}};SERVER={host},{port};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes"
+    conn = pyodbc.connect(connection_string)
+    cursor = conn.cursor()
+
+    #: get a list of all tables
+    cursor.execute(
+        """
+        SELECT database_name, owner, table_name
+        FROM sde.SDE_Table_Registry
+        WHERE owner <> 'SDE'
+        """
+    )
+    tables = cursor.fetchall()
+
+    table_dict = {
+        table[2].upper(): f"{table[0]}.{table[1]}.{table[2]}" for table in tables
+    }
+
+    return table_dict
 
 
 def get_layers(basemaps: list[str] = None):
