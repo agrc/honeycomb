@@ -26,7 +26,11 @@ def get_pro_map(basemap: str) -> arcpy._mp.Map:
 
 def validate_map_layers(basemap: str) -> None:
     pro_map = get_pro_map(basemap)
-    broken_layers = [layer.longName for layer in pro_map.listLayers() if layer.isBroken]
+    broken_layers = [
+        f"{layer.longName} ({layer.dataSource})"
+        for layer in pro_map.listLayers()
+        if layer.isBroken
+    ]
     if len(broken_layers) > 0:
         raise Exception(
             f"The following layers are broken in the '{pro_map.name}' map:\n"
