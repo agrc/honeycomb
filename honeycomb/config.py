@@ -126,9 +126,12 @@ def is_dev():
 
 def get_basemap(name):
     basemaps = _get_config()["basemaps"]
+    vector_basemaps = _get_config()["vectorBaseMaps"]
     try:
         return basemaps[name]
     except KeyError:
+        return vector_basemaps[name]
+    except KeyError:
         raise KeyError(
-            "Invalid basemap! Current basemaps: {}".format(", ".join(basemaps))
+            f"Invalid basemap! Current basemaps: {', '.join(basemaps)}. Current vector basemaps: {', '.join(vector_basemaps)}"
         )
