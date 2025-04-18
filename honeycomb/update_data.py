@@ -16,7 +16,7 @@ import arcpy
 import pytz
 from forklift import engine
 
-from . import settings
+from . import config, settings
 from .log import logger, logging_tqdm
 
 LOCAL = Path(r"C:\Cache\MapData")
@@ -81,14 +81,28 @@ def get_layers(basemaps: list[str] = None):
     """
     layers = set()
 
+    maps = {}
+    if basemaps:
+        for basemap in basemaps:
+            basemap_config = config.get_basemap(basemap)
+            maps.setdefault(basemap_config.get("mapName", basemap), {}).setdefault(
+                "groupLayers", set()
+            ).update(basemap_config.get("groupLayers", []))
+
     logger.info("getting unique data sources from layers")
     project = arcpy.mp.ArcGISProject(str(settings.PRO_PROJECT))
     for map in project.listMaps():
-        if basemaps and map.name not in basemaps:
-            continue
+        if basemaps:
+            if map.name not in maps:
+                continue
+            else:
+                group_layers = maps[map.name].get("groupLayers", [])
         logger.info(f"map: {map.name}")
-        for layer in logging_tqdm(map.listLayers()):
+        for layer in map.listLayers():
             if layer.isFeatureLayer and SGID_GDB_NAME in layer.dataSource:
+                if group_layers:
+                    if layer.longName.split("\\")[0] not in group_layers:
+                        continue
                 layers.add(Path(layer.dataSource).name)
 
     return list(layers)
@@ -105,12 +119,13 @@ def sgid(basemaps: list[str] = None):
 
     sgid_layers = get_layers(basemaps)
     logger.info(f"updating {str(len(sgid_layers))} layers in {local_db}...")
+
     with arcpy.EnvManager(workspace=local_db):
         progress_bar = logging_tqdm(sgid_layers)
         for fc in progress_bar:
             progress_bar.set_postfix_str(fc)
             try:
-                sgid_name = sgid_fcs[fc]
+                sgid_name = sgid_fcs[fc.upper()]
             except KeyError:
                 logger.warning(
                     f"Table not found in internal: {fc}. No update will be performed."
@@ -159,7 +174,7 @@ def main(
     dont_wait: bool = False,
     basemaps: list[str] = None,
 ):
-    if len(basemaps) == 1 and basemaps[0] == "StatewideParcels":
+    if "StatewideParcels" in basemaps:
         #: statewide parcels is a special case. It only has a single layer and the
         #: source is in AGOL.
         update_statewide_parcels()
@@ -188,6 +203,7 @@ def main(
     if static_only or all:
         static()
 
-    if external_only or all:
-        pallet_path = Path(__file__).parent / "pallets" / "BasemapsPallet.py"
-        run_forklift(str(pallet_path))
+    # Zach doesn't use these datasets yet anyways and we should probably take forklift out of the equation
+    # if external_only or all:
+    #     pallet_path = Path(__file__).parent / "pallets" / "BasemapsPallet.py"
+    #     run_forklift(str(pallet_path))

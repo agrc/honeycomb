@@ -37,7 +37,7 @@ def main(
     utilities.validate_map_layers(mapName)
 
     if not skip_update:
-        update_data.main(basemaps=[mapName], dont_wait=dont_wait)
+        update_data.main(basemaps=[basemap], dont_wait=dont_wait)
 
     promap = utilities.get_pro_map(mapName)
 
