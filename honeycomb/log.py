@@ -42,22 +42,19 @@ sys.excepthook = global_exception_handler
 
 
 #: https://github.com/tqdm/tqdm/issues/313#issuecomment-812224667
+#: this makes tqdm logging more friendly to and show up in cloud logs
 class logging_tqdm(tqdm):
     def __init__(self, *args, **kwargs):
         self._logger = logger
         self._last_log_n = -1
         ncols = 80
-        mininterval = 60 * 5  #: seconds
-        super().__init__(*args, mininterval=mininterval, ncols=ncols, **kwargs)
+        super().__init__(*args, ncols=ncols, **kwargs)
 
     @property
     def logger(self):
         return logger
 
     def display(self, msg=None, pos=None):
-        if not self.n:
-            # skip progress bar before having processed anything
-            return
         if self.n == self._last_log_n:
             # avoid logging for the same progress multiple times
             return
