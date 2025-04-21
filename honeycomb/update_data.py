@@ -136,7 +136,8 @@ def sgid(basemaps: list[str] = None):
                 #: this won't show up until the next loop iteration so we need to update it with the
                 #: next layer name
                 index += 1
-                progress_bar.set_postfix_str(sgid_layers[index])
+                if index < len(sgid_layers) - 1:
+                    progress_bar.set_postfix_str(sgid_layers[index])
             if arcpy.Exists(fc):
                 arcpy.management.Delete(fc)
             arcpy.management.Project(
