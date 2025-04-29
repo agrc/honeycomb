@@ -8,11 +8,13 @@ A module that contains code for updating the data for base maps.
 
 import datetime
 import logging
+import os
 import sys
 import time
 from pathlib import Path
 
 import arcpy
+import pyodbc
 import pytz
 from forklift import engine
 
@@ -46,16 +48,8 @@ def get_SGID_lookup():
     them with the local FGDB feature classes.
     """
     logger.info("getting SGID fc lookup")
-    import pyodbc
 
-    host = ***REMOVED***
-    port = 1433
-    database = ***REMOVED***
-    username = ***REMOVED***
-    password = ***REMOVED***
-
-    connection_string = f"DRIVER={{ODBC Driver 18 for SQL Server}};SERVER={host},{port};DATABASE={database};UID={username};PWD={password};TrustServerCertificate=yes"
-    conn = pyodbc.connect(connection_string)
+    conn = pyodbc.connect(os.getenv("HONEYCOMB_INTERNAL_CONNECTION_STRING"))
     cursor = conn.cursor()
 
     #: get a list of all tables
