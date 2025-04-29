@@ -107,6 +107,7 @@ def main(
 
     logger.info("publishing new vector tiles service...")
     temp_item = item.publish()
+    temp_item.sharing.sharing_level = arcgis.gis.SharingLevel.ORG
 
     send_email(
         f"Tile Package Generation Complete for {basemap}",
