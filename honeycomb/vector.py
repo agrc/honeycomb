@@ -110,12 +110,12 @@ def main(
 
     send_email(
         f"Tile Package Generation Complete for {basemap}",
-        f"Check out the temporary service here: {temp_item.url}. Once you are happy with the service, go back to the honeycomb server and press enter to continue with the replacement.",
+        f"Check out the temporary service here: https://www.arcgis.com/apps/mapviewer/index.html?basemapUrl={temp_item.url}. Once you are happy with the service, go back to the honeycomb server and press enter to continue with the replacement.",
     )
     input(
         f"""
         *************
-        Tile Package Generation Complete for {basemap}. Check out the temporary service here: {temp_item.url}. Press enter to continue with the replacement.
+        Tile Package Generation Complete for {basemap}. Check out the temporary service here: https://www.arcgis.com/apps/mapviewer/index.html?basemapUrl={temp_item.urls}. Press enter to continue with the replacement.
         *************
         """
     )
