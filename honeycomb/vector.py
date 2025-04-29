@@ -116,7 +116,7 @@ def main(
     input(
         f"""
         *************
-        Tile Package Generation Complete for {basemap}. Check out the temporary service here: https://www.arcgis.com/apps/mapviewer/index.html?basemapUrl={temp_item.urls}. Press enter to continue with the replacement.
+        Tile Package Generation Complete for {basemap}. Check out the temporary service here: https://www.arcgis.com/apps/mapviewer/index.html?basemapUrl={temp_item.url}. Press enter to continue with the replacement.
         *************
         """
     )
