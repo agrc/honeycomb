@@ -76,7 +76,7 @@ class WorkerBee(object):
         if skip_update or get_job_status("data_updated"):
             logger.info("skipping data update...")
         else:
-            update_data.main(dont_wait=dont_wait, basemaps=basemap)
+            update_data.main(dont_wait=dont_wait, basemaps=[basemap])
             send_email(
                 self.email_subject, "Data update complete. Proceeding with caching..."
             )
@@ -133,6 +133,8 @@ class WorkerBee(object):
             )
             logger.info("spot caching levels 18-19...")
             self.cache_extent(settings.SCALES[18:], intersect, SPOT_CACHE_NAME)
+
+            self.explode_cache()
 
     def cache_extent(
         self,
