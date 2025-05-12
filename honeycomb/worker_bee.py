@@ -253,7 +253,7 @@ class WorkerBee(object):
             "Time to manually convert cache to exploded format.",
         )
         input(
-            "Caching complete. Manually convert cache to exploded format and then press enter to continue..."
+            f"Caching complete for {self.basemap}. Manually convert cache to exploded format and then press enter to continue..."
         )
 
         # try:
