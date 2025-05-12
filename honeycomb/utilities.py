@@ -18,12 +18,12 @@ def get_pro_map(basemap: str) -> arcpy._mp.Map:
     pro_map = project.listMaps(basemap)[0]
     pro_map.clearSelection()
     pro_map.defaultCamera.setExtent(
-        #: state of utah extent
+        #: western states
         arcpy.Extent(
-            XMax=-12612006,
-            XMin=-12246370,
-            YMax=5125456,
-            YMin=4473357,
+            XMin=-13885235,
+            XMax=-11359207,
+            YMin=3675964,
+            YMax=6275285,
             spatial_reference=arcpy.SpatialReference(3857),
         )
     )
