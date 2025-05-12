@@ -87,7 +87,7 @@ def main():
         is_resumed_job=False,
         dont_wait=False,
     ):
-        if not is_resumed_job:
+        if not is_resumed_job and not spot:
             start_new_job(basemap, missing_only, skip_update, skip_test, spot, levels)
             stats.record_start(basemap, "cache")
 
@@ -97,18 +97,22 @@ def main():
             WorkerBee(
                 basemap, missing_only, skip_update, skip_test, spot, levels, dont_wait
             )
-            stats.record_finish(basemap, "cache")
-            update_job("caching_complete", True)
+            if not spot:
+                stats.record_finish(basemap, "cache")
+                update_job("caching_complete", True)
+
+        if not spot:
+            stats.record_start(basemap, "upload")
 
         upload(basemap)
 
-        finish_job()
+        if not spot:
+            stats.record_finish(basemap, "upload")
+            finish_job()
 
     def upload(basemap):
         basemap_info = config.get_basemap(basemap)
-        stats.record_start(basemap, "upload")
         swarm(basemap, basemap_info["bucket"], basemap_info["imageType"])
-        stats.record_finish(basemap, "upload")
 
     if args["config"]:
         if args["init"]:
