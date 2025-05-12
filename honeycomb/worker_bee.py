@@ -162,7 +162,6 @@ class WorkerBee(object):
 
         try:
             #: this takes 8-10 minutes to start for some reason
-            print(arcpy.env.parallelProcessingFactor)
             arcpy.management.ManageTileCache(
                 str(settings.CACHES_DIR),
                 "RECREATE_EMPTY_TILES",

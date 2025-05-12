@@ -17,6 +17,16 @@ def get_pro_map(basemap: str) -> arcpy._mp.Map:
     project = arcpy.mp.ArcGISProject(str(temp_project_path))
     pro_map = project.listMaps(basemap)[0]
     pro_map.clearSelection()
+    pro_map.defaultCamera.setExtent(
+        #: state of utah extent
+        arcpy.Extent(
+            XMax=-12612006,
+            XMin=-12246370,
+            YMax=5125456,
+            YMin=4473357,
+            spatial_reference=arcpy.SpatialReference(3857),
+        )
+    )
 
     if not pro_map:
         raise Exception(f"Map '{basemap}' not found in project.")
