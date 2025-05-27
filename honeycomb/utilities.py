@@ -15,7 +15,10 @@ def get_pro_map(basemap: str) -> arcpy._mp.Map:
     copy(settings.PRO_PROJECT, temp_project_path)
 
     project = arcpy.mp.ArcGISProject(str(temp_project_path))
-    pro_map = project.listMaps(basemap)[0]
+    maps = project.listMaps(basemap)
+    if not maps:
+        raise Exception(f"Map '{basemap}' not found in project.")
+    pro_map = maps[0]
     pro_map.clearSelection()
     pro_map.defaultCamera.setExtent(
         #: western states
