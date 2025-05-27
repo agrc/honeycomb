@@ -51,7 +51,7 @@ def create_default_config():
             "gcpProject": "",
             "gizaInstance": "https://discover.agrc.utah.gov",
             "mxdFolder": "C:\\temp",
-            "notify": ["stdavis@utah.gov"],
+            "notify": ["ugrc-developers@utah.gov"],
             "sendEmails": False,
             "vectorBaseMaps": {},
             "vectorTilesFolder": "C:\\temp",
