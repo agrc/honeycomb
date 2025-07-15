@@ -28,7 +28,7 @@ TEST_EXTENT = os.path.join(EXTENTSFGDB, "test_extent")
 
 COMPLETE_NUM_BUNDLES_LU = {
     "Lite": 20509,
-    "Terrain": 20511,
+    "Terrain": 2962,
     "Overlay": 2934,
     "AddressPoints": 2635,
 }
@@ -73,6 +73,6 @@ GRIDS = [
     [GRIDS18_19, SCALES[19]],
 ]
 
-arcpy.env.parallelProcessingFactor = "95%"
+arcpy.env.parallelProcessingFactor = "90%"
 #: required for using the RECREATE_EMPTY_TILES option in the Manage Tile Cache tool
 arcpy.env.overwriteOutput = True
