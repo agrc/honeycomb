@@ -153,18 +153,21 @@ def static():
 
 
 def update_statewide_parcels():
-    local = LOCAL / "StatewideParcels.gdb" / "StateWideParcels"
+    local_gdb = LOCAL / "StatewideParcels.gdb"
+    if not local_gdb.exists():
+        logger.info(f"creating: {local_gdb}")
+        arcpy.CreateFileGDB_management(str(local_gdb.parent), local_gdb.name)
 
-    if not local.exists():
-        logger.info(f"creating: {local}")
-        arcpy.CreateFileGDB_management(str(local.parent), local.name)
+    local = str(local_gdb / "StateWideParcels")
 
     logger.info(f"updating statewide parcels in {local}...")
-    arcpy.management.Delete(local)
+    if arcpy.Exists(local):
+        logger.info(f"deleting: {local}")
+        arcpy.management.Delete(local)
 
-    arcpy.management.Copy(
+    arcpy.conversion.ExportFeatures(
         "https://services1.arcgis.com/99lidPhWCzftIe9K/arcgis/rest/services/UtahStatewideParcels/FeatureServer/0",
-        str(local),
+        local,
     )
 
 
