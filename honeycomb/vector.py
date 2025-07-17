@@ -8,10 +8,10 @@ import os
 from datetime import date
 from shutil import rmtree
 
-import arcgis
 import arcpy
 import google.auth
 import pygsheets
+from arcgis.gis import GIS, Item, ItemProperties, ItemTypeEnum, SharingLevel
 
 from . import settings, stats, update_data, utilities
 from .log import logger
@@ -41,7 +41,7 @@ def main(
 
     promap = utilities.get_pro_map(mapName)
 
-    if config["groupLayers"]:
+    if "groupLayers" in config:
         for layer in promap.listLayers():
             #: we only want to set the visibility of root-level group layers
             if layer.isGroupLayer and layer.longName == layer.name:
@@ -95,19 +95,19 @@ def main(
     stats.record_finish(basemap, "cache")
 
     logger.info("publishing new tile package item...")
-    gis = arcgis.gis.GIS(username=USERNAME, password=PASSWORD)
+    gis = GIS(username=USERNAME, password=PASSWORD)
     temp_folder = gis.content.folders.get(folder="Temp")
-    item_properties = arcgis.gis.ItemProperties(
+    item_properties = ItemProperties(
         title=tile_package_path.stem,
-        item_type=arcgis.gis.ItemTypeEnum.VECTOR_TILE_PACKAGE.value,
+        item_type=ItemTypeEnum.VECTOR_TILE_PACKAGE.value,
     )
     job = temp_folder.add(item_properties, file=str(tile_package_path))
 
-    item = job.result(60 * 10)  #: 10 minute timeout
+    item = job.result()
 
     logger.info("publishing new vector tiles service...")
     temp_item = item.publish()
-    temp_item.sharing.sharing_level = arcgis.gis.SharingLevel.ORG
+    temp_item.sharing.sharing_level = SharingLevel.ORG
 
     send_email(
         f"Tile Package Generation Complete for {basemap}",
@@ -123,7 +123,7 @@ def main(
 
     stats.record_start(basemap, "upload")
     logger.info("replacing production service...")
-    prod_item = arcgis.gis.Item(gis, config["id"])
+    prod_item = Item(gis, config["id"])
     gis.content.replace_service(prod_item, temp_item)
 
     logger.info("removing temporary items...")
