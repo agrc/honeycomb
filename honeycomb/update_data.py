@@ -22,7 +22,7 @@ from . import config, settings
 from .log import logger, logging_tqdm
 
 LOCAL = Path(r"C:\Cache\MapData")
-SHARE = Path(settings.SHARE) / "Data"
+SHARE = Path(settings.SHARE) / "Data"  # type: ignore
 SGID = SHARE / "SGID.sde"
 SGID_GDB_NAME = "SGID10_WGS.gdb"
 STATIC_GDB_NAME = "UtahBaseMap-Data_WGS.gdb"
@@ -69,7 +69,7 @@ def get_SGID_lookup():
     return table_dict
 
 
-def get_layers(basemaps: list[str] = None):
+def get_layers(basemaps: list[str] | None = None):
     """
     Get a list of SGID layers that are sources in any of the cache map documents
     """
@@ -85,6 +85,7 @@ def get_layers(basemaps: list[str] = None):
 
     logger.info("getting unique data sources from layers")
     project = arcpy.mp.ArcGISProject(str(settings.PRO_PROJECT))
+    group_layers = None
     for map in project.listMaps():
         if basemaps:
             if map.name not in maps:
@@ -94,7 +95,7 @@ def get_layers(basemaps: list[str] = None):
         logger.info(f"map: {map.name}")
         for layer in map.listLayers():
             if layer.isFeatureLayer and SGID_GDB_NAME in layer.dataSource:
-                if group_layers:
+                if group_layers is not None:
                     if layer.longName.split("\\")[0] not in group_layers:
                         continue
                 layers.add(Path(layer.dataSource).name)
@@ -102,7 +103,7 @@ def get_layers(basemaps: list[str] = None):
     return list(layers)
 
 
-def sgid(basemaps: list[str] = None):
+def sgid(basemaps: list[str] | None = None):
     sgid_fcs = get_SGID_lookup()
 
     local_db = str(LOCAL / SGID_GDB_NAME)
@@ -176,9 +177,9 @@ def main(
     sgid_only: bool = False,
     external_only: bool = False,
     dont_wait: bool = False,
-    basemaps: list[str] = None,
+    basemaps: list[str] | None = None,
 ):
-    if "StatewideParcels" in basemaps:
+    if basemaps is not None and "StatewideParcels" in basemaps:
         #: statewide parcels is a special case. It only has a single layer and the
         #: source is in AGOL.
         update_statewide_parcels()

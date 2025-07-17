@@ -13,12 +13,12 @@ import arcpy
 
 SHARE_ENV_NAME = "HONEYCOMB_SHARE"
 SHARE = os.getenv(SHARE_ENV_NAME)
-PRO_PROJECT = Path(SHARE) / "Maps" / "Maps.aprx"
-QUAD_WORD = os.getenv("HONEYCOMB_QUAD_WORD")
 if SHARE is None:
     raise Exception(
         'Please set the "{}" environmental variable!'.format(SHARE_ENV_NAME)
     )
+PRO_PROJECT = Path(SHARE) / "Maps" / "Maps.aprx"
+QUAD_WORD = os.getenv("HONEYCOMB_QUAD_WORD")
 PREVIEW_URL = rf"https://discover.agrc.utah.gov/login/path/{QUAD_WORD}/tiles/preview#basemap_{{}}_test/8/39.527/-111.555"
 DATA_FOLDER = Path(__file__).parent / "data"
 EXTENTSFGDB = str(DATA_FOLDER / "Extents.geodatabase")

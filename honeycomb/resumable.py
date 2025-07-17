@@ -17,7 +17,7 @@ Properties = Literal[
 
 
 class Job(TypedDict):
-    cache_args: List[Union[str, bool, List[int]]]
+    cache_args: List[Union[str, bool, List[int], None]]
     data_updated: bool
     test_cache_complete: bool
     cache_extents_completed: List[str]
@@ -44,8 +44,8 @@ def start_new_job(
     missing_only: bool,
     skip_update: bool,
     skip_test: bool,
-    spot: str,
-    levels: List[int],
+    spot: str | None,
+    levels: List[int] | None,
 ) -> None:
     job: Job = {
         "cache_args": [basemap, missing_only, skip_update, skip_test, spot, levels],
@@ -69,11 +69,11 @@ def update_job(
     if job is None:
         raise Exception("No job has been created!")
 
-    try:
-        #: if the property is a list, append the value to it
-        job[prop].append(value)
-    except AttributeError:
-        job[prop] = value
+    # If the property is a list, append the value to it; otherwise, assign directly
+    if isinstance(job[prop], list):
+        job[prop].append(value)  # type: ignore
+    else:
+        job[prop] = value  # type: ignore
 
     cache_job_status(job)
 

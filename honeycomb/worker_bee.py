@@ -12,6 +12,7 @@ from datetime import date
 from os.path import join
 from pathlib import Path
 from shutil import rmtree
+from typing import cast
 
 import arcpy
 import google.auth
@@ -27,7 +28,7 @@ AGOL_SCHEME_NAME = "ARCGISONLINE_SCHEME"
 SPOT_CACHE_NAME = "spot cache"
 
 
-def parse_levels(levels_txt):
+def parse_levels(levels_txt: str) -> list[float]:
     #: parse the levels parameter text into an array of scales
     min, max = list(map(int, levels_txt.split("-")))
 
@@ -48,8 +49,8 @@ class WorkerBee(object):
         missing_only: bool = False,
         skip_update: bool = False,
         skip_test: bool = False,
-        spot_path: bool = False,
-        levels: bool = False,
+        spot_path: str | None = None,
+        levels: str | None = None,
         dont_wait: bool = False,
     ):
         logger.info("caching {}".format(basemap))
@@ -132,7 +133,7 @@ class WorkerBee(object):
                 join_attributes="ONLY_FID",
             )
             logger.info("spot caching levels 18-19...")
-            self.cache_extent(settings.SCALES[18:], intersect, SPOT_CACHE_NAME)
+            self.cache_extent(settings.SCALES[18:], str(intersect), SPOT_CACHE_NAME)
 
             self.explode_cache()
 
@@ -144,8 +145,8 @@ class WorkerBee(object):
         dont_skip: bool = False,
     ) -> None:
         cache_job_key = f"{name}-{scales}"
-        if dont_skip is False and cache_job_key in get_job_status(
-            "cache_extents_completed"
+        if dont_skip is False and cache_job_key in cast(
+            list, get_job_status("cache_extents_completed")
         ):
             logger.info(f"skipping extent based on current job: {cache_job_key}")
 
@@ -339,7 +340,7 @@ class WorkerBee(object):
 
         #: update sgid changelog
         today = date.today().strftime(r"%m/%d/%Y")
-        matrix = sgid_worksheet.get_all_values(
+        matrix = sgid_worksheet.get_all_values(  # type: ignore
             include_tailing_empty_rows=False, include_tailing_empty=False
         )
         row = [
@@ -357,14 +358,14 @@ class WorkerBee(object):
             "no",
             "yes",
         ]
-        sgid_worksheet.insert_rows(len(matrix), values=row, inherit=True)
+        sgid_worksheet.insert_rows(len(matrix), values=row, inherit=True)  # type: ignore
 
         #: update base maps spreadsheet embedded in gis.utah.gov page
         this_month = date.today().strftime(r"%b %Y")
-        results = base_maps_worksheet.find(self.basemap, matchEntireCell=True)
+        results = base_maps_worksheet.find(self.basemap, matchEntireCell=True)  # type: ignore
         cell = results[0]
 
-        base_maps_worksheet.update_value((cell.row + 1, cell.col), this_month)
+        base_maps_worksheet.update_value((cell.row + 1, cell.col), this_month)  # type: ignore
 
         if not get_job_status("exploding_complete"):
             self.explode_cache()

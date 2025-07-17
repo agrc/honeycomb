@@ -141,7 +141,7 @@ def main(
     base_maps_worksheet = base_maps_sheet[0]
 
     today = date.today().strftime(r"%m/%d/%Y")
-    results = base_maps_worksheet.find(basemap, includeFormulas=True)
+    results = base_maps_worksheet.find(basemap, includeFormulas=True)  # type: ignore
     cell = results[0]
 
-    base_maps_worksheet.update_value((cell.row + 1, cell.col), today)
+    base_maps_worksheet.update_value((cell.row + 1, cell.col), today)  # type: ignore

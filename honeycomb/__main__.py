@@ -82,8 +82,8 @@ def main():
         missing_only=False,
         skip_update=False,
         skip_test=False,
-        spot=False,
-        levels=False,
+        spot=None,
+        levels=None,
         is_resumed_job=False,
         dont_wait=False,
     ):
@@ -202,7 +202,7 @@ def main():
             logger.info(f"resuming {cache_name}")
             send_email(f"Cache Job Resumed: {cache_name}", json.dumps(job, indent=2))
             update_job("restart_times", str(datetime.now()))
-            cache(*job["cache_args"], is_resumed_job=True)
+            cache(*job["cache_args"], is_resumed_job=True)  # type: ignore
 
 
 if __name__ == "__main__":
