@@ -85,7 +85,7 @@ def get_layers(basemaps: list[str] | None = None):
 
     logger.info("getting unique data sources from layers")
     project = arcpy.mp.ArcGISProject(str(settings.PRO_PROJECT))
-    group_layers = None
+    group_layers = []
     for map in project.listMaps():
         if basemaps:
             if map.name not in maps:
@@ -95,7 +95,7 @@ def get_layers(basemaps: list[str] | None = None):
         logger.info(f"map: {map.name}")
         for layer in map.listLayers():
             if layer.isFeatureLayer and SGID_GDB_NAME in layer.dataSource:
-                if group_layers is not None:
+                if len(group_layers) > 0:
                     if layer.longName.split("\\")[0] not in group_layers:
                         continue
                 layers.add(Path(layer.dataSource).name)
