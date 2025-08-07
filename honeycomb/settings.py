@@ -27,7 +27,7 @@ CACHES_DIR.mkdir(exist_ok=True)
 TEST_EXTENT = os.path.join(EXTENTSFGDB, "test_extent")
 
 COMPLETE_NUM_BUNDLES_LU = {
-    "Lite": 20509,
+    "Lite": 2934,
     "Terrain": 2962,
     "Overlay": 2934,
     "AddressPoints": 2635,
