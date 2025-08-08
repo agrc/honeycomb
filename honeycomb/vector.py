@@ -84,8 +84,8 @@ def main(
         str(tile_package_path),
         "ONLINE",
         tile_structure="INDEXED",
-        min_cached_scale=295828763.795778,
-        max_cached_scale=564.248588,
+        min_cached_scale=settings.SCALES[1],  #: tile packages do not support level 0
+        max_cached_scale=settings.SCALES[20],
         index_polygons=str(index_path),
         summary=config["summary"],
         tags=config["tags"],
