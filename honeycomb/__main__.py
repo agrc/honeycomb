@@ -18,6 +18,7 @@ Usage:
     honeycomb vector <basemap> [--skip-update] [--dont-wait]
     honeycomb vector-all [--skip-update] [--dont-wait]
     honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test] [--spot <path>] [--levels <levels>] [--dont-wait]
+    honeycomb explode <basemap>
 
 Arguments:
     -h --help               Show this screen.
@@ -71,7 +72,7 @@ from .resumable import (
     update_job,
 )
 from .swarm import swarm
-from .worker_bee import WorkerBee
+from .worker_bee import WorkerBee, explode_cache
 
 
 def main():
@@ -180,6 +181,8 @@ def main():
             vector.main(basemap, vector_basemaps[basemap], skip_update=True)
     elif args["cleanup"]:
         cleanup.main()
+    elif args["explode"] and args["<basemap>"]:
+        explode_cache(args["<basemap>"])
     elif args["<basemap>"]:
         cache(
             args["<basemap>"],

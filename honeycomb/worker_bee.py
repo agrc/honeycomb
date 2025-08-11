@@ -89,7 +89,7 @@ class WorkerBee(object):
         else:
             self.cache_test_extent()
 
-            self.explode_cache()
+            explode_cache(basemap)
 
             swarm(
                 basemap,
@@ -135,7 +135,7 @@ class WorkerBee(object):
             logger.info("spot caching levels 18-19...")
             self.cache_extent(settings.SCALES[18:], str(intersect), SPOT_CACHE_NAME)
 
-            self.explode_cache()
+            explode_cache(basemap)
 
     def cache_extent(
         self,
@@ -245,25 +245,6 @@ class WorkerBee(object):
             )
             raise arcpy.ExecuteError
 
-    def explode_cache(self) -> None:
-        logger.info("exploding cache")
-
-        try:
-            arcpy.management.ExportTileCache(
-                str(settings.CACHES_DIR / self.basemap / self.basemap),
-                str(settings.CACHES_DIR),
-                f"{self.basemap}_Exploded",
-                export_cache_type="TILE_CACHE",
-                storage_format_type="EXPLODED",
-            )
-        except arcpy.ExecuteError:
-            logger.error(arcpy.GetMessages())
-            send_email(
-                "Explode Cache Error ({}) - arcpy.ExecuteError".format(self.basemap),
-                arcpy.GetMessages(),
-            )
-            raise arcpy.ExecuteError
-
     def delete_cache(self) -> None:
         dir = settings.CACHES_DIR / self.basemap
         if dir.exists():
@@ -368,8 +349,28 @@ class WorkerBee(object):
         base_maps_worksheet.update_value((cell.row + 1, cell.col), this_month)  # type: ignore
 
         if not get_job_status("exploding_complete"):
-            self.explode_cache()
+            explode_cache(self.basemap)
             update_job("exploding_complete", True)
             send_email(self.email_subject, "Exploding complete.")
         else:
             logger.info("skipping exploding cache based on job status")
+
+
+def explode_cache(basemap) -> None:
+    logger.info("exploding cache")
+
+    try:
+        arcpy.management.ExportTileCache(
+            str(settings.CACHES_DIR / basemap / basemap),
+            str(settings.CACHES_DIR),
+            f"{basemap}_Exploded",
+            export_cache_type="TILE_CACHE",
+            storage_format_type="EXPLODED",
+        )
+    except arcpy.ExecuteError:
+        logger.error(arcpy.GetMessages())
+        send_email(
+            "Explode Cache Error ({}) - arcpy.ExecuteError".format(basemap),
+            arcpy.GetMessages(),
+        )
+        raise arcpy.ExecuteError
