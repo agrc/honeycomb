@@ -252,10 +252,7 @@ class WorkerBee(object):
 
             rmtree(dir)
 
-        exploded_directory = settings.CACHES_DIR / f"{self.basemap}_Exploded"
-        if exploded_directory.exists():
-            logger.info("deleting existing exploded cache")
-            rmtree(exploded_directory)
+        delete_exploded_cache(self.basemap)
 
     def cache(self, run_all_levels: bool, dont_skip: bool = False) -> None:
         arcpy.env.workspace = settings.EXTENTSFGDB
@@ -356,9 +353,17 @@ class WorkerBee(object):
             logger.info("skipping exploding cache based on job status")
 
 
-def explode_cache(basemap) -> None:
-    logger.info("exploding cache")
+def delete_exploded_cache(basemap) -> None:
+    exploded_directory = settings.CACHES_DIR / f"{basemap}_Exploded"
+    if exploded_directory.exists():
+        logger.info("deleting existing exploded cache")
+        rmtree(exploded_directory)
 
+
+def explode_cache(basemap) -> None:
+    delete_exploded_cache(basemap)
+
+    logger.info("exploding cache for {}".format(basemap))
     try:
         arcpy.management.ExportTileCache(
             str(settings.CACHES_DIR / basemap / basemap),
