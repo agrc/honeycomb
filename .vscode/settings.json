@@ -3,6 +3,8 @@
     "addopts",
     "alllayers",
     "arcgiscache",
+    "arcpy",
+    "basemap",
     "dask",
     "docopt",
     "excepthook",

@@ -88,7 +88,7 @@ def main():
         is_resumed_job=False,
         dont_wait=False,
     ):
-        if not is_resumed_job and not spot:
+        if not is_resumed_job:
             start_new_job(basemap, missing_only, skip_update, skip_test, spot, levels)
             stats.record_start(basemap, "cache")
 
@@ -98,9 +98,8 @@ def main():
             WorkerBee(
                 basemap, missing_only, skip_update, skip_test, spot, levels, dont_wait
             )
-            if not spot:
-                stats.record_finish(basemap, "cache")
-                update_job("caching_complete", True)
+            stats.record_finish(basemap, "cache")
+            update_job("caching_complete", True)
 
         if not spot:
             stats.record_start(basemap, "upload")
