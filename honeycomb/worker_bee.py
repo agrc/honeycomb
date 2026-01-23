@@ -7,12 +7,14 @@ A module that contains logic for building traditional image-based caches.
 """
 
 import os
+import shutil
+import subprocess
+import tempfile
 import time
 from datetime import date
 from os.path import join
 from pathlib import Path
-from shutil import rmtree
-from typing import cast
+from typing import Union, cast
 
 import arcpy
 import google.auth
@@ -26,6 +28,72 @@ from .swarm import swarm
 
 AGOL_SCHEME_NAME = "ARCGISONLINE_SCHEME"
 SPOT_CACHE_NAME = "spot cache"
+
+
+def fast_delete_robocopy(target_path: Union[str, Path]) -> None:
+    """
+    Deletes a directory tree using Windows Robocopy.
+
+    Raises:
+        FileNotFoundError: If the target_path does not exist.
+        subprocess.CalledProcessError: If Robocopy fails critically (Exit Code >= 8).
+        OSError: If the directory cannot be removed after emptying (e.g., active locks).
+    """
+    target = Path(target_path).resolve()
+    logger.info(f"Fast deleting directory: {target}")
+
+    if not target.exists():
+        raise FileNotFoundError(f"The directory '{target}' does not exist.")
+
+    # 1. Create a temporary empty directory
+    with tempfile.TemporaryDirectory() as empty_source:
+        # 2. Construct the Robocopy command
+        # /MIR  : Mirror source to target (deletes destination files not in source)
+        # /MT:32: Multi-threaded (32 threads)
+        # /R:5  : Retry 5 times (increased to handle locked files)
+        # /W:1  : Wait 1 second between retries
+        # /NP, /NFL, /NDL: Suppress logging for speed
+        cmd = [
+            "robocopy",
+            str(empty_source),
+            str(target),
+            "/MIR",
+            "/MT:32",
+            "/R:5",
+            "/W:1",
+            "/NP",
+            "/NFL",
+            "/NDL",
+        ]
+
+        # 3. Execute
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        # Robocopy Exit Codes 0-7 indicate success/partial success (e.g., file deletion).
+        # Exit Codes >= 8 indicate a critical failure.
+        if result.returncode >= 8:
+            raise subprocess.CalledProcessError(
+                returncode=result.returncode,
+                cmd=cmd,
+                output=result.stdout,
+                stderr=result.stderr,
+            )
+
+    # 4. Attempt to remove the root directory.
+    # If Robocopy skipped locked files, this will raise OSError: [WinError 145] Directory not empty.
+    try:
+        shutil.rmtree(target)
+    except OSError as e:
+        # We catch and re-raise to add context if it's a "Directory not empty" error
+        # which is common with ArcGIS locks.
+        if getattr(e, "winerror", 0) == 145:  # WinError 145 = Directory not empty
+            remaining = len(list(target.iterdir()))
+            raise OSError(
+                f"Deletion incomplete. {remaining} items remain in '{target.name}'. "
+            ) from e
+        raise e
+
+    logger.info(f"Successfully deleted directory: {target}")
 
 
 def parse_levels(levels_txt: str) -> list[float]:
@@ -60,7 +128,10 @@ class WorkerBee(object):
         self.preview_url = settings.PREVIEW_URL.format(self.basemap.lower())
         self.email_subject = "Cache Update ({})".format(self.basemap)
         basemap_config = config.get_basemap(basemap)
-        self.image_type = basemap_config["imageType"]
+        try:
+            self.image_type = basemap_config["imageType"]
+        except KeyError:
+            self.image_type = None
 
         utilities.validate_map_layers(basemap)
 
@@ -84,7 +155,7 @@ class WorkerBee(object):
 
         update_job("data_updated", True)
 
-        if skip_test or get_job_status("test_cache_complete"):
+        if skip_test or get_job_status("test_cache_complete") or spot_path is not None:
             logger.info("skipping test cache...")
         else:
             self.cache_test_extent()
@@ -250,7 +321,7 @@ class WorkerBee(object):
         if dir.exists():
             logger.info("deleting existing cache")
 
-            rmtree(dir)
+            fast_delete_robocopy(dir)
 
         delete_exploded_cache(self.basemap)
 
@@ -356,8 +427,7 @@ class WorkerBee(object):
 def delete_exploded_cache(basemap) -> None:
     exploded_directory = settings.CACHES_DIR / f"{basemap}_Exploded"
     if exploded_directory.exists():
-        logger.info("deleting existing exploded cache")
-        rmtree(exploded_directory)
+        fast_delete_robocopy(exploded_directory)
 
 
 def explode_cache(basemap) -> None:
@@ -379,3 +449,4 @@ def explode_cache(basemap) -> None:
             arcpy.GetMessages(),
         )
         raise arcpy.ExecuteError
+    logger.info("exploding complete")
