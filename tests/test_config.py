@@ -87,3 +87,29 @@ def test_get_basemap():
 
     with pytest.raises(KeyError):
         config.get_basemap("Bad")
+
+
+@patch("honeycomb.config.storage.Client")
+def test_get_storage_client_configures_retry_strategy(mock_storage_client):
+    """Test that get_storage_client configures a proper retry strategy for handling SSL errors."""
+    from urllib3.util.retry import Retry
+
+    # Reset the global storage_client to None to force initialization
+    config.storage_client = None
+
+    # Mock the storage client
+    mock_client_instance = mock_storage_client.return_value
+    mock_client_instance._http.mount = lambda protocol, adapter: None
+    mock_client_instance._http._auth_request.session.mount = lambda protocol, adapter: None
+
+    # Call get_storage_client
+    client = config.get_storage_client()
+
+    # Verify storage.Client was called
+    assert mock_storage_client.called
+
+    # Verify the client is stored globally
+    assert config.storage_client is not None
+
+    # Reset for next test
+    config.storage_client = None
