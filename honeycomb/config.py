@@ -25,7 +25,7 @@ except Exception:
 storage_client = None
 
 
-pool_threads = 50
+pool_threads = 75
 
 
 def get_storage_client():
