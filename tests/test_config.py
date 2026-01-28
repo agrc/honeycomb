@@ -89,8 +89,11 @@ def test_get_basemap():
         config.get_basemap("Bad")
 
 
+@patch("honeycomb.config.requests.adapters.HTTPAdapter")
 @patch("honeycomb.config.storage.Client")
-def test_get_storage_client_configures_retry_strategy(mock_storage_client):
+def test_get_storage_client_configures_retry_strategy(
+    mock_storage_client, mock_http_adapter
+):
     """Test that get_storage_client configures a proper retry strategy for handling SSL errors."""
     from urllib3.util.retry import Retry
 
@@ -103,10 +106,22 @@ def test_get_storage_client_configures_retry_strategy(mock_storage_client):
     mock_client_instance._http._auth_request.session.mount = lambda protocol, adapter: None
 
     # Call get_storage_client
-    client = config.get_storage_client()
+    config.get_storage_client()
 
     # Verify storage.Client was called
     assert mock_storage_client.called
+
+    # Verify HTTPAdapter was called with retry strategy
+    assert mock_http_adapter.called
+    adapter_call_kwargs = mock_http_adapter.call_args[1]
+
+    # Verify max_retries is a Retry instance with correct configuration
+    retry_strategy = adapter_call_kwargs["max_retries"]
+    assert isinstance(retry_strategy, Retry)
+    assert retry_strategy.total == 5
+    assert retry_strategy.backoff_factor == 1
+    assert retry_strategy.status_forcelist == [500, 502, 503, 504]
+    assert retry_strategy.raise_on_status is False
 
     # Verify the client is stored globally
     assert config.storage_client is not None
