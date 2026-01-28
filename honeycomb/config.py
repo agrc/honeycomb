@@ -11,6 +11,7 @@ from os.path import abspath, dirname, exists, join
 
 import requests
 from google.cloud import storage
+from urllib3.util.retry import Retry
 
 config_folder = abspath(join(abspath(dirname(__file__)), "..", "honeycomb-hive"))
 config_location = join(config_folder, "config.json")
@@ -24,17 +25,26 @@ except Exception:
 storage_client = None
 
 
-pool_threads = 100
+pool_threads = 50
 
 
 def get_storage_client():
     global storage_client
     if storage_client is None:
         storage_client = storage.Client(get_config_value("gcpProject"))
+
+        retry_strategy = Retry(
+            total=5,
+            backoff_factor=1,
+            status_forcelist=[500, 502, 503, 504],
+            allowed_methods=["HEAD", "GET", "PUT", "POST", "DELETE", "OPTIONS", "TRACE"],
+            raise_on_status=False,
+        )
+
         adapter = requests.adapters.HTTPAdapter(
             pool_connections=pool_threads,
             pool_maxsize=pool_threads,
-            max_retries=3,
+            max_retries=retry_strategy,
             pool_block=True,
         )
         storage_client._http.mount("https://", adapter)
