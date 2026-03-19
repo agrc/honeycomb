@@ -35,6 +35,7 @@ setup(
         "pygsheets==2.*",
         "sendgrid==6.*",
         "tabulate==0.*",
+        "truststore==0.*",
         "tqdm==4.*",
     ],
     dependency_links=[],

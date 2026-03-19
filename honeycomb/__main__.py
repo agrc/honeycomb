@@ -59,6 +59,13 @@ import sys
 from datetime import datetime
 from os import startfile
 
+try:
+    import truststore
+
+    truststore.inject_into_ssl()
+except ImportError:
+    pass
+
 from docopt import docopt
 
 from . import cleanup, config, stats, update_data, vector
