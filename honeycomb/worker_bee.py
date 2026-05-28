@@ -206,6 +206,8 @@ class WorkerBee(object):
             logger.info("spot caching levels 18-19...")
             self.cache_extent(settings.SCALES[18:], str(intersect), SPOT_CACHE_NAME)
 
+            self.recache_errors()
+
             explode_cache(basemap)
 
     def cache_extent(
@@ -359,10 +361,7 @@ class WorkerBee(object):
                 ),
             )
 
-        while len(self.errors) > 0:
-            msg = "Recaching errors. Errors left: {}".format(len(self.errors))
-            logger.warning(msg)
-            self.cache_extent(*self.errors.pop())
+        self.recache_errors()
 
         bundles = self.get_bundles_count()
         if bundles < self.complete_num_bundles and run_all_levels:
@@ -422,6 +421,12 @@ class WorkerBee(object):
             send_email(self.email_subject, "Exploding complete.")
         else:
             logger.info("skipping exploding cache based on job status")
+
+    def recache_errors(self) -> None:
+        while len(self.errors) > 0:
+            msg = "Recaching errors. Errors left: {}".format(len(self.errors))
+            logger.warning(msg)
+            self.cache_extent(*self.errors.pop())
 
 
 def delete_exploded_cache(basemap) -> None:
