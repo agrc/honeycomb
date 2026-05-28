@@ -204,7 +204,7 @@ class WorkerBee(object):
                 join_attributes="ONLY_FID",
             )
             logger.info("spot caching levels 18-19...")
-            self.cache_extent(settings.SCALES[18:], str(intersect), SPOT_CACHE_NAME)
+            self.cache_extent(settings.SCALES[18:20], str(intersect), SPOT_CACHE_NAME)
 
             self.recache_errors()
 
