@@ -208,7 +208,7 @@ def main(
     if static_only or all:
         static()
 
-    # Zach doesn't use these datasets yet anyways and we should probably take forklift out of the equation
-    # if external_only or all:
-    #     pallet_path = Path(__file__).parent / "pallets" / "BasemapsPallet.py"
-    #     run_forklift(str(pallet_path))
+    #: TODO forklift should be removed to make this easier for Zach to run on his machine
+    if external_only or all:
+        pallet_path = Path(__file__).parent / "pallets" / "BasemapsPallet.py"
+        run_forklift(str(pallet_path))
