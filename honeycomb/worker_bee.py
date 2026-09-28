@@ -128,12 +128,13 @@ class WorkerBee(object):
         self.preview_url = settings.PREVIEW_URL.format(self.basemap.lower())
         self.email_subject = "Cache Update ({})".format(self.basemap)
         basemap_config = config.get_basemap(basemap)
+        self.cache_directory = utilities.get_cache_directory(basemap)
         try:
             self.image_type = basemap_config["imageType"]
         except KeyError:
             self.image_type = None
 
-        utilities.validate_map_layers(basemap)
+        utilities.validate_map_layers(basemap, self.cache_directory)
 
         if not levels:
             self.restrict_scales = settings.SCALES
@@ -160,7 +161,7 @@ class WorkerBee(object):
         else:
             self.cache_test_extent()
 
-            explode_cache(basemap)
+            explode_cache(basemap, self.cache_directory)
 
             swarm(
                 basemap,
@@ -168,6 +169,7 @@ class WorkerBee(object):
                 self.image_type,
                 is_test=True,
                 preview_url=self.preview_url,
+                cache_directory=self.cache_directory,
             )
 
         update_job("test_cache_complete", True)
@@ -208,7 +210,7 @@ class WorkerBee(object):
 
             self.recache_errors()
 
-            explode_cache(basemap)
+            explode_cache(basemap, self.cache_directory)
 
     def cache_extent(
         self,
@@ -237,10 +239,10 @@ class WorkerBee(object):
         try:
             #: this takes 8-10 minutes to start for some reason
             arcpy.management.ManageTileCache(
-                str(settings.CACHES_DIR),
+                str(self.cache_directory),
                 "RECREATE_EMPTY_TILES",
                 in_cache_name=self.basemap,
-                in_datasource=utilities.get_pro_map(self.basemap),
+                in_datasource=utilities.get_pro_map(self.basemap, self.cache_directory),
                 tiling_scheme=AGOL_SCHEME_NAME,
                 scales=cache_scales,
                 area_of_interest=aoi,
@@ -283,7 +285,7 @@ class WorkerBee(object):
     def get_bundles_count(self) -> int:
         total_files = 0
         name = self.basemap.replace("/", "_")
-        base_folder = Path(settings.CACHES_DIR) / name / name / "_alllayers"
+        base_folder = self.cache_directory / name / name / "_alllayers"
         if base_folder.exists():
             for d in os.listdir(base_folder):
                 if d != "missing.jpg":
@@ -300,10 +302,10 @@ class WorkerBee(object):
             logger.info("caching test extent")
             #: this takes 8-10 minutes to start for some reason
             arcpy.management.ManageTileCache(
-                str(settings.CACHES_DIR),
+                str(self.cache_directory),
                 "RECREATE_ALL_TILES",
                 in_cache_name=self.basemap,
-                in_datasource=utilities.get_pro_map(self.basemap),
+                in_datasource=utilities.get_pro_map(self.basemap, self.cache_directory),
                 tiling_scheme=AGOL_SCHEME_NAME,
                 scales=cache_scales,
                 area_of_interest=settings.TEST_EXTENT,
@@ -319,7 +321,7 @@ class WorkerBee(object):
             raise arcpy.ExecuteError
 
     def delete_cache(self) -> None:
-        dir = settings.CACHES_DIR / self.basemap
+        dir = self.cache_directory / self.basemap
         if dir.exists():
             logger.info("deleting existing cache")
 
@@ -416,7 +418,7 @@ class WorkerBee(object):
         base_maps_worksheet.update_value((cell.row + 1, cell.col), this_month)  # type: ignore
 
         if not get_job_status("exploding_complete"):
-            explode_cache(self.basemap)
+            explode_cache(self.basemap, self.cache_directory)
             update_job("exploding_complete", True)
             send_email(self.email_subject, "Exploding complete.")
         else:
@@ -429,20 +431,26 @@ class WorkerBee(object):
             self.cache_extent(*self.errors.pop())
 
 
-def delete_exploded_cache(basemap) -> None:
-    exploded_directory = settings.CACHES_DIR / f"{basemap}_Exploded"
+def delete_exploded_cache(basemap: str, cache_directory: Path | None = None) -> None:
+    cache_directory = cache_directory or utilities.get_cache_directory(basemap)
+    exploded_directory = cache_directory / f"{basemap}_Exploded"
     if exploded_directory.exists():
         fast_delete_robocopy(exploded_directory)
 
 
-def explode_cache(basemap) -> None:
-    delete_exploded_cache(basemap)
+def explode_cache(basemap: str, cache_directory: Path | None = None) -> None:
+    cache_directory = cache_directory or utilities.get_cache_directory(basemap)
+    delete_exploded_cache(basemap, cache_directory)
 
     logger.info("exploding cache for {}".format(basemap))
     try:
+        cache_source = cache_directory / basemap / basemap
+        if not cache_source.exists():
+            cache_source = cache_directory / basemap
+
         arcpy.management.ExportTileCache(
-            str(settings.CACHES_DIR / basemap / basemap),
-            str(settings.CACHES_DIR),
+            str(cache_source),
+            str(cache_directory),
             f"{basemap}_Exploded",
             export_cache_type="TILE_CACHE",
             storage_format_type="EXPLODED",

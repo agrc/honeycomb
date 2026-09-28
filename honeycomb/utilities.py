@@ -1,15 +1,22 @@
+from pathlib import Path
 from shutil import copy
 
 import arcpy
 
-from . import settings
+from . import config, settings
 from .log import logger
 
 
-def get_pro_map(basemap: str) -> arcpy._mp.Map:
+def get_cache_directory(basemap: str) -> Path:
+    cache_location = config.get_basemap(basemap).get("cacheLocation")
+    return Path(cache_location) if cache_location else settings.CACHES_DIR
+
+
+def get_pro_map(basemap: str, cache_directory: Path | None = None) -> arcpy._mp.Map:
     #: make a copy of the pro project so that we don't keep a lock on it
     #: append the name of the cache so that we can run multiple caches at once without lock issues
-    temp_project_path = settings.CACHES_DIR / "TempProjects" / f"Maps_{basemap}.aprx"
+    cache_directory = cache_directory or get_cache_directory(basemap)
+    temp_project_path = cache_directory / "TempProjects" / f"Maps_{basemap}.aprx"
     temp_project_path.unlink(missing_ok=True)
     temp_project_path.parent.mkdir(parents=True, exist_ok=True)
     copy(settings.PRO_PROJECT, temp_project_path)
@@ -37,8 +44,8 @@ def get_pro_map(basemap: str) -> arcpy._mp.Map:
     return pro_map
 
 
-def validate_map_layers(basemap: str) -> None:
-    pro_map = get_pro_map(basemap)
+def validate_map_layers(basemap: str, cache_directory: Path | None = None) -> None:
+    pro_map = get_pro_map(basemap, cache_directory)
     broken_layers = [
         f"{layer.longName} ({layer.dataSource})"
         for layer in pro_map.listLayers()

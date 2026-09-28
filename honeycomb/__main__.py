@@ -68,7 +68,7 @@ except ImportError:
 
 from docopt import docopt
 
-from . import cleanup, config, stats, update_data, vector
+from . import cleanup, config, stats, update_data, utilities, vector
 from .log import logger
 from .messaging import send_email
 from .resumable import (
@@ -119,7 +119,12 @@ def main():
 
     def upload(basemap):
         basemap_info = config.get_basemap(basemap)
-        swarm(basemap, basemap_info["bucket"], basemap_info["imageType"])
+        swarm(
+            basemap,
+            basemap_info["bucket"],
+            basemap_info["imageType"],
+            cache_directory=basemap_info.get("cacheLocation"),
+        )
 
     if args["config"]:
         if args["init"]:
@@ -188,7 +193,8 @@ def main():
     elif args["cleanup"]:
         cleanup.main()
     elif args["explode"] and args["<basemap>"]:
-        explode_cache(args["<basemap>"])
+        basemap = args["<basemap>"]
+        explode_cache(basemap, utilities.get_cache_directory(basemap))
     elif args["<basemap>"]:
         cache(
             args["<basemap>"],

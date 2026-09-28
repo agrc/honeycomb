@@ -56,6 +56,17 @@ Run `honeycomb config open` to open the config file.
 | `notify`        | A list of email addresses to whom honeycomb sends status updates.                                                         |
 | `sendEmails`    | A boolean that determines whether emails are actually sent or not. Useful during development.                             |
 
+Each entry in `basemaps` may optionally include `cacheLocation`, which is the local folder where that basemap's raster cache is built. If omitted, the default `C:\Cache\Caches` folder is used. For example:
+
+```json
+"Terrain": {
+   "bucket": "state-of-utah-pyramid-tiles-terrain-v2",
+   "imageType": "JPEG",
+   "loop": true,
+   "cacheLocation": "D:\\Cache\\Terrain"
+}
+```
+
 ## Adding a New Layer
 
 1. Add the new layer to your local file geodatabase (`C:\Cache\MapData\SGID10_WGS.gdb`).

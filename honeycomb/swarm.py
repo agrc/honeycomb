@@ -85,12 +85,20 @@ def _format_cache_job_summary(bucket_name, name, level_summaries):
     return "\n".join(lines)
 
 
-def swarm(name, bucket_name, image_type, is_test=False, preview_url=None):
+def swarm(
+    name,
+    bucket_name,
+    image_type,
+    is_test=False,
+    preview_url=None,
+    cache_directory=None,
+):
     """
     copies all tiles into WMTS format as a sibling folder to the cache folder
     returns a list of all of the column folders
     """
-    base_folder = Path(settings.CACHES_DIR) / f"{name}_Exploded" / "_alllayers"
+    cache_directory = cache_directory or settings.CACHES_DIR
+    base_folder = Path(cache_directory) / f"{name}_Exploded" / "_alllayers"
 
     if is_test:
         bucket_name += "-test"
