@@ -17,7 +17,7 @@ Usage:
     honeycomb resume
     honeycomb vector <basemap> [--skip-update] [--dont-wait]
     honeycomb vector-all [--skip-update] [--dont-wait]
-    honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test] [--spot <path>] [--levels <levels>] [--dont-wait]
+    honeycomb <basemap> [--missing-only] [--skip-update] [--skip-test] [--spot <path>] [--cache-extent <path>] [--levels <levels>] [--dont-wait]
     honeycomb explode <basemap>
 
 Arguments:
@@ -29,6 +29,7 @@ Arguments:
     --skip-update           Skip update vector data from SGID.
     --skip-test             Skip running a test cache.
     --spot <path>           Cache only a specific extent. <path> is a path to a polygon feature class.
+    --cache-extent <path>   Override the default cache extents with a polygon feature class.
     --levels <levels>       Cache only specific levels
     --static-only           Copy static data from the SHARE to your local machine.
     --sgid-only             Copy vector data from the SGID to your local machine.
@@ -47,6 +48,7 @@ Examples:
     honeycomb Terrain                                           Builds a single base map and pushes to GCP.
     honeycomb Terrain --skip-update                             Builds a single base map (skipping data update) and pushes to GCP.
     honeycomb Terrain --skip-test --spot C:\\\\test.gdb\\extent Builds a single base map (skipping test and for a specific extent) and pushes to GCP.
+    honeycomb Terrain --cache-extent C:\\\\test.gdb\\extent Builds a single base map using a custom cache extent and pushes to GCP.
     honeycomb Terrain --levels 5-7                              Builds a single base map for levels 5, 6 & 7 and pushes to GCP.
     honeycomb vector UtahAddressPoints                          Builds a new vector tile package and uploads to AGOL.
     honeycomb vector-all                                        Builds all of the vector tile packages in the config and uploads to AGOL.
@@ -92,18 +94,37 @@ def main():
         skip_test=False,
         spot=None,
         levels=None,
+        cache_extent=None,
         is_resumed_job=False,
         dont_wait=False,
     ):
+        if spot and cache_extent:
+            raise ValueError("--spot and --cache-extent cannot be used together")
+
         if not is_resumed_job:
-            start_new_job(basemap, missing_only, skip_update, skip_test, spot, levels)
+            start_new_job(
+                basemap,
+                missing_only,
+                skip_update,
+                skip_test,
+                spot,
+                levels,
+                cache_extent,
+            )
             stats.record_start(basemap, "cache")
 
         if not is_resumed_job or get_job_status("caching_complete") is False:
             if is_resumed_job:
                 missing_only = True
             WorkerBee(
-                basemap, missing_only, skip_update, skip_test, spot, levels, dont_wait
+                basemap,
+                missing_only,
+                skip_update,
+                skip_test,
+                spot,
+                levels,
+                dont_wait,
+                cache_extent,
             )
             stats.record_finish(basemap, "cache")
             update_job("caching_complete", True)
@@ -204,6 +225,7 @@ def main():
             args["--spot"],
             args["--levels"],
             dont_wait=args["--dont-wait"],
+            cache_extent=args["--cache-extent"],
         )
     elif args["stats"]:
         stats.print_stats()

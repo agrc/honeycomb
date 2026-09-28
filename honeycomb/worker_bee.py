@@ -120,13 +120,18 @@ class WorkerBee(object):
         spot_path: str | None = None,
         levels: str | None = None,
         dont_wait: bool = False,
+        cache_extent: str | None = None,
     ):
+        if spot_path and cache_extent:
+            raise ValueError("spot_path and cache_extent cannot be used together")
+
         logger.info("caching {}".format(basemap))
         self.errors = []
         self.start_time = time.time()
         self.basemap = basemap
         self.preview_url = settings.PREVIEW_URL.format(self.basemap.lower())
         self.email_subject = "Cache Update ({})".format(self.basemap)
+        self.cache_extent_override = cache_extent
         basemap_config = config.get_basemap(basemap)
         self.cache_directory = utilities.get_cache_directory(basemap)
         try:
@@ -233,7 +238,11 @@ class WorkerBee(object):
 
         logging_tqdm.write("caching {} at {}".format(name, cache_scales))
 
-        if config.is_dev() and name != SPOT_CACHE_NAME:
+        if (
+            config.is_dev()
+            and name != SPOT_CACHE_NAME
+            and self.cache_extent_override is None
+        ):
             aoi = settings.TEST_EXTENT
 
         try:
@@ -333,7 +342,8 @@ class WorkerBee(object):
         arcpy.env.workspace = settings.EXTENTSFGDB
 
         for fc_name, scales in settings.CACHE_EXTENTS:
-            self.cache_extent(scales, fc_name, fc_name, dont_skip)
+            aoi = self.cache_extent_override or fc_name
+            self.cache_extent(scales, aoi, fc_name, dont_skip)
             logger.info(self.get_progress())
 
         send_email(
@@ -349,9 +359,10 @@ class WorkerBee(object):
                 for row in logging_tqdm(
                     cur, total=total_grids, position=1, desc=f"Level {grid[0]}"
                 ):
+                    aoi = self.cache_extent_override or row[0]
                     self.cache_extent(
                         [grid[1]],
-                        row[0],
+                        aoi,
                         "{}: OBJECTID: {}".format(grid[0], row[1]),
                         dont_skip,
                     )

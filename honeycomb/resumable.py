@@ -46,9 +46,18 @@ def start_new_job(
     skip_test: bool,
     spot: str | None,
     levels: List[int] | None,
+    cache_extent: str | None = None,
 ) -> None:
     job: Job = {
-        "cache_args": [basemap, missing_only, skip_update, skip_test, spot, levels],
+        "cache_args": [
+            basemap,
+            missing_only,
+            skip_update,
+            skip_test,
+            spot,
+            levels,
+            cache_extent,
+        ],
         "data_updated": False,
         "test_cache_complete": False,
         "cache_extents_completed": [],

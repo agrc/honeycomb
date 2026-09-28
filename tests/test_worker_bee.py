@@ -10,6 +10,7 @@ from pathlib import Path
 
 from mock import Mock, call, patch
 
+from honeycomb import settings
 from honeycomb.worker_bee import WorkerBee, intersect_scales, parse_levels
 
 
@@ -99,6 +100,34 @@ def test_parse_levels():
 
 def test_intersect_scales():
     assert intersect_scales([1, 2, 4], [1, 2, 3]) == [1, 2]
+
+
+@patch("honeycomb.worker_bee.get_job_status", return_value=True)
+@patch("honeycomb.worker_bee.google.auth.default", return_value=(Mock(), "project"))
+@patch("honeycomb.worker_bee.pygsheets.authorize")
+@patch("honeycomb.worker_bee.send_email")
+def test_cache_uses_cache_extent_override(
+    send_email, authorize, auth_default, get_job_status
+):
+    bee = WorkerBee.__new__(WorkerBee)
+    bee.cache_extent_override = "larger-area"
+    bee.errors = []
+    bee.basemap = "Terrain"
+    bee.email_subject = "Cache Update (Terrain)"
+    bee.preview_url = "preview"
+    bee.complete_num_bundles = 0
+    bee.start_bundles = 0
+    bee.cache_extent = Mock()
+    bee.get_bundles_count = Mock(return_value=0)
+    bee.get_progress = Mock(return_value="progress")
+    bee.recache_errors = Mock()
+
+    bee.cache(run_all_levels=False)
+
+    assert bee.cache_extent.call_args_list[:3] == [
+        call(scales, "larger-area", name, False)
+        for name, scales in settings.CACHE_EXTENTS
+    ]
 
 
 @patch("honeycomb.worker_bee.arcpy.management.ManageTileCache")

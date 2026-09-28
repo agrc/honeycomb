@@ -45,6 +45,11 @@ This is an effort to polish/standardize/automate a mishmash of stand-alone pytho
 
 Run `honeycomb -help` to see documentation for the various commands.
 
+For a normal raster cache, pass `--cache-extent <path>` to use a polygon feature
+class larger than the built-in cache extents. This replaces the default area of
+interest for all selected levels. It is separate from `--spot <path>`, which is
+intended to cache only a specific spot, and the two options cannot be combined.
+
 ## Config file
 
 Run `honeycomb config open` to open the config file.
