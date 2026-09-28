@@ -17,6 +17,7 @@ import requests
 from google.api_core.retry import Retry
 from google_crc32c import Checksum
 from PIL import Image
+from requests.exceptions import SSLError
 
 from . import config, settings
 from .log import logger, logging_tqdm
@@ -200,7 +201,20 @@ def process_row_folder(
     log_all_tiles,
     row_folder,
 ):
-    retry = Retry()
+    def is_transient_error(exception):
+        if isinstance(exception, SSLError):
+            return True
+
+        return False
+
+    # retry on SSLErrors which can occur when there are a lot of threads uploading at once and the server starts refusing connections. This is a known issue with requests and urllib3 and seems to be related to the way they handle connection pooling. The retry will back off exponentially which should help to mitigate the issue.
+    retry = Retry(
+        predicate=is_transient_error,
+        initial=1.0,
+        multiplier=2.0,
+        maximum=60.0,
+        deadline=120.0,
+    )
     bucket = config.get_storage_client().bucket(bucket_name)
     row = str(int(row_folder.name[1:], 16))
     upload_errors = []
