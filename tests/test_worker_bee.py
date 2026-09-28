@@ -6,8 +6,11 @@ test_worker_bee.py
 A module that contains tests for the cache module.
 """
 
-from honeycomb.worker_bee import WorkerBee, intersect_scales, parse_levels
+from pathlib import Path
+
 from mock import Mock, call, patch
+
+from honeycomb.worker_bee import WorkerBee, intersect_scales, parse_levels
 
 
 @patch("honeycomb.worker_bee.socket.gethostbyname", return_value="")
@@ -32,22 +35,19 @@ def test_cache_extent(update_mock, host_mock, count_mock, input_mock):
 def test_spot_cache_recaches_errors_before_exploding():
     manager = Mock()
 
-    with patch("honeycomb.worker_bee.config.get_basemap") as get_basemap, patch(
-        "honeycomb.worker_bee.config.is_dev", return_value=True
-    ), patch("honeycomb.worker_bee.utilities.validate_map_layers"), patch(
-        "honeycomb.worker_bee.update_job"
-    ), patch(
-        "honeycomb.worker_bee.WorkerBee.delete_cache"
-    ), patch(
-        "honeycomb.worker_bee.WorkerBee.get_bundles_count", return_value=0
-    ), patch(
-        "honeycomb.worker_bee.WorkerBee.cache_extent"
-    ) as cache_extent, patch(
-        "honeycomb.worker_bee.WorkerBee.recache_errors"
-    ) as recache_errors, patch(
-        "honeycomb.worker_bee.explode_cache"
-    ) as explode_cache, patch(
-        "honeycomb.worker_bee.arcpy.analysis.Intersect", return_value="intersected"
+    with (
+        patch("honeycomb.worker_bee.config.get_basemap") as get_basemap,
+        patch("honeycomb.worker_bee.config.is_dev", return_value=True),
+        patch("honeycomb.worker_bee.utilities.validate_map_layers"),
+        patch("honeycomb.worker_bee.update_job"),
+        patch("honeycomb.worker_bee.WorkerBee.delete_cache"),
+        patch("honeycomb.worker_bee.WorkerBee.get_bundles_count", return_value=0),
+        patch("honeycomb.worker_bee.WorkerBee.cache_extent") as cache_extent,
+        patch("honeycomb.worker_bee.WorkerBee.recache_errors") as recache_errors,
+        patch("honeycomb.worker_bee.explode_cache") as explode_cache,
+        patch(
+            "honeycomb.worker_bee.arcpy.analysis.Intersect", return_value="intersected"
+        ),
     ):
         get_basemap.return_value = {"imageType": "jpeg"}
         manager.attach_mock(recache_errors, "recache_errors")
@@ -99,3 +99,33 @@ def test_parse_levels():
 
 def test_intersect_scales():
     assert intersect_scales([1, 2, 4], [1, 2, 3]) == [1, 2]
+
+
+@patch("honeycomb.worker_bee.arcpy.management.ManageTileCache")
+def test_cache_extent_uses_configured_cache_location(manage_tile_cache):
+    bee = WorkerBee.__new__(WorkerBee)
+    bee.basemap = "Terrain"
+    bee.cache_directory = Path("D:/alternate-cache")
+    bee.restrict_scales = [1]
+    bee.errors = []
+
+    with (
+        patch("honeycomb.worker_bee.config.is_dev", return_value=False),
+        patch("honeycomb.worker_bee.utilities.get_pro_map"),
+        patch("honeycomb.worker_bee.update_job"),
+    ):
+        bee.cache_extent([1], "area", "name")
+
+    assert manage_tile_cache.call_args.args[0] == "D:/alternate-cache"
+
+
+@patch("honeycomb.worker_bee.arcpy.management.ExportTileCache")
+def test_explode_cache_uses_flat_cache_layout(export_tile_cache, tmp_path):
+    cache_directory = tmp_path / "caches"
+    (cache_directory / "Terrain").mkdir(parents=True)
+
+    from honeycomb.worker_bee import explode_cache
+
+    explode_cache("Terrain", cache_directory)
+
+    assert export_tile_cache.call_args.args[0] == str(cache_directory / "Terrain")

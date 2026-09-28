@@ -413,9 +413,14 @@ class WorkerBee(object):
         #: update base maps spreadsheet embedded in gis.utah.gov page
         this_month = date.today().strftime(r"%b %Y")
         results = base_maps_worksheet.find(self.basemap, matchEntireCell=True)  # type: ignore
-        cell = results[0]
+        if not results:
+            logger.warning(
+                f"Basemap '{self.basemap}' not found in the base maps worksheet."
+            )
+        else:
+            cell = results[0]
 
-        base_maps_worksheet.update_value((cell.row + 1, cell.col), this_month)  # type: ignore
+            base_maps_worksheet.update_value((cell.row + 1, cell.col), this_month)  # type: ignore
 
         if not get_job_status("exploding_complete"):
             explode_cache(self.basemap, self.cache_directory)

@@ -47,6 +47,20 @@
       "module": "honeycomb",
       "justMyCode": false,
       "args": ["upload", "AddressPoints"]
+    },
+    {
+      "name": "spot cache Terrain",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "honeycomb",
+      "justMyCode": true,
+      "args": [
+        "Terrain",
+        "--dont-wait",
+        "--skip-update",
+        "--spot",
+        "https://services1.arcgis.com/99lidPhWCzftIe9K/arcgis/rest/services/cache_me/FeatureServer/0"
+      ]
     }
   ]
 }
