@@ -8,7 +8,16 @@ from .log import logger
 
 
 def get_cache_directory(basemap: str) -> Path:
-    cache_location = config.get_basemap(basemap).get("cacheLocation")
+    try:
+        basemap_config = config.get_basemap(basemap)
+    except KeyError:
+        logger.warning(
+            f'No configuration found for "{basemap}". Using default cache directory: '
+            f"{settings.CACHES_DIR}"
+        )
+        return settings.CACHES_DIR
+
+    cache_location = basemap_config.get("cacheLocation")
     return Path(cache_location) if cache_location else settings.CACHES_DIR
 
 

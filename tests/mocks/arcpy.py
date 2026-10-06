@@ -11,6 +11,11 @@ class env(object):
     workspace = None
 
 
+class _mp(object):
+    class Map:
+        pass
+
+
 class management(object):
     @staticmethod
     def Delete(arg):
