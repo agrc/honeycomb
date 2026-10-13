@@ -31,8 +31,8 @@ COMPLETE_NUM_BUNDLES_LU = {
     "Terrain": 2962,
     "Overlay": 2934,
     "AddressPoints": 2635,
-    "RGB": 1107,
-    "NRG": 1107,
+    "RGB": 1451,
+    "NRG": 1451,
 }
 
 SCALES = [
