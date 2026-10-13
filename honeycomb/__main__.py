@@ -84,6 +84,16 @@ from .swarm import swarm
 from .worker_bee import WorkerBee, explode_cache
 
 
+def explode_job(basemap, is_resumed_job=False):
+    if not is_resumed_job:
+        start_new_job(basemap, True, True, True, None, None)
+        update_job("caching_complete", True)
+
+    explode_cache(basemap, utilities.get_cache_directory(basemap))
+    update_job("exploding_complete", True)
+    finish_job()
+
+
 def main():
     args = docopt(__doc__, version="1.1.1")
 
@@ -214,8 +224,7 @@ def main():
     elif args["cleanup"]:
         cleanup.main()
     elif args["explode"] and args["<basemap>"]:
-        basemap = args["<basemap>"]
-        explode_cache(basemap, utilities.get_cache_directory(basemap))
+        explode_job(args["<basemap>"])
     elif args["<basemap>"]:
         cache(
             args["<basemap>"],
@@ -239,7 +248,12 @@ def main():
             logger.info(f"resuming {cache_name}")
             send_email(f"Cache Job Resumed: {cache_name}", json.dumps(job, indent=2))
             update_job("restart_times", str(datetime.now()))
-            cache(*job["cache_args"], is_resumed_job=True)  # type: ignore
+            if get_job_status("caching_complete") and not get_job_status(
+                "exploding_complete"
+            ):
+                explode_job(cache_name, is_resumed_job=True)
+            else:
+                cache(*job["cache_args"], is_resumed_job=True)  # type: ignore
 
 
 if __name__ == "__main__":
