@@ -47,7 +47,15 @@ def start_new_job(
     spot: str | None,
     levels: List[int] | None,
     cache_extent: str | None = None,
-) -> None:
+) -> bool:
+    if get_current_job() is not None:
+        overwrite = input(
+            "WARNING: current_job.json contains an unfinished job. "
+            "Overwrite it and lose the previous job's progress? [y/N] "
+        )
+        if overwrite.strip().lower() not in ("y", "yes"):
+            return False
+
     job: Job = {
         "cache_args": [
             basemap,
@@ -67,6 +75,7 @@ def start_new_job(
     }
 
     cache_job_status(job)
+    return True
 
 
 def update_job(

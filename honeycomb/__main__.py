@@ -86,7 +86,8 @@ from .worker_bee import WorkerBee, explode_cache
 
 def explode_job(basemap, is_resumed_job=False):
     if not is_resumed_job:
-        start_new_job(basemap, True, True, True, None, None)
+        if not start_new_job(basemap, True, True, True, None, None):
+            return
         update_job("caching_complete", True)
 
     explode_cache(basemap, utilities.get_cache_directory(basemap))
@@ -112,7 +113,7 @@ def main():
             raise ValueError("--spot and --cache-extent cannot be used together")
 
         if not is_resumed_job:
-            start_new_job(
+            if not start_new_job(
                 basemap,
                 missing_only,
                 skip_update,
@@ -120,7 +121,8 @@ def main():
                 spot,
                 levels,
                 cache_extent,
-            )
+            ):
+                return
             stats.record_start(basemap, "cache")
 
         if not is_resumed_job or get_job_status("caching_complete") is False:
