@@ -31,7 +31,7 @@ setup(
         "google-cloud-storage==3.*",
         "humanize==4.*",
         "p_tqdm==1.*",
-        "Pillow>=11,<13",
+        "Pillow>=11,<14",
         "pygsheets==2.*",
         "sendgrid==6.*",
         "tabulate==0.*",
